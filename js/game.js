@@ -1,12 +1,9 @@
 let canvas;
-let ctx;
-let character = new Image();
+let world; // 선언만 먼저 해둡니다.
 
 function init() {
     canvas = document.getElementById('canvas');
-    ctx = canvas.getcontext('2d');
+    world = new World(canvas); 
 
-    character.src = '../img/2_character_pepe/2_walk/W-21.png';
-
-    ctx.drauImage(character, 20, 20, 50, 150);
+    console.log('my character is', world.character);
 }
