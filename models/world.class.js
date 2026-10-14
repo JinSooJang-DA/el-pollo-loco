@@ -14,31 +14,33 @@ class World {
         new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 0),
         new BackgroundObject('img/5_background/layers/2_second_layer/1.png', 0),
         new BackgroundObject('img/5_background/layers/1_first_layer/1.png', 0)
-        
     ];
     canvas;
     ctx;
+    keyboard;
 
-    constructor(canvas) {
+    constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
+        this.keyboard = keyboard;
+        this.setWorld();
         this.draw();
+    }
 
+    setWorld() {
+        this.character.world = this;
     }
 
     draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.addObjectsToMap(this.backgroundobjects);
         this.addToMap(this.character);
         this.addObjectsToMap(this.clouds);
         this.addObjectsToMap(this.enemies);
 
-
-        //draw() wird immer wieder gerufen
         let self = this;
         requestAnimationFrame(function () {
-            ;
             self.draw();
         });
     }

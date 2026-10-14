@@ -32,7 +32,7 @@ class MovableObject {
     }
      moveLeft() {
         setInterval(() => {
-            this.x -= 0.15;
-        }, 100
-    )};
+            this.x -= this.speed;
+        }, 1000/60 );
+    }
 }
