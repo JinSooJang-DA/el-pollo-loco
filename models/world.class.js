@@ -52,6 +52,26 @@ class World {
     }
 
     addToMap(mo) {
+        if (mo.otherDirection) {
+            this.flipImage(mo);
+        }
+
         this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+
+        if (mo.otherDirection) {
+            this.flipImageBack(mo);
+        }
+    }
+
+    flipImage(mo) {
+        this.ctx.save();
+        this.ctx.translate(mo.width, 0);
+        this.ctx.scale(-1, 1);
+        mo.x = mo.x * -1; // 반전된 X축에 맞춰 x좌표 부호 반전
+    }
+
+    flipImageBack(mo) {
+        mo.x = mo.x * -1; // 다음 연산을 위해 x좌표 원상복구
+        this.ctx.restore();
     }
 }
