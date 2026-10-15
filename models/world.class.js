@@ -20,15 +20,11 @@ class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.ctx.translate(this.camera_x, 0);
-
         this.addObjectsToMap(this.level.backgroundObjects);
-        
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.level.enemies);
-
         this.ctx.translate(-this.camera_x, 0);
 
         let self = this;
@@ -47,8 +43,8 @@ class World {
         if (mo.otherDirection) {
             this.flipImage(mo);
         }
-
-        this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
+        mo.draw(this.ctx);
+        mo.drawFrame(this.ctx);
 
         if (mo.otherDirection) {
             this.flipImageBack(mo);
@@ -59,11 +55,11 @@ class World {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
         this.ctx.scale(-1, 1);
-        mo.x = mo.x * -1; // 반전된 X축에 맞춰 x좌표 부호 반전
+        mo.x = mo.x * -1;
     }
 
     flipImageBack(mo) {
-        mo.x = mo.x * -1; // 다음 연산을 위해 x좌표 원상복구
+        mo.x = mo.x * -1;
         this.ctx.restore();
     }
 }
