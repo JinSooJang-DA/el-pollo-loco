@@ -16,10 +16,10 @@ class MovableObject extends DrawableObject {
     }
 
     isAboveGround() {
-        return this.y < 140;
+        return this.y < 140; // 또는 본인이 설정한 캐릭터 바닥 높이(180)
     }
 
-        
+
     offset = {
         top: 0,
         bottom: 0,
@@ -56,7 +56,7 @@ class MovableObject extends DrawableObject {
     }
 
 
-    
+
 
     playAnimation(images) {
         let i = this.currentImage % images.length;
