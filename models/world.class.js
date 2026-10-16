@@ -1,20 +1,23 @@
 class World {
     character = new Character();
-    level = level1;
+    level;
     canvas;
     ctx;
     keyboard;
     camera_x = 0;
-    statusBar = new StatusBar;
+    statusBar = new StatusBar();
     throwableObjects = [];
+    canThrow = true;
+    availableBottles = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.draw();
+        this.level = level1; // level1 인스턴스 직접 할당
         this.setWorld();
-        this.run(); // 게임 루프 실행
+        this.draw();
+        this.run();
     }
 
     setWorld() {
@@ -25,11 +28,11 @@ class World {
         setInterval(() => {
             this.checkCollisions();
             this.checkThrowObjects();
-        }, 200);
+        }, 50);
     }
 
     checkThrowObjects() {
-        if (this.keyboard.D) {
+        if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
             let xOffset = this.character.otherDirection ? 0 : 60;
             let bottle = new ThrowableObject(
                 this.character.x + xOffset,
@@ -37,45 +40,99 @@ class World {
                 this.character.otherDirection
             );
             this.throwableObjects.push(bottle);
+            this.availableBottles--;
+
+            this.canThrow = false;
+            setTimeout(() => {
+                this.canThrow = true;
+            }, 1000);
         }
     }
 
     checkCollisions() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy)) {
-                this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
+        // 1. 캐릭터와 적 충돌 검사
+        this.level.enemies.forEach((enemy, enemyIndex) => {
+            if (!enemy.isDead && this.character.isColliding(enemy)) {
+                let isFalling = this.character.speedY < 0 || this.character.isAboveGround();
+
+                if (isFalling && !(enemy instanceof Endboss)) {
+                    enemy.die();
+                    this.character.speedY = 15;
+                    setTimeout(() => {
+                        this.level.enemies.splice(enemyIndex, 1);
+                    }, 500);
+                } else if (!isFalling && !this.character.isHurt()) {
+                    this.character.hit();
+                    this.statusBar.setPercentage(this.character.energy);
+                }
             }
         });
+
+        // 2. 던진 병과 적 충돌 검사
+        this.throwableObjects.forEach((bottle, bottleIndex) => {
+            this.level.enemies.forEach((enemy, enemyIndex) => {
+                if (!bottle.isSplashed && !enemy.isDead && bottle.isColliding(enemy)) {
+                    bottle.splash();
+
+                    if (enemy instanceof Chicken) {
+                        enemy.die();
+                        setTimeout(() => {
+                            this.level.enemies.splice(enemyIndex, 1);
+                        }, 500);
+                    }
+
+                    setTimeout(() => {
+                        this.throwableObjects.splice(bottleIndex, 1);
+                    }, 200);
+                }
+            });
+        });
+
+        // 3. 바닥 병 수집 충돌 검사
+        if (this.level.bottles) {
+            this.level.bottles.forEach((bottle, index) => {
+                if (this.character.isColliding(bottle)) {
+                    this.availableBottles++;
+                    this.level.bottles.splice(index, 1);
+                }
+            });
+        }
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // 1. 카메라 이동 후 월드 오브젝트 그리기
+        // 1. 카메라 이동 후 월드 객체 렌더링
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.clouds);
+
+        if (this.level.bottles) {
+            this.addObjectsToMap(this.level.bottles); // 바닥 병 렌더링
+        }
+
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.throwableObjects);
 
         this.ctx.translate(-this.camera_x, 0);
 
-        // 2. 고정 UI (카메라 좌표 복구 후 맨 마지막에 그리기)
+        // 2. 고정 UI (상태바)
         this.addToMap(this.statusBar);
 
         let self = this;
-        requestAnimationFrame(function () {
+        requestAnimationFrame(function() {
             self.draw();
         });
     }
 
     addObjectsToMap(objects) {
-        objects.forEach(o => {
-            this.addToMap(o);
-        });
+        if (objects) {
+            objects.forEach(o => {
+                this.addToMap(o);
+            });
+        }
     }
 
     addToMap(mo) {
@@ -84,7 +141,6 @@ class World {
         }
         mo.draw(this.ctx);
 
-        // drawFrame 함수가 존재하는 객체인 경우에만 실행
         if (mo.drawFrame) {
             mo.drawFrame(this.ctx);
         }

@@ -5,20 +5,29 @@ class MovableObject extends DrawableObject {
     acceleration = 2.5;
     energy = 100;
 
-
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
+            } else {
+                // 지상에 닿았을 때 정확히 바닥 높이(150)로 고정하고 하강 속도 리셋
+                if (!(this instanceof ThrowableObject)) {
+                    this.y = 150;
+                    this.speedY = 0;
+                }
             }
         }, 1000 / 25);
     }
 
     isAboveGround() {
-        return this.y < 140; // 또는 본인이 설정한 캐릭터 바닥 높이(180)
+        if (this instanceof ThrowableObject) {
+            return true;
+        } else {
+            // 지상 높이가 150이므로 150보다 작을 때(공중에 떠 있을 때)만 true
+            return this.y < 150;
+        }
     }
-
 
     offset = {
         top: 0,
@@ -48,15 +57,12 @@ class MovableObject extends DrawableObject {
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit; // 밀리초(ms) 단위 차이
         timepassed = timepassed / 1000; // 초(s) 단위 변환
-        return timepassed < 1; // 
+        return timepassed < 1;
     }
 
     isDead() {
         return this.energy == 0;
     }
-
-
-
 
     playAnimation(images) {
         let i = this.currentImage % images.length;
@@ -67,8 +73,8 @@ class MovableObject extends DrawableObject {
 
     moveRight() {
         this.x += this.speed;
-
     }
+
     moveLeft() {
         this.x -= this.speed;
     }

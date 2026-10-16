@@ -1,6 +1,7 @@
 class Character extends MovableObject {
     height = 280;
-    y = 80;
+    width = 120; // 가로 크기 명시
+    y = 150; // 지상 높이 150으로 설정 (시작 시 낙하 방지 및 닭과 지면 일치)
     speed = 10;
 
     // 캐릭터 히트박스 여백 설정
@@ -36,7 +37,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/4_hurt/H-41.png',
         'img/2_character_pepe/4_hurt/H-42.png',
         'img/2_character_pepe/4_hurt/H-43.png'
-    ]
+    ];
 
     IMAGES_DEAD = [
         'img/2_character_pepe/5_dead/D-51.png',
@@ -92,8 +93,11 @@ class Character extends MovableObject {
             } else if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
             } else {
-                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+                if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
                     this.playAnimation(this.IMAGES_WALKING);
+                } else {
+                    // 서 있을 때 기본 대기 스프라이트
+                    this.loadImage('img/2_character_pepe/2_walk/W-21.png');
                 }
             }
         }, 50);

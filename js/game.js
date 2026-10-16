@@ -3,14 +3,12 @@ let world;
 let keyboard = new Keyboard();
 
 function init() {
-    initLevel(); // 1. 레벨 객체(적, 배경 등)를 먼저 생성
+    initLevel(); // 1. level1 인스턴스를 먼저 생성
     canvas = document.getElementById('canvas');
-    world = new World(canvas, keyboard);
-
-    console.log('my character is', world.character);
+    world = new World(canvas, keyboard); // 2. 그 다음 World 생성
 }
 
-window.addEventListener("keydown", (e) => {
+window.addEventListener('keydown', (e) => {
     if (e.keyCode == 39) {
         keyboard.RIGHT = true;
     }
@@ -31,7 +29,7 @@ window.addEventListener("keydown", (e) => {
     }
 });
 
-window.addEventListener("keyup", (e) => {
+window.addEventListener('keyup', (e) => {
     if (e.keyCode == 39) {
         keyboard.RIGHT = false;
     }
