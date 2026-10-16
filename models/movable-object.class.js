@@ -46,11 +46,11 @@ class MovableObject extends DrawableObject {
     lastHit = 0; // 마지막 피격 시점 (타임스탬프)
 
     hit() {
-        this.energy -= 5;
+        this.energy -= 25; // 4방에 사망하도록 25 차감
         if (this.energy < 0) {
             this.energy = 0;
         } else {
-            this.lastHit = new Date().getTime(); // 맞은 시간 기록
+            this.lastHit = new Date().getTime();
         }
     }
 
