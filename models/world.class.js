@@ -29,11 +29,16 @@ class World {
     }
 
     checkThrowObjects() {
-    if (this.keyboard.D) {
-        let bottle = new ThrowableObject(this.character.x + 60, this.character.y + 140);
-        this.throwableObjects.push(bottle);
+        if (this.keyboard.D) {
+            let xOffset = this.character.otherDirection ? 0 : 60;
+            let bottle = new ThrowableObject(
+                this.character.x + xOffset,
+                this.character.y + 140,
+                this.character.otherDirection
+            );
+            this.throwableObjects.push(bottle);
+        }
     }
-}
 
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {

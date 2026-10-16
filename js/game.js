@@ -3,6 +3,7 @@ let world;
 let keyboard = new Keyboard();
 
 function init() {
+    initLevel(); // 1. 레벨 객체(적, 배경 등)를 먼저 생성
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
 
