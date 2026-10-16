@@ -1,3 +1,7 @@
+/**
+ * Represents a thrown salsa bottle flying in arc trajectory.
+ * @extends MovableObject
+ */
 class ThrowableObject extends MovableObject {
     otherDirection = false;
     isSplashed = false;
@@ -26,6 +30,12 @@ class ThrowableObject extends MovableObject {
         'img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png'
     ];
 
+    /**
+     * Initializes thrown bottle position and flight path.
+     * @param {number} x - Starting horizontal coordinate.
+     * @param {number} y - Starting vertical coordinate.
+     * @param {boolean} otherDirection - Whether bottle travels to the left.
+     */
     constructor(x, y, otherDirection) {
         super().loadImage(this.IMAGES_ROTATING[0]);
         this.loadImages(this.IMAGES_ROTATING);
@@ -39,20 +49,22 @@ class ThrowableObject extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Initiates upward velocity and continuous horizontal travel.
+     */
     throw() {
         this.speedY = 30;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
             if (!this.isSplashed) {
-                if (this.otherDirection) {
-                    this.x -= 10;
-                } else {
-                    this.x += 10;
-                }
+                this.x += this.otherDirection ? -10 : 10;
             }
         }, 25);
     }
 
+    /**
+     * Loops rotating or splash animation sequences.
+     */
     animate() {
         setInterval(() => {
             if (this.isSplashed) {
@@ -63,12 +75,19 @@ class ThrowableObject extends MovableObject {
         }, 60);
     }
 
+    /**
+     * Triggers bottle smash, stopping flight and falling physics.
+     */
     splash() {
         this.isSplashed = true;
-        this.speedY = 0; // 공중 낙하 멈춤
-        clearInterval(this.throwInterval); // 전진 이동 중단
+        this.speedY = 0;
+        clearInterval(this.throwInterval);
     }
 
+    /**
+     * Checks if bottle is airborne and eligible for gravity.
+     * @returns {boolean} True if bottle has not splashed yet.
+     */
     isAboveGround() {
         return !this.isSplashed;
     }

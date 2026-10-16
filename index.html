@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./style.css">
-    <title>Document</title>
+    <link rel="icon" type="image/x-icon" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
+    <title>El Pollo Loco</title>
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
     <script src="models/character.class.js"></script>
     <script src="models/chicken.class.js"></script>
+    <script src="models/small-chicken.class.js"></script>
     <script src="models/bottle.class.js"></script>
     <script src="models/cloud.class.js"></script>
     <script src="models/coin.class.js"></script>
@@ -24,13 +26,85 @@
     <script src="models/world.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
-
 </head>
 <body onload="init()">
-    <h1>El pollo loco</h1>
+    <h1>El Pollo Loco</h1>
 
-    <canvas id="canvas" width="720" height="480">
+    <div class="game-container" id="gameContainer">
+        <!-- 상단 컨트롤 버튼 바 (모바일 전체화면에서도 항상 접근 가능) -->
+        <div class="top-nav-bar">
+            <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()" title="Sound On/Off">🔊</button>
+            <button class="nav-icon-btn" onclick="openImpressum()" title="Impressum / Legal">§</button>
+            <button class="nav-icon-btn" onclick="openInfoDialog()" title="Controls & Story">❓</button>
+            <button class="nav-icon-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+        </div>
 
-    </canvas>
+        <!-- 메인 게임 캔버스 -->
+        <canvas id="canvas" width="720" height="480"></canvas>
+
+        <!-- 1. 시작 화면 오버레이 (제목 일러스트 노출을 위해 버튼 하단 배치) -->
+        <div id="startScreen" class="overlay-screen start-screen-layout">
+            <img src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" class="start-bg">
+            <button id="startBtn" onclick="startGame()">START GAME</button>
+        </div>
+
+        <!-- 2. 게임 설명 다이얼로그 -->
+        <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
+            <div class="dialog-card">
+                <button class="dialog-close-btn" onclick="closeInfoDialog()">✕</button>
+                <h2>Game Controls & Rules</h2>
+                <div class="dialog-content">
+                    <div class="control-row">
+                        <span class="key-badge">⬅️ / ➡️</span>
+                        <span>Move Left / Right</span>
+                    </div>
+                    <div class="control-row">
+                        <span class="key-badge">SPACE</span>
+                        <span>Jump (Stomp enemies)</span>
+                    </div>
+                    <div class="control-row">
+                        <span class="key-badge">D</span>
+                        <span>Throw Salsa Bottle</span>
+                    </div>
+                </div>
+                <p class="story-desc">
+                    Help Pepe defeat the angry giant Chicken Boss! Collect bottles and coins across the desert.
+                </p>
+            </div>
+        </div>
+
+        <!-- 3. 결과 화면 (종료 오버레이) -->
+        <div id="restartScreen" class="overlay-screen d-none">
+            <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
+            <div class="end-buttons-group">
+                <button id="restartBtn" onclick="restartGame()">PLAY AGAIN</button>
+                <button id="homeBtn" onclick="backToMainMenu()">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- 4. 모바일 온스크린 터치 컨트롤 (가로 모바일/태블릿 전용) -->
+        <div id="mobileControls" class="mobile-controls-container">
+            <div class="touch-group-left">
+                <button id="btnLeft" class="touch-btn">◀</button>
+                <button id="btnRight" class="touch-btn">▶</button>
+            </div>
+            <div class="touch-group-right">
+                <button id="btnJump" class="touch-btn">JUMP</button>
+                <button id="btnThrow" class="touch-btn">THROW</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. 세로 모드 회전 경고 오버레이 -->
+    <div id="turnDeviceScreen" class="turn-device-overlay">
+        <div class="turn-icon">🔄</div>
+        <h2>Please turn your device</h2>
+        <p>This game can only be played in landscape mode.</p>
+    </div>
+
+    <!-- 일반 PC 화면용 하단 링크 -->
+    <footer class="game-footer">
+        <a href="impressum.html" target="_blank">Impressum</a>
+    </footer>
 </body>
 </html>

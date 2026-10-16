@@ -1,16 +1,47 @@
+/**
+ * Represents the playable hero Pepe.
+ * @extends MovableObject
+ */
 class Character extends MovableObject {
     height = 280;
-    width = 120; // 가로 크기 명시
-    y = 150; // 지상 높이 150으로 설정 (시작 시 낙하 방지 및 닭과 지면 일치)
+    width = 120;
+    y = 150;
     speed = 10;
+    world;
+    lastActionTime = new Date().getTime();
 
-    // 캐릭터 히트박스 여백 설정
     offset = {
         top: 120,
         bottom: 30,
         left: 40,
         right: 30
     };
+
+    IMAGES_IDLE = [
+        'img/2_character_pepe/1_idle/idle/I-1.png',
+        'img/2_character_pepe/1_idle/idle/I-2.png',
+        'img/2_character_pepe/1_idle/idle/I-3.png',
+        'img/2_character_pepe/1_idle/idle/I-4.png',
+        'img/2_character_pepe/1_idle/idle/I-5.png',
+        'img/2_character_pepe/1_idle/idle/I-6.png',
+        'img/2_character_pepe/1_idle/idle/I-7.png',
+        'img/2_character_pepe/1_idle/idle/I-8.png',
+        'img/2_character_pepe/1_idle/idle/I-9.png',
+        'img/2_character_pepe/1_idle/idle/I-10.png'
+    ];
+
+    IMAGES_LONG_IDLE = [
+        'img/2_character_pepe/1_idle/long_idle/I-11.png',
+        'img/2_character_pepe/1_idle/long_idle/I-12.png',
+        'img/2_character_pepe/1_idle/long_idle/I-13.png',
+        'img/2_character_pepe/1_idle/long_idle/I-14.png',
+        'img/2_character_pepe/1_idle/long_idle/I-15.png',
+        'img/2_character_pepe/1_idle/long_idle/I-16.png',
+        'img/2_character_pepe/1_idle/long_idle/I-17.png',
+        'img/2_character_pepe/1_idle/long_idle/I-18.png',
+        'img/2_character_pepe/1_idle/long_idle/I-19.png',
+        'img/2_character_pepe/1_idle/long_idle/I-20.png'
+    ];
 
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',
@@ -49,60 +80,123 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-57.png'
     ];
 
-    world;
-
+    /**
+     * Creates and initializes the character animations and physics.
+     */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
+        this.loadImages(this.IMAGES_IDLE);
+        this.loadImages(this.IMAGES_LONG_IDLE);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
         this.applyGravity();
-
         this.animate();
     }
 
+    /**
+     * Starts interval timers for character movement and animation cycles.
+     */
     animate() {
-        // 1. 이동 및 카메라 추적 루프 (60 FPS)
-        setInterval(() => {
-            if (this.world) {
-                if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-                    this.moveRight();
-                    this.otherDirection = false;
-                }
-
-                if (this.world.keyboard.LEFT && this.x > 0) {
-                    this.moveLeft();
-                    this.otherDirection = true;
-                }
-
-                if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-                    this.jump();
-                }
-
-                this.world.camera_x = -this.x + 100;
-            }
-        }, 1000 / 60);
-
-        // 2. 상태별 애니메이션 재생 루프 (50ms)
-        setInterval(() => {
-            if (this.isDead()) {
-                this.playAnimation(this.IMAGES_DEAD);
-            } else if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            } else if (this.isAboveGround()) {
-                this.playAnimation(this.IMAGES_JUMPING);
-            } else {
-                if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
-                    this.playAnimation(this.IMAGES_WALKING);
-                } else {
-                    // 서 있을 때 기본 대기 스프라이트
-                    this.loadImage('img/2_character_pepe/2_walk/W-21.png');
-                }
-            }
-        }, 50);
+        setInterval(() => this.processMovement(), 1000 / 60);
+        setInterval(() => this.processAnimations(), 150);
     }
 
+    /**
+     * Processes input checks, character position updates, and camera following.
+     */
+    processMovement() {
+        if (!this.world) return;
+        let isMoving = this.handleWalkAndJump();
+        if (isMoving || this.world.keyboard.D) {
+            this.resetIdleTimer();
+        }
+        this.updateCameraPosition();
+    }
+
+    /**
+     * Evaluates horizontal walking and jumping inputs.
+     * @returns {boolean} True if any movement action was performed.
+     */
+    handleWalkAndJump() {
+        let acted = false;
+        if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+            this.moveRight();
+            this.otherDirection = false;
+            acted = true;
+        }
+        if (this.world.keyboard.LEFT && this.x > 0) {
+            this.moveLeft();
+            this.otherDirection = true;
+            acted = true;
+        }
+        if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+            this.jump();
+            acted = true;
+        }
+        return acted;
+    }
+
+    /**
+     * Synchronizes world camera position with character location within bounds.
+     */
+    updateCameraPosition() {
+        let maxCameraX = -(this.world.level.level_end_x - 620);
+        let targetCameraX = -this.x + 100;
+        this.world.camera_x = Math.max(targetCameraX, maxCameraX);
+    }
+
+    /**
+     * Resolves the visual state and plays corresponding sprite sequence.
+     */
+    processAnimations() {
+        if (this.isDead()) {
+            this.playAnimation(this.IMAGES_DEAD);
+        } else if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+            this.resetIdleTimer();
+        } else if (this.isAboveGround()) {
+            this.playAnimation(this.IMAGES_JUMPING);
+            this.resetIdleTimer();
+        } else {
+            this.handleGroundState();
+        }
+    }
+
+    /**
+     * Handles sprite switching while on the ground (walking vs idle).
+     */
+    handleGroundState() {
+        if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
+            this.playAnimation(this.IMAGES_WALKING);
+        } else {
+            this.handleIdleAnimation();
+        }
+    }
+
+    /**
+     * Resets the idle activity timestamp to current time.
+     */
+    resetIdleTimer() {
+        this.lastActionTime = new Date().getTime();
+    }
+
+    /**
+     * Decides between short breathing idle and long sleeping idle animation.
+     */
+    handleIdleAnimation() {
+        let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
+        if (timePassed > 4) {
+            this.playAnimation(this.IMAGES_LONG_IDLE);
+        } else {
+            this.playAnimation(this.IMAGES_IDLE);
+        }
+    }
+
+    /**
+     * Sets vertical speed for jumping.
+     */
     jump() {
         this.speedY = 30;
     }

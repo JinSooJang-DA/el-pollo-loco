@@ -1,3 +1,7 @@
+/**
+ * Represents a floating collectible coin.
+ * @extends MovableObject
+ */
 class Coin extends MovableObject {
     width = 100;
     height = 100;
@@ -14,6 +18,11 @@ class Coin extends MovableObject {
         'img/8_coin/coin_2.png'
     ];
 
+    /**
+     * Creates a coin with an animated pulse loop.
+     * @param {number} x - Horizontal coordinate.
+     * @param {number} y - Vertical coordinate.
+     */
     constructor(x, y) {
         super().loadImage(this.IMAGES[0]);
         this.loadImages(this.IMAGES);
@@ -22,6 +31,9 @@ class Coin extends MovableObject {
         this.animate();
     }
 
+    /**
+     * Runs periodic coin frame animation.
+     */
     animate() {
         setInterval(() => {
             this.playAnimation(this.IMAGES);

@@ -1,3 +1,7 @@
+/**
+ * Represents the final Endboss chicken.
+ * @extends MovableObject
+ */
 class Endboss extends MovableObject {
     height = 400;
     width = 250;
@@ -5,6 +9,8 @@ class Endboss extends MovableObject {
     speed = 2.5;
     energy = 100;
     hadFirstContact = false;
+    deathAnimationFinished = false;
+    animationStep = 0;
 
     offset = {
         top: 60,
@@ -46,6 +52,9 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
 
+    /**
+     * Initializes the Endboss position, images, and loop.
+     */
     constructor() {
         super().loadImage(this.IMAGES_ALERT[0]);
         this.loadImages(this.IMAGES_ALERT);
@@ -56,7 +65,9 @@ class Endboss extends MovableObject {
         this.animate();
     }
 
-    // 4번에 죽도록 1회당 데미지 25 차감
+    /**
+     * Reduces boss energy when hit by a thrown bottle.
+     */
     hit() {
         this.energy -= 25;
         if (this.energy < 0) {
@@ -66,56 +77,92 @@ class Endboss extends MovableObject {
         }
     }
 
+    /**
+     * Initiates main animation and state loop for the boss.
+     */
     animate() {
-        let i = 0;
-        let deadInterval;
         let mainInterval = setInterval(() => {
-            // 1. 사망했을 때: 일반 동작 인터벌을 즉시 멈추고 사망 전용 연출 시작
             if (this.isDead()) {
-                clearInterval(mainInterval); // 이동 및 공격 완전 중단
-
-                let deadFrame = 0;
-                deadInterval = setInterval(() => {
-                    if (deadFrame < this.IMAGES_DEAD.length) {
-                        this.img = this.imageCache[this.IMAGES_DEAD[deadFrame]];
-                        deadFrame++;
-                    } else {
-                        clearInterval(deadInterval); // 3장 재생 완료
-
-                        // 3장이 다 나오고 통구이가 된 상태로 아래로 낙하
-                        let fallInterval = setInterval(() => {
-                            this.y += 15;
-                            if (this.y > 600) {
-                                clearInterval(fallInterval);
-                                this.deathAnimationFinished = true; // [핵심] 퇴장 완료 플래그!
-                            }
-                        }, 1000 / 30);
-                    }
-                }, 200); // 0.2초마다 사망 프레임 전환 (충분히 눈으로 보임)
-            } 
-            // 2. 피격 중일 때 (사망이 아닐 때만)
-            else if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            } 
-            // 3. 첫 등장 경계
-            else if (i < 10) {
-                this.playAnimation(this.IMAGES_ALERT);
-            } 
-            // 4. 일반 이동/공격
-            else {
-                this.playAnimation(this.IMAGES_ATTACK);
-                this.moveLeft();
-            }
-            i++;
-
-            // 조우 플래그
-            if (world && !this.hadFirstContact) {
-                let distance = Math.abs(this.x - world.character.x);
-                if (world.character.x > 1600 || distance < 600) {
-                    i = 0;
-                    this.hadFirstContact = true;
-                }
+                clearInterval(mainInterval);
+                this.startDeathSequence();
+            } else {
+                this.handleBossActions();
             }
         }, 150);
+    }
+
+    /**
+     * Handles hurt, alert, and attack behaviors depending on current state.
+     */
+    handleBossActions() {
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+        } else if (this.animationStep < 10) {
+            this.playAnimation(this.IMAGES_ALERT);
+        } else {
+            this.playAnimation(this.IMAGES_ATTACK);
+            this.chaseCharacter();
+        }
+        this.animationStep++;
+        this.checkContactTrigger();
+    }
+
+    /**
+     * Checks distance to character to trigger first boss contact.
+     */
+    checkContactTrigger() {
+        if (world && !this.hadFirstContact) {
+            let distance = Math.abs(this.x - world.character.x);
+            if (world.character.x > 1600 || distance < 600) {
+                this.animationStep = 0;
+                this.hadFirstContact = true;
+            }
+        }
+    }
+
+    /**
+     * Executes the sequence of dead sprites upon defeat.
+     */
+    startDeathSequence() {
+        let frame = 0;
+        let deadInterval = setInterval(() => {
+            if (frame < this.IMAGES_DEAD.length) {
+                this.img = this.imageCache[this.IMAGES_DEAD[frame]];
+                frame++;
+            } else {
+                clearInterval(deadInterval);
+                this.startFallAnimation();
+            }
+        }, 200);
+    }
+
+    /**
+     * Causes the boss to drop downward off the screen.
+     */
+    startFallAnimation() {
+        let fallInterval = setInterval(() => {
+            this.y += 15;
+            if (this.y > 600) {
+                clearInterval(fallInterval);
+                this.deathAnimationFinished = true;
+            }
+        }, 1000 / 30);
+    }
+
+    /**
+     * Moves toward Pepe and flips direction to always face the player.
+     */
+    chaseCharacter() {
+        if (!world || !world.character) {
+            this.moveLeft();
+            return;
+        }
+        if (world.character.x > this.x + 50) {
+            this.otherDirection = true;
+            this.x += this.speed;
+        } else if (world.character.x < this.x - 50) {
+            this.otherDirection = false;
+            this.moveLeft();
+        }
     }
 }

@@ -1,8 +1,12 @@
+/**
+ * Represents a standard walking chicken enemy.
+ * @extends MovableObject
+ */
 class Chicken extends MovableObject {
     height = 50;
     width = 65;
     y = 370;
-    isDead = false;
+    isDeadChicken = false;
     walkInterval;
     animationInterval;
 
@@ -19,41 +23,48 @@ class Chicken extends MovableObject {
         'img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
     ];
 
-    // 정확한 파일명인 dead.png로 지정
     IMAGE_DEAD = 'img/3_enemies_chicken/chicken_normal/2_dead/dead.png';
 
+    /**
+     * Creates and places a chicken enemy.
+     * @param {number} [x] - Initial horizontal spawn position.
+     */
     constructor(x) {
-        super().loadImage('img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
+        super().loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
-
-        if (x !== undefined) {
-            this.x = x;
-        } else {
-            this.x = 600 + Math.random() * 1200;
-        }
-
+        this.x = x !== undefined ? x : 600 + Math.random() * 1200;
         this.speed = 0.15 + Math.random() * 0.5;
         this.animate();
     }
 
+    /**
+     * Runs movement and sprite animation timers.
+     */
     animate() {
         this.walkInterval = setInterval(() => {
-            if (!this.isDead) {
-                this.moveLeft();
-            }
+            if (!this.isDeadChicken) this.moveLeft();
         }, 1000 / 60);
 
         this.animationInterval = setInterval(() => {
-            if (!this.isDead) {
-                this.playAnimation(this.IMAGES_WALKING);
-            }
+            if (!this.isDeadChicken) this.playAnimation(this.IMAGES_WALKING);
         }, 200);
     }
 
+    /**
+     * Kills chicken, swaps to dead texture, and clears timers.
+     */
     die() {
-        this.isDead = true;
-        this.loadImage(this.IMAGE_DEAD); // dead.png 이미지로 교체
-        clearInterval(this.walkInterval); // 이동 중지
-        clearInterval(this.animationInterval); // 걷기 애니메이션 중지
+        this.isDeadChicken = true;
+        this.loadImage(this.IMAGE_DEAD);
+        clearInterval(this.walkInterval);
+        clearInterval(this.animationInterval);
+    }
+
+    /**
+     * Checks if this enemy is dead.
+     * @returns {boolean} True if dead, false otherwise.
+     */
+    isDead() {
+        return this.isDeadChicken;
     }
 }

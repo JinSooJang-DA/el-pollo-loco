@@ -1,3 +1,6 @@
+/**
+ * Tracks the current state of user control inputs.
+ */
 class Keyboard {
     LEFT = false;
     RIGHT = false;

@@ -1,3 +1,6 @@
+/**
+ * Represents the game world managing rendering loops, collisions, and state.
+ */
 class World {
     character = new Character();
     level;
@@ -15,22 +18,33 @@ class World {
     maxBottles = 5;
     collectedCoins = 0;
     maxCoins = 5;
-    gameEnded = false; // 게임 종료 상태 플래그
+    gameEnded = false;
 
+    /**
+     * Initializes the world canvas context, level references, and loops.
+     * @param {HTMLCanvasElement} canvas - Target rendering canvas.
+     * @param {Keyboard} keyboard - Input state tracker.
+     */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.level = level1; // level1 인스턴스 직접 할당
+        this.level = level1;
         this.setWorld();
         this.draw();
         this.run();
     }
 
+    /**
+     * Injects the world instance into the character.
+     */
     setWorld() {
         this.character.world = this;
     }
 
+    /**
+     * Runs collision, projectile, and game over detection loops.
+     */
     run() {
         setInterval(() => {
             this.checkCollisions();
@@ -39,248 +53,286 @@ class World {
         }, 50);
     }
 
-    showEndScreen(imagePath) {
-        for (let i = 1; i < 9999; i++) {
-            window.clearInterval(i);
-        }
-
-        let endImg = new Image();
-        endImg.src = imagePath;
-        endImg.onload = () => {
-            // 1. 전체 화면을 깔끔한 어두운 배경으로 덮기
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // 뒷배경이 살짝 보이는 반투명 블랙 (완전 검정은 '#000000')
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-            // 2. 원본 가로세로 비율을 유지하며 중앙 배치 계산
-            let targetWidth = 500; // 원하는 글자 너비
-            let aspectRatio = endImg.naturalHeight / endImg.naturalWidth;
-            let targetHeight = targetWidth * aspectRatio; // 원래 비율대로 높이 계산
-
-            let x = (this.canvas.width - targetWidth) / 2;
-            let y = (this.canvas.height - targetHeight) / 2;
-
-            // 3. 중앙에 예쁘게 그리기
-            this.ctx.drawImage(endImg, x, y, targetWidth, targetHeight);
-
-            let restartBtn = document.getElementById('restartBtnContainer');
-            if (restartBtn) {
-                restartBtn.classList.remove('d-none');
-            }
-        };
-    }
-
-    checkThrowObjects() {
-        if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
-            let xOffset = this.character.otherDirection ? 0 : 60;
-            let bottle = new ThrowableObject(
-                this.character.x + xOffset,
-                this.character.y + 140,
-                this.character.otherDirection
-            );
-            this.throwableObjects.push(bottle);
-            this.availableBottles--;
-
-            // 투척 후 상태바 갱신
-            let percentage = (this.availableBottles / this.maxBottles) * 100;
-            this.statusBarBottle.setPercentage(percentage);
-
-            this.canThrow = false;
-            setTimeout(() => {
-                this.canThrow = true;
-            }, 1000);
-        }
-    }
-
-    checkCollisions() {
-        // [1] 페페와 적(보스, 일반 닭) 충돌 검사
-        this.level.enemies.forEach((enemy) => {
-            let isEnemyAlive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
-
-            if (isEnemyAlive && this.character.isColliding(enemy)) {
-                // 1) 보스에게 부딪혔을 때: 무조건 페페 피격
-                if (enemy instanceof Endboss) {
-                    if (!this.character.isHurt()) {
-                        console.log('>>> [성공] 보스에게 페페 피격!');
-                        this.character.hit();
-                        this.statusBar.setPercentage(this.character.energy);
-                    }
-                }
-                // 2) 일반 닭에게 부딪혔을 때
-                else {
-                    let isFalling = this.character.speedY < 0 || this.character.isAboveGround();
-
-                    if (isFalling) {
-                        if (typeof enemy.die === 'function') {
-                            enemy.die();
-                        }
-                        this.character.speedY = 15;
-                        setTimeout(() => {
-                            let idx = this.level.enemies.indexOf(enemy);
-                            if (idx > -1) {
-                                this.level.enemies.splice(idx, 1);
-                            }
-                        }, 500);
-                    } else if (!this.character.isHurt()) {
-                        this.character.hit();
-                        this.statusBar.setPercentage(this.character.energy);
-                    }
-                }
-            }
-        });
-
-        // [2] 던진 병과 적(보스, 일반 닭) 충돌 검사
-        this.throwableObjects.forEach((bottle) => {
-            this.level.enemies.forEach((enemy) => {
-                let isEnemyAlive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
-
-                // 터지지 않은 병이 살아있는 적과 부딪혔을 때
-                if (isEnemyAlive && !bottle.isSplashed && bottle.isColliding(enemy)) {
-                    bottle.isSplashed = true; // 다중 타격 방지
-
-                    if (typeof bottle.splash === 'function') {
-                        bottle.splash();
-                    }
-
-                    if (enemy instanceof Endboss) {
-                        enemy.hadFirstContact = true;
-                        
-                        // [수정] 무적 검사를 풀고 병이 맞으면 무조건 1회 타격 반영
-                        enemy.hit();
-                        this.statusBarEndboss.setPercentage(enemy.energy);
-                        console.log('>>> [타격 성공] 보스 잔여 체력:', enemy.energy);
-
-                    } else if (enemy instanceof Chicken) {
-                        if (typeof enemy.die === 'function') {
-                            enemy.die();
-                        }
-                        setTimeout(() => {
-                            let eIdx = this.level.enemies.indexOf(enemy);
-                            if (eIdx > -1) {
-                                this.level.enemies.splice(eIdx, 1);
-                            }
-                        }, 500);
-                    }
-
-                    // 맞은 병 삭제
-                    setTimeout(() => {
-                        let bIdx = this.throwableObjects.indexOf(bottle);
-                        if (bIdx > -1) {
-                            this.throwableObjects.splice(bIdx, 1);
-                        }
-                    }, 100);
-                }
-            });
-        });
-
-        // [3] 바닥 병 수집 검사
-        if (this.level.bottles) {
-            this.level.bottles.forEach((bottle, index) => {
-                if (this.character.isColliding(bottle)) {
-                    if (this.availableBottles < this.maxBottles) {
-                        this.availableBottles++;
-                        this.level.bottles.splice(index, 1);
-                        let percentage = (this.availableBottles / this.maxBottles) * 100;
-                        this.statusBarBottle.setPercentage(percentage);
-                    }
-                }
-            });
-        }
-
-        // [4] 공중 동전 수집 검사
-        if (this.level.coins) {
-            this.level.coins.forEach((coin, index) => {
-                if (this.character.isColliding(coin)) {
-                    this.collectedCoins++;
-                    this.level.coins.splice(index, 1);
-
-                    let percentage = (this.collectedCoins / this.maxCoins) * 100;
-                    this.statusBarCoin.setPercentage(percentage);
-                    console.log('코인 수집! 현재 개수:', this.collectedCoins);
-                }
-            });
-        }
-    }
-
-    draw() {
-        // 게임이 종료되면 애니메이션 프레임 루프 정지
-        if (this.gameEnded) {
-            return;
-        }
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.translate(this.camera_x, 0);
-
-        this.addObjectsToMap(this.level.backgroundObjects);
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.clouds);
-
-        if (this.level.bottles) {
-            this.addObjectsToMap(this.level.bottles);
-        }
-
-        if (this.level.coins) {
-            this.addObjectsToMap(this.level.coins);
-        }
-
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.throwableObjects);
-
-        this.ctx.translate(-this.camera_x, 0);
-
-        // 고정 UI 상태바
-        this.addToMap(this.statusBar);
-        this.addToMap(this.statusBarBottle);
-        this.addToMap(this.statusBarCoin);
-
-        // 보스와 조우했을 때만 보스 체력바 표시
-        let endboss = this.level.enemies.find(e => e instanceof Endboss);
-        if (endboss && endboss.hadFirstContact) {
-            this.addToMap(this.statusBarEndboss);
-        }
-
-        let self = this;
-        requestAnimationFrame(function () {
-            self.draw();
-        });
-    }
-
+    /**
+     * Verifies victory and defeat conditions.
+     */
     checkGameOver() {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
-
-        // 1. 페페 사망 -> 게임 오버(패배)
         if (this.character.isDead() && !this.gameEnded) {
             this.gameEnded = true;
-            setTimeout(() => {
-                this.showEndScreen('img/9_intro_outro_screens/game_over/game over.png');
-            }, 1000);
+            setTimeout(() => this.showEndScreen('img/You won, you lost/You lost.png'), 1000);
         }
-
-        // 2. 보스 사망 연출 완료 -> 승리 화면 표시!
         if (endboss && endboss.deathAnimationFinished && !this.gameEnded) {
             this.gameEnded = true;
             this.showEndScreen('img/You won, you lost/You win B.png');
         }
     }
 
+    /**
+     * Clears game timers and reveals the end screen.
+     * @param {string} imagePath - Result image path to display.
+     */
+    showEndScreen(imagePath) {
+        for (let i = 1; i < 9999; i++) window.clearInterval(i);
+        let endScreenImg = document.getElementById('endScreenImg');
+        let restartScreen = document.getElementById('restartScreen');
+        this.setEndScreenImage(endScreenImg, imagePath);
+        if (restartScreen) {
+            restartScreen.classList.remove('d-none');
+        }
+    }
+
+    /**
+     * Sets result screen image source and provides fallback handling.
+     * @param {HTMLImageElement} imgElement - Image DOM element.
+     * @param {string} imagePath - Primary image path.
+     */
+    setEndScreenImage(imgElement, imagePath) {
+        if (!imgElement) return;
+        imgElement.src = imagePath;
+        imgElement.onload = () => imgElement.classList.remove('d-none');
+        imgElement.onerror = () => {
+            imgElement.src = 'img/9_intro_outro_screens/game_over/game over.png';
+            imgElement.classList.remove('d-none');
+        };
+    }
+
+    /**
+     * Triggers bottle throwing if user input is active and ammo is available.
+     */
+    checkThrowObjects() {
+        if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
+            let offset = this.character.otherDirection ? 0 : 60;
+            let bottle = new ThrowableObject(this.character.x + offset, this.character.y + 140, this.character.otherDirection);
+            this.throwableObjects.push(bottle);
+            this.availableBottles--;
+            this.updateBottleBar();
+            this.cooldownThrow();
+        }
+    }
+
+    /**
+     * Updates bottle status bar based on remaining quantity.
+     */
+    updateBottleBar() {
+        let percentage = (this.availableBottles / this.maxBottles) * 100;
+        this.statusBarBottle.setPercentage(percentage);
+    }
+
+    /**
+     * Applies cooldown delay to bottle throwing.
+     */
+    cooldownThrow() {
+        this.canThrow = false;
+        setTimeout(() => this.canThrow = true, 1000);
+    }
+
+    /**
+     * Orchestrates all collision sub-checks.
+     */
+    checkCollisions() {
+        this.checkCharacterCollisions();
+        this.checkBottleCollisions();
+        this.checkCollectBottles();
+        this.checkCollectCoins();
+    }
+
+    /**
+     * Checks collision between hero Pepe and all active enemies.
+     */
+    checkCharacterCollisions() {
+        this.level.enemies.forEach((enemy) => {
+            let isAlive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
+            if (isAlive && this.character.isColliding(enemy)) {
+                this.handleEnemyContact(enemy);
+            }
+        });
+    }
+
+    /**
+     * Resolves stomp versus hurt outcome during enemy collision.
+     * @param {MovableObject} enemy - Colliding enemy object.
+     */
+    handleEnemyContact(enemy) {
+        if (enemy instanceof Endboss) {
+            this.hurtCharacter();
+        } else if (this.character.speedY < 0 || this.character.isAboveGround()) {
+            this.stompEnemy(enemy);
+        } else {
+            this.hurtCharacter();
+        }
+    }
+
+    /**
+     * Inflicts damage onto Pepe and updates the health status bar.
+     */
+    hurtCharacter() {
+        if (!this.character.isHurt()) {
+            this.character.hit();
+            this.statusBar.setPercentage(this.character.energy);
+        }
+    }
+
+    /**
+     * Eliminates regular enemies jumped on from above and bounces character upward.
+     * @param {Chicken|SmallChicken} enemy - Target enemy to stomp.
+     */
+    stompEnemy(enemy) {
+        if (typeof enemy.die === 'function') enemy.die();
+        this.character.speedY = 15;
+        this.removeEnemyAfterDelay(enemy, 500);
+    }
+
+    /**
+     * Removes an enemy from level array after animation delay.
+     * @param {MovableObject} enemy - Target enemy object.
+     * @param {number} delay - Removal delay in milliseconds.
+     */
+    removeEnemyAfterDelay(enemy, delay) {
+        setTimeout(() => {
+            let idx = this.level.enemies.indexOf(enemy);
+            if (idx > -1) this.level.enemies.splice(idx, 1);
+        }, delay);
+    }
+
+    /**
+     * Checks projectile bottle collision with enemies.
+     */
+    checkBottleCollisions() {
+        this.throwableObjects.forEach((bottle) => {
+            this.level.enemies.forEach((enemy) => {
+                let isAlive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
+                if (isAlive && !bottle.isSplashed && bottle.isColliding(enemy)) {
+                    this.handleBottleImpact(bottle, enemy);
+                }
+            });
+        });
+    }
+
+    /**
+     * Handles bottle splash animation and damage on impact.
+     * @param {ThrowableObject} bottle - Thrown projectile.
+     * @param {MovableObject} enemy - Impact target.
+     */
+    handleBottleImpact(bottle, enemy) {
+        bottle.isSplashed = true;
+        if (typeof bottle.splash === 'function') bottle.splash();
+        if (enemy instanceof Endboss) {
+            enemy.hadFirstContact = true;
+            enemy.hit();
+            this.statusBarEndboss.setPercentage(enemy.energy);
+        } else {
+            if (typeof enemy.die === 'function') enemy.die();
+            this.removeEnemyAfterDelay(enemy, 500);
+        }
+        this.removeBottleAfterDelay(bottle, 100);
+    }
+
+    /**
+     * Removes thrown bottle from the map array after splash completion.
+     * @param {ThrowableObject} bottle - Bottle instance to remove.
+     * @param {number} delay - Removal delay in milliseconds.
+     */
+    removeBottleAfterDelay(bottle, delay) {
+        setTimeout(() => {
+            let idx = this.throwableObjects.indexOf(bottle);
+            if (idx > -1) this.throwableObjects.splice(idx, 1);
+        }, delay);
+    }
+
+    /**
+     * Checks pickup collisions with ground bottles.
+     */
+    checkCollectBottles() {
+        if (!this.level.bottles) return;
+        this.level.bottles.forEach((bottle, idx) => {
+            if (this.character.isColliding(bottle) && this.availableBottles < this.maxBottles) {
+                this.availableBottles++;
+                this.level.bottles.splice(idx, 1);
+                this.updateBottleBar();
+            }
+        });
+    }
+
+    /**
+     * Checks pickup collisions with coins.
+     */
+    checkCollectCoins() {
+        if (!this.level.coins) return;
+        this.level.coins.forEach((coin, idx) => {
+            if (this.character.isColliding(coin)) {
+                this.collectedCoins++;
+                this.level.coins.splice(idx, 1);
+                let percentage = (this.collectedCoins / this.maxCoins) * 100;
+                this.statusBarCoin.setPercentage(percentage);
+            }
+        });
+    }
+
+    /**
+     * Main canvas rendering animation loop.
+     */
+    draw() {
+        if (this.gameEnded) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.translate(this.camera_x, 0);
+        this.drawWorldObjects();
+        this.ctx.translate(-this.camera_x, 0);
+        this.drawStatusBars();
+        let self = this;
+        requestAnimationFrame(() => self.draw());
+    }
+
+    /**
+     * Draws moving world objects with camera translation applied.
+     */
+    drawWorldObjects() {
+        this.addObjectsToMap(this.level.backgroundObjects);
+        this.addToMap(this.character);
+        this.addObjectsToMap(this.level.clouds);
+        if (this.level.bottles) this.addObjectsToMap(this.level.bottles);
+        if (this.level.coins) this.addObjectsToMap(this.level.coins);
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.throwableObjects);
+    }
+
+    /**
+     * Draws static UI status bars on top of canvas.
+     */
+    drawStatusBars() {
+        this.addToMap(this.statusBar);
+        this.addToMap(this.statusBarBottle);
+        this.addToMap(this.statusBarCoin);
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        if (endboss && endboss.hadFirstContact) {
+            this.addToMap(this.statusBarEndboss);
+        }
+    }
+
+    /**
+     * Adds an array of objects to map.
+     * @param {DrawableObject[]} objects - List of drawable objects.
+     */
     addObjectsToMap(objects) {
         if (objects) {
-            objects.forEach(o => {
-                this.addToMap(o);
-            });
+            objects.forEach(o => this.addToMap(o));
         }
     }
 
+    /**
+     * Renders a drawable object with directional flipping if required.
+     * @param {MovableObject} mo - Movable object instance.
+     */
     addToMap(mo) {
-        if (mo.otherDirection) {
-            this.flipImage(mo);
-        }
+        if (mo.otherDirection) this.flipImage(mo);
         mo.draw(this.ctx);
-
-        if (mo.otherDirection) {
-            this.flipImageBack(mo);
-        }
+        if (mo.otherDirection) this.flipImageBack(mo);
     }
 
+    /**
+     * Flips canvas context horizontally for mirror-facing rendering.
+     * @param {MovableObject} mo - Movable object instance.
+     */
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
@@ -288,6 +340,10 @@ class World {
         mo.x = mo.x * -1;
     }
 
+    /**
+     * Restores canvas transformation back to normal orientation.
+     * @param {MovableObject} mo - Movable object instance.
+     */
     flipImageBack(mo) {
         mo.x = mo.x * -1;
         this.ctx.restore();
