@@ -80,6 +80,7 @@ class World {
         }
         if (endboss && endboss.deathAnimationFinished && !this.gameEnded) {
             this.gameEnded = true;
+            stopSoundEffects();
             playBgm(AUDIO_HUB.bgmWin);
             this.showEndScreen('img/You won, you lost/You win B.png');
         }
@@ -174,6 +175,7 @@ class World {
      */
     handleEnemyContact(enemy) {
         if (enemy instanceof Endboss) {
+            if (Date.now() - enemy.lastHit < 2000) return;
             this.hurtCharacter();
         } else if (this.character.speedY < 0 || this.character.isAboveGround()) {
             this.stompEnemy(enemy);

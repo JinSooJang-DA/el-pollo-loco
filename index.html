@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="icon" type="image/x-icon" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
     <title>El Pollo Loco</title>
+
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
     <script src="models/character.class.js"></script>
@@ -28,83 +29,111 @@
     <script src="models/world.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
+
 </head>
 
-<body onload="init()">
+<body onload="init(); startLoadingAnimation()">
     <h1>El Pollo Loco</h1>
 
     <div class="game-container" id="gameContainer">
 
-        <div class="top-nav-bar">
-            <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause(); this.blur();"
-                title="Pause/Play">⏸️</button>
-            <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu(); this.blur();"
-                title="Main Menu">🏠</button>
+        <!-- Collapsible navigation menu -->
+        <details class="game-menu">
+            <summary>Menu</summary>
+            <div class="top-nav-bar">
+                <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause()">Pause</button>
+                <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu()">Main Menu</button>
+                <button class="nav-icon-btn" onclick="openSettingsDialog()">Settings</button>
+                <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()">Sound: On</button>
+                <button class="nav-icon-btn" onclick="openImpressum()">Legal Notice</button>
+                <button class="nav-icon-btn" onclick="openInfoDialog()">How to Play</button>
+                <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
+            </div>
+        </details>
 
-            <button class="nav-icon-btn" onclick="openSettingsDialog(); this.blur();" title="Settings">⚙️</button>
-            <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute(); this.blur();"
-                title="Sound On/Off">🔊</button>
-            <button class="nav-icon-btn" onclick="openImpressum(); this.blur();" title="Impressum / Legal">§</button>
-            <button class="nav-icon-btn" onclick="openInfoDialog(); this.blur();" title="Controls & Story">❓</button>
-            <button class="nav-icon-btn" onclick="toggleFullscreen(); this.blur();" title="Fullscreen">⛶</button>
-        </div>
-
+        <!-- Game canvas -->
         <canvas id="canvas" width="720" height="480"></canvas>
 
+        <!-- Pause screen -->
         <div id="pauseScreen" class="overlay-screen d-none">
             <h2 class="pause-title">GAME PAUSED</h2>
-            <button id="resumeBtn" onclick="togglePause()">RESUME GAME</button>
+            <button id="resumeBtn" onclick="togglePause()">
+                RESUME GAME
+            </button>
         </div>
 
+        <!-- Start screen -->
         <div id="startScreen" class="overlay-screen start-screen-layout">
             <img src="img/9_intro_outro_screens/start/startscreen_1.webp" alt="Start Screen" class="start-bg">
-            <button id="startBtn" onclick="startGame()">START GAME</button>
+            <button id="startBtn" onclick="startGame()">
+                START GAME
+            </button>
         </div>
 
+        <!-- Game instructions -->
         <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
+
             <div class="dialog-card">
                 <button class="dialog-close-btn" onclick="closeInfoDialog()">✕</button>
-                <h2>Game Controls & Rules</h2>
+
+                <h2>Game Controls &amp; Rules</h2>
+
                 <div class="dialog-content">
                     <div class="control-row">
                         <span class="key-badge">⬅️ / ➡️</span>
                         <span>Move Left / Right</span>
                     </div>
+
                     <div class="control-row">
                         <span class="key-badge">SPACE</span>
                         <span>Jump (Stomp enemies)</span>
                     </div>
+
                     <div class="control-row">
                         <span class="key-badge">D</span>
                         <span>Throw Salsa Bottle</span>
                     </div>
                 </div>
+
                 <p class="story-desc">
-                    Help Pepe defeat the angry giant Chicken Boss! Collect bottles and coins across the desert.
+                    Help Pepe defeat the angry giant Chicken Boss!
+                    Collect bottles and coins across the desert.
                 </p>
             </div>
         </div>
 
+        <!-- Game result screen -->
         <div id="restartScreen" class="overlay-screen d-none">
             <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
+
             <div class="end-buttons-group">
-                <button id="restartBtn" onclick="restartGame()">PLAY AGAIN</button>
-                <button id="homeBtn" onclick="backToMainMenu()">MAIN MENU</button>
+                <button id="restartBtn" onclick="restartGame()">
+                    PLAY AGAIN
+                </button>
+
+                <button id="homeBtn" onclick="backToMainMenu()">
+                    MAIN MENU
+                </button>
             </div>
         </div>
 
+        <!-- Volume settings -->
         <div id="settingsDialog" class="dialog-overlay d-none" onclick="closeSettingsOnBackdrop(event)">
+
             <div class="dialog-card">
                 <button class="dialog-close-btn" onclick="closeSettingsDialog()">✕</button>
+
                 <h2>Volume Settings</h2>
+
                 <div class="dialog-content">
                     <div class="volume-control-row">
-                        <label for="bgmSlider">🎵 BGM Volume</label>
+                        <label for="bgmSlider">BGM Volume</label>
                         <input type="range" id="bgmSlider" min="0" max="1" step="0.05" value="0.5"
                             oninput="changeBgmVolume(this.value)">
                     </div>
+
                     <div class="volume-control-row">
-                        <label for="sfxSlider">🔊 SFX Volume</label>
+                        <label for="sfxSlider">SFX Volume</label>
                         <input type="range" id="sfxSlider" min="0" max="1" step="0.05" value="0.5"
                             oninput="changeSfxVolume(this.value)">
                     </div>
@@ -116,16 +145,24 @@
         <div class="mobile-controls-container">
             <div class="touch-group-left">
                 <button id="btnLeft" class="touch-btn" aria-label="Move left">◀</button>
+
                 <button id="btnRight" class="touch-btn" aria-label="Move right">▶</button>
             </div>
 
             <div class="touch-group-right">
                 <button id="btnJump" class="touch-btn" aria-label="Jump">JUMP</button>
+
                 <button id="btnThrow" class="touch-btn" aria-label="Throw bottle">THROW</button>
             </div>
         </div>
-    </div> <!-- gameContainer ends here -->
+    </div>
 
+    <!-- Pepe loading animation -->
+    <div id="loadingScreen">
+        <img id="loadingPepe" src="img/2_character_pepe/2_walk/W-21.png" alt="Pepe running">
+    </div>
+
+    <!-- Portrait orientation warning -->
     <div id="turnDeviceScreen" class="turn-device-overlay">
         <div class="turn-icon">🔄</div>
         <h2>Please turn your device</h2>

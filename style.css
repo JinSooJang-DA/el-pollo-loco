@@ -379,16 +379,6 @@ canvas {
         flex-shrink: 0;
         margin: 0 auto;
     }
-
-    /* Footer stays at the bottom */
-    .game-footer {
-        position: absolute;
-        bottom: 12px;
-        left: 0;
-        width: 100%;
-        margin: 0;
-        text-align: center;
-    }
 }
 
 @keyframes rotateDevice {
@@ -396,27 +386,11 @@ canvas {
     50% { transform: rotate(90deg); }
 }
 
-.game-footer {
-    margin: 12px 0 20px 0;
-}
-
-.game-footer a {
-    color: #aaa;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.game-footer a:hover {
-    color: #ff9800;
-    text-decoration: underline;
-}
-
-/* 미디어 쿼리 */
 @media screen and (orientation: portrait) and (max-width: 1024px) {
     .turn-device-overlay {
         display: flex !important;
     }
-    h1, .game-container, .game-footer {
+    h1, .game-container {
         display: none !important;
     }
 }
@@ -426,7 +400,7 @@ canvas {
         margin: 0;
         overflow: hidden;
     }
-    h1, .game-footer {
+    h1 {
         display: none !important;
     }
     .game-container {
@@ -477,4 +451,63 @@ canvas {
     .mobile-controls-container {
         display: none !important;
     }
+}
+
+
+.game-menu {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 25;
+    font-family: 'Rye', cursive;
+}
+
+.game-menu summary {
+    cursor: pointer;
+    padding: 8px 14px;
+    background: #422512;
+    border: 2px solid white;
+    border-radius: 10px;
+    list-style: none;
+}
+
+.game-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.game-menu .top-nav-bar {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    flex-direction: column;
+    width: 155px;
+    border-radius: 10px;
+}
+
+.game-menu .nav-icon-btn {
+    width: 100%;
+    height: auto;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Rye', cursive;
+    font-size: 12px;
+    text-align: left;
+}
+
+/* Pepe loading animation */
+#loadingScreen {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+
+#loadingPepe {
+    width: auto;
+    height: 180px;
+    object-fit: contain;
 }

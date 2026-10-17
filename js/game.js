@@ -87,8 +87,10 @@ function toggleMute() {
 
 /** Updates the sound button icon. */
 function updateMuteUI() {
-    const button = document.getElementById('soundBtn');
-    if (button) button.innerText = isMuted ? '🔇' : '🔊';
+    const soundBtn = document.getElementById('soundBtn');
+    if (soundBtn) {
+        soundBtn.innerText = isMuted ? 'Sound: Off' : 'Sound: On';
+    }
 }
 
 /** Applies mute settings to all audio tracks. */
@@ -210,7 +212,7 @@ function updatePauseUI() {
     const screen = document.getElementById('pauseScreen');
     const button = document.getElementById('pauseBtn');
     if (screen) screen.classList.toggle('d-none', !isPaused);
-    if (button) button.innerText = isPaused ? '▶️' : '⏸️';
+    if (pauseBtn) pauseBtn.innerText = isPaused ? 'Resume' : 'Pause';
 }
 
 /** Handles audio when pausing or resuming. */
@@ -399,3 +401,26 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', event => {
     updateKeyboardState(event, false);
 });
+
+document.addEventListener('click', (event) => {
+    const menu = document.querySelector('.game-menu');
+    if (menu && !menu.contains(event.target)) {
+        menu.open = false;
+    }
+});
+
+/** Shows Pepe running before the start screen. */
+function startLoadingAnimation() {
+    let frame = 21;
+    const pepe = document.getElementById('loadingPepe');
+
+    const animation = setInterval(() => {
+        pepe.src = `img/2_character_pepe/2_walk/W-${frame}.png`;
+        frame = frame < 26 ? frame + 1 : 21;
+    }, 120);
+
+    setTimeout(() => {
+        clearInterval(animation);
+        document.getElementById('loadingScreen').remove();
+    }, 1800);
+}

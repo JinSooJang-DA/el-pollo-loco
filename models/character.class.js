@@ -139,14 +139,21 @@ class Character extends MovableObject {
         return acted;
     }
 
-    /**
-     * Synchronizes world camera position with character location within bounds.
-     */
-    updateCameraPosition() {
-        let maxCameraX = -(this.world.level.level_end_x - 620);
-        let targetCameraX = -this.x + 100;
-        this.world.camera_x = Math.max(targetCameraX, maxCameraX);
+    /** Updates the camera smoothly around the boss. */
+updateCameraPosition() {
+    let boss = this.world.level.enemies.find(e => e instanceof Endboss);
+    let offset = 100;
+
+    if (boss) {
+        let distance = this.x - (boss.x + boss.width / 2);
+        let progress = Math.max(0, Math.min(1, (distance + 250) / 500));
+        offset = 100 + progress * 440;
     }
+
+    let maxCameraX = -(this.world.level.level_end_x - 620);
+    let targetCameraX = -this.x + offset;
+    this.world.camera_x = Math.max(maxCameraX, Math.min(0, targetCameraX));
+}
 
     /**
      * Resolves the visual state and plays corresponding sprite sequence.
@@ -241,19 +248,19 @@ class Character extends MovableObject {
      * Resolves the visual state and plays corresponding sprite sequence.
      */
     processAnimations() {
-    if (isPaused) return AUDIO_HUB.run.pause();
-    if (this.isDead() || this.isHurt() || this.isAboveGround()) {
-        AUDIO_HUB.run.pause();
-        AUDIO_HUB.run.currentTime = 0;
+        if (isPaused) return AUDIO_HUB.run.pause();
+        if (this.isDead() || this.isHurt() || this.isAboveGround()) {
+            AUDIO_HUB.run.pause();
+            AUDIO_HUB.run.currentTime = 0;
+        }
+        if (this.isDead()) return this.playDeathAnimation();
+        if (this.isHurt() || this.isAboveGround()) {
+            this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
+            this.resetIdleTimer();
+        } else {
+            this.handleGroundState();
+        }
     }
-    if (this.isDead()) return this.playDeathAnimation();
-    if (this.isHurt() || this.isAboveGround()) {
-        this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
-        this.resetIdleTimer();
-    } else {
-        this.handleGroundState();
-    }
-}
 
     /**
      * Resets the idle activity timestamp and stops snoring sound immediately.

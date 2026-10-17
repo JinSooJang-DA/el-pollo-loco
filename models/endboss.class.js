@@ -6,7 +6,7 @@ class Endboss extends MovableObject {
     height = 400;
     width = 250;
     y = 55;
-    speed = 2.5;
+    speed = 3;
     energy = 100;
     hadFirstContact = false;
     deathAnimationFinished = false;
@@ -95,16 +95,16 @@ class Endboss extends MovableObject {
      * Handles hurt, alert, and attack behaviors depending on current state.
      */
     handleBossActions() {
+        this.checkContactTrigger();
         if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
-        } else if (this.animationStep < 10) {
+        } else if (!this.hadFirstContact || this.animationStep < 10) {
             this.playAnimation(this.IMAGES_ALERT);
         } else {
             this.playAnimation(this.IMAGES_ATTACK);
             this.chaseCharacter();
         }
-        this.animationStep++;
-        this.checkContactTrigger();
+        if (this.hadFirstContact) this.animationStep++;
     }
 
     /**
@@ -149,20 +149,16 @@ class Endboss extends MovableObject {
         }, 1000 / 30);
     }
 
-    /**
-     * Moves toward Pepe and flips direction to always face the player.
-     */
+    /** Chases Pepe after the boss fight begins. */
     chaseCharacter() {
-        if (!world || !world.character) {
-            this.moveLeft();
-            return;
-        }
+        if (!this.hadFirstContact || !world || !world.character) return;
+
         if (world.character.x > this.x + 50) {
             this.otherDirection = true;
-            this.x += this.speed;
+            this.x += 15;
         } else if (world.character.x < this.x - 50) {
             this.otherDirection = false;
-            this.moveLeft();
+            this.x -= 15;
         }
     }
 }
