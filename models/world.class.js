@@ -124,6 +124,7 @@ class World {
             let bottle = new ThrowableObject(this.character.x + offset, this.character.y + 140, this.character.otherDirection);
             this.throwableObjects.push(bottle);
             this.availableBottles--;
+            playSound(AUDIO_HUB.throw); // 실제로 병을 던질 때만 소리 재생!
             this.updateBottleBar();
             this.cooldownThrow();
         }
@@ -306,16 +307,18 @@ class World {
      * Main canvas rendering animation loop.
      */
     draw() {
-        if (this.stopDrawing) return; // 3. gameEnded 대신 stopDrawing일 때만 멈춤!
+        if (this.stopDrawing) return;
         if (!isPaused) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.translate(this.camera_x, 0);
             this.drawWorldObjects();
             this.ctx.translate(-this.camera_x, 0);
             this.drawStatusBars();
+            this.ctx.translate(this.camera_x, 0);
+            this.addToMap(this.character);
+            this.ctx.translate(-this.camera_x, 0);
         }
-        let self = this;
-        requestAnimationFrame(() => self.draw());
+        requestAnimationFrame(() => this.draw());
     }
 
     /**

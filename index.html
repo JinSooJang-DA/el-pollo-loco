@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./style.css">
     <link rel="icon" type="image/x-icon" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
@@ -27,36 +29,38 @@
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
 </head>
+
 <body onload="init()">
     <h1>El Pollo Loco</h1>
 
     <div class="game-container" id="gameContainer">
-        <!-- 상단 컨트롤 버튼 바 (일시정지 ⏸️ 버튼 추가) -->
+
         <div class="top-nav-bar">
-            <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause()" title="Pause/Play">⏸️</button>
-            <button class="nav-icon-btn" onclick="openSettingsDialog()" title="Settings">⚙️</button>
-            <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()" title="Sound On/Off">🔊</button>
-            <button class="nav-icon-btn" onclick="openImpressum()" title="Impressum / Legal">§</button>
-            <button class="nav-icon-btn" onclick="openInfoDialog()" title="Controls & Story">❓</button>
-            <button class="nav-icon-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+            <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause(); this.blur();"
+                title="Pause/Play">⏸️</button>
+            <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu(); this.blur();"
+                title="Main Menu">🏠</button>
+
+            <button class="nav-icon-btn" onclick="openSettingsDialog(); this.blur();" title="Settings">⚙️</button>
+            <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute(); this.blur();"
+                title="Sound On/Off">🔊</button>
+            <button class="nav-icon-btn" onclick="openImpressum(); this.blur();" title="Impressum / Legal">§</button>
+            <button class="nav-icon-btn" onclick="openInfoDialog(); this.blur();" title="Controls & Story">❓</button>
+            <button class="nav-icon-btn" onclick="toggleFullscreen(); this.blur();" title="Fullscreen">⛶</button>
         </div>
 
-        <!-- 메인 게임 캔버스 -->
         <canvas id="canvas" width="720" height="480"></canvas>
 
-        <!-- 일시정지 화면 오버레이 -->
         <div id="pauseScreen" class="overlay-screen d-none">
             <h2 class="pause-title">GAME PAUSED</h2>
             <button id="resumeBtn" onclick="togglePause()">RESUME GAME</button>
         </div>
 
-        <!-- 1. 시작 화면 오버레이 (제목 일러스트 노출을 위해 버튼 하단 배치) -->
         <div id="startScreen" class="overlay-screen start-screen-layout">
-            <img src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" class="start-bg">
+            <img src="img/9_intro_outro_screens/start/startscreen_1.webp" alt="Start Screen" class="start-bg">
             <button id="startBtn" onclick="startGame()">START GAME</button>
         </div>
 
-        <!-- 2. 게임 설명 다이얼로그 -->
         <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
             <div class="dialog-card">
                 <button class="dialog-close-btn" onclick="closeInfoDialog()">✕</button>
@@ -81,7 +85,6 @@
             </div>
         </div>
 
-        <!-- 3. 결과 화면 (종료 오버레이) -->
         <div id="restartScreen" class="overlay-screen d-none">
             <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
             <div class="end-buttons-group">
@@ -90,7 +93,6 @@
             </div>
         </div>
 
-        <!-- 4. 볼륨 설정 다이얼로그 -->
         <div id="settingsDialog" class="dialog-overlay d-none" onclick="closeSettingsOnBackdrop(event)">
             <div class="dialog-card">
                 <button class="dialog-close-btn" onclick="closeSettingsDialog()">✕</button>
@@ -98,26 +100,24 @@
                 <div class="dialog-content">
                     <div class="volume-control-row">
                         <label for="bgmSlider">🎵 BGM Volume</label>
-                        <input type="range" id="bgmSlider" min="0" max="1" step="0.05" value="0.5" oninput="changeBgmVolume(this.value)">
+                        <input type="range" id="bgmSlider" min="0" max="1" step="0.05" value="0.5"
+                            oninput="changeBgmVolume(this.value)">
                     </div>
                     <div class="volume-control-row">
                         <label for="sfxSlider">🔊 SFX Volume</label>
-                        <input type="range" id="sfxSlider" min="0" max="1" step="0.05" value="0.5" oninput="changeSfxVolume(this.value)">
+                        <input type="range" id="sfxSlider" min="0" max="1" step="0.05" value="0.5"
+                            oninput="changeSfxVolume(this.value)">
                     </div>
                 </div>
             </div>
         </div>
 
-    <!-- 5. 세로 모드 회전 경고 오버레이 -->
-    <div id="turnDeviceScreen" class="turn-device-overlay">
-        <div class="turn-icon">🔄</div>
-        <h2>Please turn your device</h2>
-        <p>This game can only be played in landscape mode.</p>
-    </div>
+        <div id="turnDeviceScreen" class="turn-device-overlay">
+            <div class="turn-icon">🔄</div>
+            <h2>Please turn your device</h2>
+            <p>This game can only be played in landscape mode.</p>
+        </div>
 
-    <!-- 일반 PC 화면용 하단 링크 -->
-    <footer class="game-footer">
-        <a href="impressum.html" target="_blank">Impressum</a>
-    </footer>
 </body>
+
 </html>

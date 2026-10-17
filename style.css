@@ -348,6 +348,49 @@ canvas {
     animation: rotateDevice 2s infinite ease-in-out;
 }
 
+/* Desktop background and game centering */
+@media screen and (min-width: 721px) {
+    body {
+        position: relative;
+        min-height: 100vh;
+        min-height: 100dvh;
+        box-sizing: border-box;
+        justify-content: center;
+
+        background-color: #59331d;
+        background-image: url('./img/9_intro_outro_screens/start/intro-backdrop.webp');
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    /* Title stays at the top */
+    body > h1 {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        text-align: center;
+    }
+
+    /* The game itself stays at the center */
+    .game-container {
+        flex-shrink: 0;
+        margin: 0 auto;
+    }
+
+    /* Footer stays at the bottom */
+    .game-footer {
+        position: absolute;
+        bottom: 12px;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        text-align: center;
+    }
+}
+
 @keyframes rotateDevice {
     0%, 100% { transform: rotate(0deg); }
     50% { transform: rotate(90deg); }
@@ -395,3 +438,10 @@ canvas {
         display: flex !important;
     }
 }
+
+/* Hide game-only buttons on the start screen */
+.game-container:has(#startScreen:not(.d-none)) #pauseBtn,
+.game-container:has(#startScreen:not(.d-none)) #menuBtn {
+    display: none;
+}
+

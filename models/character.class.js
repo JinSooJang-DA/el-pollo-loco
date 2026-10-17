@@ -182,7 +182,12 @@ class Character extends MovableObject {
     handleGroundState() {
         if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
             this.playAnimation(this.IMAGES_WALKING);
+            if (AUDIO_HUB.run.paused && !isMuted && !isPaused) {
+                playSound(AUDIO_HUB.run);
+            }
         } else {
+            AUDIO_HUB.run.pause();
+            AUDIO_HUB.run.currentTime = 0;
             this.handleIdleAnimation();
         }
     }
@@ -214,5 +219,50 @@ class Character extends MovableObject {
      */
     jump() {
         this.speedY = 30;
+        if (typeof playSound === 'function' && typeof AUDIO_HUB !== 'undefined') {
+            playSound(AUDIO_HUB.jump);
+        }
+    }
+
+    /**
+     * Processes input checks, character position updates, and camera following.
+     */
+    processMovement() {
+        // 일시정지 중이거나 사망 시 이동 차단
+        if (!this.world || this.isDead() || (typeof isPaused !== 'undefined' && isPaused)) return;
+        let isMoving = this.handleWalkAndJump();
+        if (isMoving || this.world.keyboard.D) {
+            this.resetIdleTimer();
+        }
+        this.updateCameraPosition();
+    }
+
+    /**
+     * Resolves the visual state and plays corresponding sprite sequence.
+     */
+    processAnimations() {
+    if (isPaused) return AUDIO_HUB.run.pause();
+    if (this.isDead() || this.isHurt() || this.isAboveGround()) {
+        AUDIO_HUB.run.pause();
+        AUDIO_HUB.run.currentTime = 0;
+    }
+    if (this.isDead()) return this.playDeathAnimation();
+    if (this.isHurt() || this.isAboveGround()) {
+        this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
+        this.resetIdleTimer();
+    } else {
+        this.handleGroundState();
+    }
+}
+
+    /**
+     * Resets the idle activity timestamp and stops snoring sound immediately.
+     */
+    resetIdleTimer() {
+        this.lastActionTime = new Date().getTime();
+        if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && !AUDIO_HUB.pepeSnore.paused) {
+            AUDIO_HUB.pepeSnore.pause();
+            AUDIO_HUB.pepeSnore.currentTime = 0;
+        }
     }
 }
