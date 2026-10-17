@@ -112,11 +112,25 @@
             </div>
         </div>
 
-        <div id="turnDeviceScreen" class="turn-device-overlay">
-            <div class="turn-icon">🔄</div>
-            <h2>Please turn your device</h2>
-            <p>This game can only be played in landscape mode.</p>
+        <!-- Mobile touch controls -->
+        <div class="mobile-controls-container">
+            <div class="touch-group-left">
+                <button id="btnLeft" class="touch-btn" aria-label="Move left">◀</button>
+                <button id="btnRight" class="touch-btn" aria-label="Move right">▶</button>
+            </div>
+
+            <div class="touch-group-right">
+                <button id="btnJump" class="touch-btn" aria-label="Jump">JUMP</button>
+                <button id="btnThrow" class="touch-btn" aria-label="Throw bottle">THROW</button>
+            </div>
         </div>
+    </div> <!-- gameContainer ends here -->
+
+    <div id="turnDeviceScreen" class="turn-device-overlay">
+        <div class="turn-icon">🔄</div>
+        <h2>Please turn your device</h2>
+        <p>This game can only be played in landscape mode.</p>
+    </div>
 
 </body>
 

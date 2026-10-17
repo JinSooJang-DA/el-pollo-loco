@@ -445,3 +445,36 @@ canvas {
     display: none;
 }
 
+
+/* Mobile and tablet: portrait orientation */
+@media screen and (orientation: portrait) and (pointer: coarse),
+       screen and (orientation: portrait) and (max-width: 600px) {
+    .turn-device-overlay {
+        display: flex !important;
+    }
+}
+
+/* Mobile and tablet: landscape touch controls */
+@media screen and (orientation: landscape) and (pointer: coarse) {
+    .turn-device-overlay {
+        display: none !important;
+    }
+
+    .game-container {
+        width: min(100vw, 150dvh);
+        height: auto;
+        aspect-ratio: 3 / 2;
+        margin: 0 auto;
+    }
+
+    .mobile-controls-container {
+        display: flex !important;
+    }
+}
+
+/* Prevent touch buttons from appearing on desktop */
+@media screen and (pointer: fine) {
+    .mobile-controls-container {
+        display: none !important;
+    }
+}
