@@ -1,3 +1,12 @@
+/* 1. 로컬 폰트 (Rye) 등록 */
+@font-face {
+    font-family: 'Rye';
+    src: url('./fonts/rye-v17-latin-regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -12,10 +21,14 @@ body {
     -webkit-user-select: none;
 }
 
+/* 2. 게임 메인 타이틀에 적용 */
 h1 {
+    font-family: 'Rye', cursive, sans-serif;
     margin: 12px 0 8px 0;
-    font-size: 32px;
-    letter-spacing: 2px;
+    font-size: 38px;
+    letter-spacing: 3px;
+    color: #ff9800;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
 }
 
 .game-container {
@@ -37,21 +50,24 @@ canvas {
 
 .top-nav-bar {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     display: flex;
-    gap: 8px;
+    gap: 6px;
     z-index: 25;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
 }
 
 .nav-icon-btn {
     background: rgba(0, 0, 0, 0.65);
     border: 2px solid #fff;
     color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    width: 36px;
-    height: 36px;
+    font-size: 15px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -63,6 +79,33 @@ canvas {
 .nav-icon-btn:hover {
     transform: scale(1.1);
     background: #ff9800;
+}
+
+/* 일시정지 오버레이 스타일 */
+.pause-title {
+    font-family: 'Rye', cursive, sans-serif;
+    font-size: 38px;
+    color: #ff9800;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px #000;
+}
+
+#resumeBtn {
+    font-family: 'Rye', cursive, sans-serif;
+    padding: 12px 36px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(180deg, #ff9800, #e65100);
+    border: 3px solid #fff;
+    border-radius: 35px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease;
+}
+
+#resumeBtn:hover {
+    transform: scale(1.05);
 }
 
 .overlay-screen {
@@ -79,7 +122,6 @@ canvas {
     background: rgba(0, 0, 0, 0.75);
 }
 
-/* 시작 화면: 가운데 로고를 비워두고 버튼을 하단 중앙에 배치 */
 .start-screen-layout {
     background: transparent;
     justify-content: flex-end;
@@ -113,10 +155,12 @@ canvas {
     display: none !important;
 }
 
+/* 3. 버튼에 웨스턴 폰트 적용 */
 #startBtn, #restartBtn {
+    font-family: 'Rye', cursive, sans-serif;
     padding: 12px 38px;
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 1.5px;
     color: white;
     background: linear-gradient(180deg, #ff9800, #e65100);
     border: 3px solid #fff;
@@ -127,9 +171,10 @@ canvas {
 }
 
 #homeBtn {
+    font-family: 'Rye', cursive, sans-serif;
     padding: 12px 28px;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 1.5px;
     color: white;
     background: #424242;
     border: 3px solid #fff;
@@ -141,6 +186,27 @@ canvas {
 
 #startBtn:hover, #restartBtn:hover, #homeBtn:hover {
     transform: scale(1.05);
+}
+
+.volume-control-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 15px 0;
+    font-size: 15px;
+    width: 100%;
+}
+
+.volume-control-row label {
+    margin-bottom: 8px;
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.volume-control-row input[type="range"] {
+    width: 100%;
+    accent-color: #ff9800;
+    cursor: pointer;
 }
 
 /* 설명 모달 */
@@ -166,6 +232,14 @@ canvas {
     width: 360px;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.dialog-card h2 {
+    font-family: 'Rye', cursive, sans-serif;
+    color: #ff9800;
+    font-size: 20px;
+    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
 .dialog-close-btn {
@@ -203,7 +277,7 @@ canvas {
     line-height: 1.4;
 }
 
-/* 모바일 터치 컨트롤 */
+/* 모바일 온스크린 컨트롤 */
 .mobile-controls-container {
     display: none;
     position: absolute;
@@ -230,7 +304,7 @@ canvas {
     background: rgba(0, 0, 0, 0.45);
     border: 2px solid rgba(255, 255, 255, 0.8);
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -263,6 +337,11 @@ canvas {
     box-sizing: border-box;
 }
 
+.turn-device-overlay h2 {
+    font-family: 'Rye', cursive, sans-serif;
+    color: #ff9800;
+}
+
 .turn-icon {
     font-size: 55px;
     margin-bottom: 15px;
@@ -289,8 +368,7 @@ canvas {
     text-decoration: underline;
 }
 
-/* ================= 반응형 미디어 쿼리 ================= */
-
+/* 미디어 쿼리 */
 @media screen and (orientation: portrait) and (max-width: 1024px) {
     .turn-device-overlay {
         display: flex !important;

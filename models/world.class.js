@@ -19,6 +19,7 @@ class World {
     collectedCoins = 0;
     maxCoins = 5;
     gameEnded = false;
+    stopDrawing = false;
 
     /**
      * Initializes the world canvas context, level references, and loops.
@@ -47,10 +48,22 @@ class World {
      */
     run() {
         setInterval(() => {
+            if (isPaused) return;
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkGameOver();
+            this.checkBossMusicTrigger();
         }, 50);
+    }
+
+    /**
+     * Triggers boss BGM (bgm03) when encountering the endboss.
+     */
+    checkBossMusicTrigger() {
+        let endboss = this.level.enemies.find(e => e instanceof Endboss);
+        if (endboss && endboss.hadFirstContact && currentBgm !== AUDIO_HUB.bgmBoss && !this.gameEnded) {
+            playBgm(AUDIO_HUB.bgmBoss);
+        }
     }
 
     /**
@@ -60,10 +73,14 @@ class World {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
         if (this.character.isDead() && !this.gameEnded) {
             this.gameEnded = true;
-            setTimeout(() => this.showEndScreen('img/You won, you lost/You lost.png'), 1000);
+            playSound(AUDIO_HUB.pepeDead);
+            playBgm(AUDIO_HUB.bgmLost);
+            // 사망 애니메이션이 충분히 보이도록 1.5초(1500ms) 뒤에 패배 화면 표시
+            setTimeout(() => this.showEndScreen('img/You won, you lost/You lost.png'), 1500);
         }
         if (endboss && endboss.deathAnimationFinished && !this.gameEnded) {
             this.gameEnded = true;
+            playBgm(AUDIO_HUB.bgmWin);
             this.showEndScreen('img/You won, you lost/You win B.png');
         }
     }
@@ -73,6 +90,7 @@ class World {
      * @param {string} imagePath - Result image path to display.
      */
     showEndScreen(imagePath) {
+        this.stopDrawing = true; // 2. 결과 화면이 뜰 때 비로소 캔버스 그리기 중단!
         for (let i = 1; i < 9999; i++) window.clearInterval(i);
         let endScreenImg = document.getElementById('endScreenImg');
         let restartScreen = document.getElementById('restartScreen');
@@ -164,20 +182,26 @@ class World {
     }
 
     /**
-     * Inflicts damage onto Pepe and updates the health status bar.
+     * Inflicts damage onto Pepe, plays hurt sound, and updates health bar.
      */
     hurtCharacter() {
-        if (!this.character.isHurt()) {
+        if (!this.character.isHurt() && !this.character.isDead()) {
             this.character.hit();
+            playSound(AUDIO_HUB.pepeHurt);
             this.statusBar.setPercentage(this.character.energy);
         }
     }
 
     /**
-     * Eliminates regular enemies jumped on from above and bounces character upward.
+     * Eliminates regular enemies jumped on from above and plays appropriate sound.
      * @param {Chicken|SmallChicken} enemy - Target enemy to stomp.
      */
     stompEnemy(enemy) {
+        if (enemy instanceof SmallChicken) {
+            playSound(AUDIO_HUB.smallChickenDead);
+        } else {
+            playSound(AUDIO_HUB.chickenDead);
+        }
         if (typeof enemy.die === 'function') enemy.die();
         this.character.speedY = 15;
         this.removeEnemyAfterDelay(enemy, 500);
@@ -210,18 +234,25 @@ class World {
     }
 
     /**
-     * Handles bottle splash animation and damage on impact.
+     * Handles bottle splash animation, sound, and damage on impact.
      * @param {ThrowableObject} bottle - Thrown projectile.
      * @param {MovableObject} enemy - Impact target.
      */
     handleBottleImpact(bottle, enemy) {
         bottle.isSplashed = true;
+        playSound(AUDIO_HUB.bottleSplash);
         if (typeof bottle.splash === 'function') bottle.splash();
         if (enemy instanceof Endboss) {
             enemy.hadFirstContact = true;
             enemy.hit();
+            playSound(AUDIO_HUB.bossHurt);
             this.statusBarEndboss.setPercentage(enemy.energy);
         } else {
+            if (enemy instanceof SmallChicken) {
+                playSound(AUDIO_HUB.smallChickenDead);
+            } else {
+                playSound(AUDIO_HUB.chickenDead);
+            }
             if (typeof enemy.die === 'function') enemy.die();
             this.removeEnemyAfterDelay(enemy, 500);
         }
@@ -241,7 +272,7 @@ class World {
     }
 
     /**
-     * Checks pickup collisions with ground bottles.
+     * Checks pickup collisions with ground bottles and plays sound.
      */
     checkCollectBottles() {
         if (!this.level.bottles) return;
@@ -249,13 +280,14 @@ class World {
             if (this.character.isColliding(bottle) && this.availableBottles < this.maxBottles) {
                 this.availableBottles++;
                 this.level.bottles.splice(idx, 1);
+                playSound(AUDIO_HUB.bottleCollect);
                 this.updateBottleBar();
             }
         });
     }
 
     /**
-     * Checks pickup collisions with coins.
+     * Checks pickup collisions with coins and plays sound.
      */
     checkCollectCoins() {
         if (!this.level.coins) return;
@@ -263,6 +295,7 @@ class World {
             if (this.character.isColliding(coin)) {
                 this.collectedCoins++;
                 this.level.coins.splice(idx, 1);
+                playSound(AUDIO_HUB.coinCollect);
                 let percentage = (this.collectedCoins / this.maxCoins) * 100;
                 this.statusBarCoin.setPercentage(percentage);
             }
@@ -273,12 +306,14 @@ class World {
      * Main canvas rendering animation loop.
      */
     draw() {
-        if (this.gameEnded) return;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.translate(this.camera_x, 0);
-        this.drawWorldObjects();
-        this.ctx.translate(-this.camera_x, 0);
-        this.drawStatusBars();
+        if (this.stopDrawing) return; // 3. gameEnded 대신 stopDrawing일 때만 멈춤!
+        if (!isPaused) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.translate(this.camera_x, 0);
+            this.drawWorldObjects();
+            this.ctx.translate(-this.camera_x, 0);
+            this.drawStatusBars();
+        }
         let self = this;
         requestAnimationFrame(() => self.draw());
     }

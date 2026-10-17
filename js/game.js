@@ -23,18 +23,135 @@ let keyboard = new Keyboard();
 let isMuted = false;
 
 /**
- * Audio hub collection mapping game events to Audio objects.
+ * Currently playing background music track.
+ * @type {HTMLAudioElement|null}
+ */
+let currentBgm = null;
+
+/**
+ * 현재 설정된 BGM 볼륨 (기본값 0.5)
+ * @type {number}
+ */
+let bgmVolume = 0.5;
+
+/**
+ * 현재 설정된 SFX 볼륨 (기본값 0.5)
+ * @type {number}
+ */
+let sfxVolume = 0.5;
+
+/**
+ * 설정 모달을 엽니다.
+ */
+function openSettingsDialog() {
+    document.getElementById('settingsDialog').classList.remove('d-none');
+}
+
+/**
+ * 설정 모달을 닫습니다.
+ */
+function closeSettingsDialog() {
+    document.getElementById('settingsDialog').classList.add('d-none');
+}
+
+/**
+ * 배경 클릭 시 설정 모달을 닫습니다.
+ * @param {MouseEvent} event 
+ */
+function closeSettingsOnBackdrop(event) {
+    if (event.target.id === 'settingsDialog') {
+        closeSettingsDialog();
+    }
+}
+
+/**
+ * BGM 볼륨을 변경하고 저장합니다.
+ * @param {string} val 
+ */
+function changeBgmVolume(val) {
+    bgmVolume = parseFloat(val);
+    localStorage.setItem('bgmVolume', bgmVolume);
+    if (currentBgm) {
+        currentBgm.volume = bgmVolume;
+    }
+}
+
+/**
+ * SFX 효과음 볼륨을 변경하고 저장합니다.
+ * @param {string} val 
+ */
+function changeSfxVolume(val) {
+    sfxVolume = parseFloat(val);
+    localStorage.setItem('sfxVolume', sfxVolume);
+}
+
+/**
+ * 저장된 볼륨 설정을 불러옵니다. (init 내부에서 호출)
+ */
+function loadVolumePreferences() {
+    let savedBgm = localStorage.getItem('bgmVolume');
+    let savedSfx = localStorage.getItem('sfxVolume');
+
+    if (savedBgm !== null) {
+        bgmVolume = parseFloat(savedBgm);
+        document.getElementById('bgmSlider').value = bgmVolume;
+    }
+    if (savedSfx !== null) {
+        sfxVolume = parseFloat(savedSfx);
+        document.getElementById('sfxSlider').value = sfxVolume;
+    }
+}
+
+// playBgm 함수 안에서 볼륨 적용
+function playBgm(bgmTrack) {
+    if (currentBgm) {
+        currentBgm.pause();
+        currentBgm.currentTime = 0;
+    }
+    currentBgm = bgmTrack;
+    if (currentBgm) {
+        currentBgm.loop = true;
+        currentBgm.volume = bgmVolume; // 볼륨 반영
+        currentBgm.currentTime = 0;
+        if (!isMuted) {
+            currentBgm.play().catch(() => {});
+        }
+    }
+}
+
+// playSound 함수 안에서 효과음 볼륨 적용
+function playSound(sound) {
+    if (!isMuted && sound) {
+        sound.volume = sfxVolume; // 볼륨 반영
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    }
+}
+
+/**
+ * Audio hub mapping exact file names from the audio directory.
  * @type {Object.<string, HTMLAudioElement>}
  */
 const AUDIO_HUB = {
-    bgm: new Audio('audio/music.mp3'),
+    // 5가지 BGM (스크린샷 bgm01 ~ bgm05 매칭)
+    bgmMenu: new Audio('audio/bgm01.mp3'), // 1. 최초 화면 대기
+    bgmGame: new Audio('audio/bgm02.mp3'), // 2. 닭/병아리 몬스터 단계
+    bgmBoss: new Audio('audio/bgm03.mp3'), // 3. 보스 대면 상태
+    bgmLost: new Audio('audio/bgm04.mp3'), // 4. 보스 패배 시
+    bgmWin: new Audio('audio/bgm05.mp3'),  // 5. 보스 승리 시
+
+    // 효과음 (SFX) - 스크린샷 실제 파일명 정확히 반영
     jump: new Audio('audio/jump.mp3'),
     throw: new Audio('audio/throw.mp3'),
     bottleSplash: new Audio('audio/splash.mp3'),
-    chickenDead: new Audio('audio/chicken.mp3'),
-    bossHurt: new Audio('audio/boss_hurt.mp3'),
-    win: new Audio('audio/win.mp3'),
-    lost: new Audio('audio/lost.mp3')
+    coinCollect: new Audio('audio/coin.mp3'),
+    bottleCollect: new Audio('audio/bottle.mp3'),
+    pepeSnore: new Audio('audio/snoring.mp3'),
+    smallChickenDead: new Audio('audio/chick-dead.mp3'),
+    chickenDead: new Audio('audio/chicken-dead.mp3'),
+    bossHurt: new Audio('audio/boss-hurt.mp3'),
+    pepeHurt: new Audio('audio/hurt.mp3'),
+    pepeDead: new Audio('audio/dead.mp3')
 };
 
 /**
@@ -43,11 +160,39 @@ const AUDIO_HUB = {
 function init() {
     canvas = document.getElementById('canvas');
     loadMutePreference();
+    loadVolumePreferences(); // 볼륨 설정 로드 추가
     bindTouchEvents();
+    playBgm(AUDIO_HUB.bgmMenu);
 }
 
 /**
- * Loads the stored mute state from localStorage and updates UI accordingly.
+ * 게임 일시정지 상태 여부
+ * @type {boolean}
+ */
+let isPaused = false;
+
+/**
+ * 게임 일시정지 / 재개 토글 함수
+ */
+function togglePause() {
+    isPaused = !isPaused;
+    let pauseScreen = document.getElementById('pauseScreen');
+    let pauseBtn = document.getElementById('pauseBtn');
+
+    if (isPaused) {
+        pauseScreen.classList.remove('d-none');
+        pauseBtn.innerText = '▶️';
+        if (currentBgm) currentBgm.pause();
+        if (AUDIO_HUB.pepeSnore) AUDIO_HUB.pepeSnore.pause(); // 일시정지 시 코골이 즉시 멈춤!
+    } else {
+        pauseScreen.classList.add('d-none');
+        pauseBtn.innerText = '⏸️';
+        if (currentBgm && !isMuted) currentBgm.play().catch(() => {});
+    }
+}
+
+/**
+ * Loads the stored mute state from localStorage and updates UI.
  */
 function loadMutePreference() {
     let savedMute = localStorage.getItem('isMuted');
@@ -88,8 +233,27 @@ function applyMuteState() {
 }
 
 /**
- * Plays an audio clip if sound is not muted.
- * @param {HTMLAudioElement} sound - Audio element to play.
+ * Plays a specific BGM track with loop enabled.
+ * @param {HTMLAudioElement} bgmTrack - The BGM track to play.
+ */
+function playBgm(bgmTrack) {
+    if (currentBgm) {
+        currentBgm.pause();
+        currentBgm.currentTime = 0;
+    }
+    currentBgm = bgmTrack;
+    if (currentBgm) {
+        currentBgm.loop = true;
+        currentBgm.currentTime = 0;
+        if (!isMuted) {
+            currentBgm.play().catch(() => {});
+        }
+    }
+}
+
+/**
+ * Plays an individual sound effect.
+ * @param {HTMLAudioElement} sound - Sound effect element.
  */
 function playSound(sound) {
     if (!isMuted && sound) {
@@ -99,14 +263,13 @@ function playSound(sound) {
 }
 
 /**
- * Hides start screen, initializes level entities, and launches the world instance.
+ * Starts the game, switches to normal stage BGM, and creates the world.
  */
 function startGame() {
     document.getElementById('startScreen').classList.add('d-none');
     initLevel();
     world = new World(canvas, keyboard);
-    AUDIO_HUB.bgm.loop = true;
-    playSound(AUDIO_HUB.bgm);
+    playBgm(AUDIO_HUB.bgmGame);
 }
 
 /**
@@ -119,26 +282,25 @@ function stopAllIntervals() {
 }
 
 /**
- * Resets running intervals, hides restart screen, and recreates the world.
+ * Restarts the game, resetting world state and game BGM.
  */
 function restartGame() {
     stopAllIntervals();
     document.getElementById('restartScreen').classList.add('d-none');
     initLevel();
     world = new World(canvas, keyboard);
-    playSound(AUDIO_HUB.bgm);
+    playBgm(AUDIO_HUB.bgmGame);
 }
 
 /**
- * Stops game timers, resets BGM, and returns to the initial landing screen.
+ * Returns to the main menu and plays menu BGM.
  */
 function backToMainMenu() {
     stopAllIntervals();
-    AUDIO_HUB.bgm.pause();
-    AUDIO_HUB.bgm.currentTime = 0;
     document.getElementById('restartScreen').classList.add('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
     world = null;
+    playBgm(AUDIO_HUB.bgmMenu);
 }
 
 /**
@@ -156,7 +318,7 @@ function closeInfoDialog() {
 }
 
 /**
- * Closes dialog modal when clicking on the darkened backdrop.
+ * Closes dialog modal when clicking on backdrop.
  * @param {MouseEvent} event - Click event.
  */
 function closeOnBackdrop(event) {
@@ -185,9 +347,9 @@ function toggleFullscreen() {
 }
 
 /**
- * Binds touchstart, touchend, and prevents context menus on a virtual touch button.
+ * Binds touch events and prevents context menu popups on mobile buttons.
  * @param {string} btnId - Element ID of the touch button.
- * @param {string} keyProperty - Keyboard property name (e.g. 'LEFT', 'SPACE').
+ * @param {string} keyProperty - Keyboard property name.
  */
 function bindTouchButton(btnId, keyProperty) {
     let btn = document.getElementById(btnId);
@@ -204,7 +366,7 @@ function bindTouchButton(btnId, keyProperty) {
 }
 
 /**
- * Binds all mobile touch controls to their respective keyboard triggers.
+ * Binds all mobile touch controls.
  */
 function bindTouchEvents() {
     bindTouchButton('btnLeft', 'LEFT');
@@ -218,8 +380,8 @@ window.addEventListener('keydown', (e) => {
     if (e.keyCode === 37) keyboard.LEFT = true;
     if (e.keyCode === 38) keyboard.UP = true;
     if (e.keyCode === 40) keyboard.DOWN = true;
-    if (e.keyCode === 32) keyboard.SPACE = true;
-    if (e.keyCode === 68) keyboard.D = true;
+    if (e.keyCode === 32) { keyboard.SPACE = true; playSound(AUDIO_HUB.jump); }
+    if (e.keyCode === 68) { keyboard.D = true; playSound(AUDIO_HUB.throw); }
 });
 
 window.addEventListener('keyup', (e) => {

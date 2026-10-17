@@ -9,6 +9,7 @@ class Character extends MovableObject {
     speed = 10;
     world;
     lastActionTime = new Date().getTime();
+    deadFrameIndex = 0;
 
     offset = {
         top: 120,
@@ -107,7 +108,7 @@ class Character extends MovableObject {
      * Processes input checks, character position updates, and camera following.
      */
     processMovement() {
-        if (!this.world) return;
+        if (!this.world || this.isDead()) return;
         let isMoving = this.handleWalkAndJump();
         if (isMoving || this.world.keyboard.D) {
             this.resetIdleTimer();
@@ -152,7 +153,7 @@ class Character extends MovableObject {
      */
     processAnimations() {
         if (this.isDead()) {
-            this.playAnimation(this.IMAGES_DEAD);
+            this.playDeathAnimation();
         } else if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
             this.resetIdleTimer();
@@ -161,6 +162,17 @@ class Character extends MovableObject {
             this.resetIdleTimer();
         } else {
             this.handleGroundState();
+        }
+    }
+
+    /**
+     * Plays death animation frames sequentially until the final frame.
+     */
+    playDeathAnimation() {
+        let idx = Math.min(this.deadFrameIndex, this.IMAGES_DEAD.length - 1);
+        this.img = this.imageCache[this.IMAGES_DEAD[idx]];
+        if (this.deadFrameIndex < this.IMAGES_DEAD.length - 1) {
+            this.deadFrameIndex++;
         }
     }
 
@@ -189,6 +201,9 @@ class Character extends MovableObject {
         let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
         if (timePassed > 4) {
             this.playAnimation(this.IMAGES_LONG_IDLE);
+            if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && AUDIO_HUB.pepeSnore.paused) {
+                playSound(AUDIO_HUB.pepeSnore);
+            }
         } else {
             this.playAnimation(this.IMAGES_IDLE);
         }
