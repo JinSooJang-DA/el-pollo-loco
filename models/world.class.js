@@ -243,7 +243,6 @@ class World {
      */
     handleBottleImpact(bottle, enemy) {
         bottle.isSplashed = true;
-        playSound(AUDIO_HUB.bottleSplash);
         if (typeof bottle.splash === 'function') bottle.splash();
         if (enemy instanceof Endboss) {
             enemy.hadFirstContact = true;

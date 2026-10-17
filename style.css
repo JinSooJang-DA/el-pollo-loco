@@ -511,3 +511,9 @@ canvas {
     height: 180px;
     object-fit: contain;
 }
+
+/* Hide touch controls on the result screen */
+.game-container:has(#restartScreen:not(.d-none))
+.mobile-controls-container {
+    display: none !important;
+}

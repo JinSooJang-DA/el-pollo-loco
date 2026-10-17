@@ -33,7 +33,6 @@ const AUDIO_HUB = {
     jump: new Audio('audio/jump.mp3'),
     run: new Audio('audio/run.mp3'),
     throw: new Audio('audio/throw.mp3'),
-    bottleSplash: new Audio('audio/splash.mp3'),
     coinCollect: new Audio('audio/coin.mp3'),
     bottleCollect: new Audio('audio/bottle.mp3'),
     pepeSnore: new Audio('audio/snoring.mp3'),
