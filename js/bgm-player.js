@@ -3,7 +3,7 @@
 let playlistActive = true;
 let playlistTrack = 0;
 let playlistShuffle = false;
-let playlistRepeat = 'track';
+let playlistRepeat = 'list';
 
 const PLAYLIST_TRACKS = [
     AUDIO_HUB.bgmMenu,
@@ -111,7 +111,7 @@ function resetPlaylist() {
     playlistActive = true;
     playlistTrack = 0;
     playlistShuffle = false;
-    playlistRepeat = 'track';
+    playlistRepeat = 'list';
     const menu = document.getElementById('bgmMenu');
     menu.classList.remove('d-none');
     menu.open = false;
