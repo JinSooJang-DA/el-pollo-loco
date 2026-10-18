@@ -174,6 +174,13 @@ class World {
      * @param {MovableObject} enemy - Colliding enemy object.
      */
     handleEnemyContact(enemy) {
+        if (enemy instanceof SmallChicken) {
+            if (!this.character.isHurt() && !this.character.isDead()) {
+                playSound(AUDIO_HUB.smallChickenDead);
+            }
+            this.hurtCharacter();
+            return;
+        }
         if (enemy instanceof Endboss) {
             if (Date.now() - enemy.lastHit < 2000) return;
             this.hurtCharacter();
