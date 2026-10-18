@@ -423,3 +423,4 @@ function startLoadingAnimation() {
         document.getElementById('loadingScreen').remove();
     }, 1800);
 }
+
