@@ -22,7 +22,9 @@ function bindTouchButton(btnId, keyProperty) {
 function handleTouchStart(event, keyProperty) {
     event.preventDefault();
     keyboard[keyProperty] = true;
+
     if (keyProperty === 'D' && world && !isPaused) {
+        world.character.resetIdleTimer();
         world.checkThrowObjects();
         keyboard.D = false;
     }
