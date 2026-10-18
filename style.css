@@ -583,3 +583,56 @@ canvas {
         display: none !important;
     }
 }
+
+
+
+/* Legal Notice dialog */
+.legal-card {
+    width: 90%;
+    max-width: 520px;
+    max-height: 85%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.legal-card h2 {
+    flex-shrink: 0;
+    margin-right: 25px;
+}
+
+.legal-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 10px;
+    text-align: left;
+    line-height: 1.5;
+    font-size: 14px;
+    overscroll-behavior: contain;
+}
+
+.legal-content h3 {
+    color: #ff9800;
+    font-size: 15px;
+    margin: 16px 0 8px;
+}
+
+.legal-content a {
+    color: #ff9800;
+}
+
+
+@media screen and (orientation: landscape) and (max-height: 600px) {
+    .legal-card {
+        max-height: 85%;
+        padding: 12px 18px;
+    }
+
+    .legal-content {
+        font-size: 12px;
+    }
+}
+
+

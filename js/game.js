@@ -311,9 +311,19 @@ function closeOnBackdrop(event) {
     }
 }
 
-/** Opens the legal information page. */
+/** Opens the legal notice inside the game. */
 function openImpressum() {
-    window.open('impressum.html', '_blank');
+    document.getElementById('legalDialog').classList.remove('d-none');
+}
+
+/** Closes the legal notice. */
+function closeLegalNotice() {
+    document.getElementById('legalDialog').classList.add('d-none');
+}
+
+/** Closes the legal notice when clicking outside. */
+function closeLegalOnBackdrop(event) {
+    if (event.target.id === 'legalDialog') closeLegalNotice();
 }
 
 /** Toggles fullscreen mode. */

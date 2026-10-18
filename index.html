@@ -101,6 +101,8 @@
                 <p class="story-desc">
                     Help Pepe defeat the angry giant Chicken Boss!
                     Collect bottles and coins across the desert.
+                    Watch out for baby chickens! You can't stomp them.
+                    Touching them will hurt Pepe!
                 </p>
             </div>
         </div>
@@ -143,6 +145,55 @@
                 </div>
             </div>
         </div>
+
+
+        <!-- Legal Notice dialog -->
+        <div id="legalDialog" class="dialog-overlay d-none" onclick="closeLegalOnBackdrop(event)">
+            <div class="dialog-card legal-card">
+                <button class="dialog-close-btn" onclick="closeLegalNotice()">✕</button>
+
+                <h2>Legal Notice</h2>
+
+                <div class="legal-content">
+                    <h3>Project Information</h3>
+                    <p>
+                        <strong>Project:</strong> El Pollo Loco - Jump & Run Game<br>
+                        <strong>Developer:</strong> Student at Developer Akademie<br>
+                        <strong>Purpose:</strong> Educational frontend development project
+                    </p>
+
+                    <p>
+                        This game was created for learning and practice
+                        purposes only. It is a non-commercial student project.
+                    </p>
+
+                    <h3>Music and Sound Effects</h3>
+                    <p>
+                        All background music was created by the developer
+                        using artificial intelligence (AI).
+                    </p>
+                    <p>
+                        Sound effects were obtained from
+                        <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer">Pixabay</a>
+                        or created using free sound generation tools.
+                    </p>
+
+                    <h3>Copyright</h3>
+                    <p>
+                        Original project content is subject to applicable
+                        copyright laws. Third-party assets remain subject
+                        to their respective licenses and usage conditions.
+                    </p>
+
+                    <h3>Disclaimer</h3>
+                    <p>
+                        This game is provided as an educational and
+                        demonstration project.
+                    </p>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Mobile touch controls -->
         <div class="mobile-controls-container">
