@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/components.css">
+    <link rel="stylesheet" href="./styles/responsive.css">
     <link rel="icon" type="image/x-icon" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
     <title>El Pollo Loco</title>
-
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
     <script src="models/character.class.js"></script>
@@ -29,6 +30,8 @@
     <script src="models/world.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/bgm-player.js"></script>
+    <script src="js/game-input.js"></script>
 
 </head>
 
@@ -50,6 +53,34 @@
                 <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
             </div>
         </details>
+
+
+        <!-- Start screen BGM playlist -->
+        <details id="bgmMenu" class="bgm-menu">
+            <summary>♫ BGM</summary>
+
+            <div class="bgm-panel">
+                <h3>Soundtrack</h3>
+
+                <button class="playlist-track is-playing" onclick="selectPlaylistTrack(0)">01 · Main Theme</button>
+                <button class="playlist-track" onclick="selectPlaylistTrack(1)">02 · Desert Adventure</button>
+                <button class="playlist-track" onclick="selectPlaylistTrack(2)">03 · Boss Battle</button>
+                <button class="playlist-track" onclick="selectPlaylistTrack(3)">04 · Game Over</button>
+                <button class="playlist-track" onclick="selectPlaylistTrack(4)">05 · Victory</button>
+
+                <div class="bgm-player-controls">
+                    <button onclick="playPreviousTrack()" title="Previous">⏮</button>
+                    <button id="bgmPlayBtn" onclick="togglePlaylistPlayback()" title="Play or pause">⏸</button>
+                    <button onclick="playNextTrack()" title="Next">⏭</button>
+                </div>
+
+                <div class="bgm-player-options">
+                    <button id="bgmShuffleBtn" onclick="togglePlaylistShuffle()">Shuffle: Off</button>
+                    <button id="bgmRepeatBtn" onclick="togglePlaylistRepeat()">Repeat: Track</button>
+                </div>
+            </div>
+        </details>
+
 
         <!-- Game canvas -->
         <canvas id="canvas" width="720" height="480"></canvas>

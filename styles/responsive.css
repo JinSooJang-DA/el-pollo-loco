@@ -1,0 +1,175 @@
+/* Desktop background and game centering */
+@media screen and (min-width: 721px) {
+    body {
+        position: relative;
+        min-height: 100vh;
+        min-height: 100dvh;
+        box-sizing: border-box;
+        justify-content: center;
+
+        background-color: #59331d;
+        background-image: url('../img/9_intro_outro_screens/start/intro-backdrop.webp');
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    /* Title stays at the top */
+    body>h1 {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        text-align: center;
+    }
+
+    /* The game itself stays at the center */
+    .game-container {
+        flex-shrink: 0;
+        margin: 0 auto;
+    }
+}
+
+@media screen and (orientation: portrait) and (max-width: 1024px) {
+    .turn-device-overlay {
+        display: flex !important;
+    }
+
+    h1,
+    .game-container {
+        display: none !important;
+    }
+}
+
+@media screen and (orientation: landscape) and (max-height: 600px) {
+    body {
+        margin: 0;
+        overflow: hidden;
+    }
+
+    h1 {
+        display: none !important;
+    }
+
+    .game-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .mobile-controls-container {
+        display: flex !important;
+    }
+}
+
+/* Mobile and tablet: portrait orientation */
+@media screen and (orientation: portrait) and (pointer: coarse),
+screen and (orientation: portrait) and (max-width: 600px) {
+    .turn-device-overlay {
+        display: flex !important;
+    }
+}
+
+/* Mobile and tablet: landscape touch controls */
+@media screen and (orientation: landscape) and (pointer: coarse) {
+    .turn-device-overlay {
+        display: none !important;
+    }
+
+    .game-container {
+        width: min(100vw, 150dvh);
+        height: auto;
+        aspect-ratio: 3 / 2;
+        margin: 0 auto;
+    }
+
+    .mobile-controls-container {
+        display: flex !important;
+    }
+}
+
+/* Prevent touch buttons from appearing on desktop */
+@media screen and (pointer: fine) {
+    .mobile-controls-container {
+        display: none !important;
+    }
+}
+
+/* Mobile landscape UI */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+
+    /* Menu button */
+    .game-menu {
+        top: 8px;
+        right: 20px;
+    }
+
+    /* Touch controls */
+    .mobile-controls-container {
+        bottom: 12px;
+        padding: 0 clamp(20px, 4vw, 40px);
+    }
+
+    .touch-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .touch-group-left,
+    .touch-group-right {
+        gap: 8px;
+    }
+
+    /* Start button */
+    #startBtn {
+        padding: 10px 24px;
+        font-size: clamp(13px, 4vh, 19px);
+    }
+
+    /* Win / Lose buttons */
+    .end-buttons-group {
+        gap: 12px;
+        max-width: 90%;
+    }
+
+    #restartBtn,
+    #homeBtn {
+        padding: 10px 20px;
+        font-size: clamp(12px, 3.5vh, 18px);
+        white-space: nowrap;
+    }
+
+    /* Hide touch controls outside gameplay */
+    .game-container:has(#startScreen:not(.d-none)) .mobile-controls-container,
+    .game-container:has(#restartScreen:not(.d-none)) .mobile-controls-container {
+        display: none !important;
+    }
+
+    .legal-card {
+        max-height: 85%;
+        padding: 12px 18px;
+    }
+
+    .legal-content {
+        font-size: 12px;
+    }
+
+    .bgm-menu {
+        top: 8px;
+        left: 12px;
+    }
+
+    .game-menu summary,
+    .bgm-menu summary {
+        width: 82px;
+        min-width: 82px;
+        height: 36px;
+        padding: 0 10px;
+        font-size: 13px;
+        border-width: 2px;
+        border-radius: 10px;
+    }
+}

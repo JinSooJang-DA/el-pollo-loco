@@ -1,0 +1,353 @@
+/* 1. 로컬 폰트 (Rye) 등록 */
+@font-face {
+    font-family: 'Rye';
+    src: url('../fonts/rye-v17-latin-regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    font-family: Arial, sans-serif;
+    color: white;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* 2. 게임 메인 타이틀에 적용 */
+h1 {
+    font-family: 'Rye', cursive, sans-serif;
+    margin: 12px 0 8px 0;
+    font-size: 38px;
+    letter-spacing: 3px;
+    color: #ff9800;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+}
+
+.game-container {
+    position: relative;
+    width: 720px;
+    height: 480px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+canvas {
+    background-color: black;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.top-nav-bar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.nav-icon-btn {
+    background: rgba(0, 0, 0, 0.65);
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 15px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, background 0.15s;
+}
+
+.nav-icon-btn:hover {
+    transform: scale(1.1);
+    background: #ff9800;
+}
+
+/* 일시정지 오버레이 스타일 */
+.pause-title {
+    font-family: 'Rye', cursive, sans-serif;
+    font-size: 38px;
+    color: #ff9800;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px #000;
+}
+
+#resumeBtn {
+    font-family: 'Rye', cursive, sans-serif;
+    padding: 12px 36px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(180deg, #ff9800, #e65100);
+    border: 3px solid #fff;
+    border-radius: 35px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease;
+}
+
+#resumeBtn:hover {
+    transform: scale(1.05);
+}
+
+.overlay-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.start-screen-layout {
+    background: transparent;
+    justify-content: flex-end;
+    padding-bottom: 35px;
+    box-sizing: border-box;
+}
+
+.start-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    object-fit: cover;
+}
+
+.end-result-img {
+    max-width: 440px;
+    max-height: 180px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+.end-buttons-group {
+    display: flex;
+    gap: 15px;
+}
+
+.d-none {
+    display: none !important;
+}
+
+/* 3. 버튼에 웨스턴 폰트 적용 */
+#startBtn, #restartBtn {
+    font-family: 'Rye', cursive, sans-serif;
+    padding: 12px 38px;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: white;
+    background: linear-gradient(180deg, #ff9800, #e65100);
+    border: 3px solid #fff;
+    border-radius: 35px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease;
+}
+
+#homeBtn {
+    font-family: 'Rye', cursive, sans-serif;
+    padding: 12px 28px;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    color: white;
+    background: #424242;
+    border: 3px solid #fff;
+    border-radius: 35px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease;
+}
+
+#startBtn:hover, #restartBtn:hover, #homeBtn:hover {
+    transform: scale(1.05);
+}
+
+.volume-control-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 15px 0;
+    font-size: 15px;
+    width: 100%;
+}
+
+.volume-control-row label {
+    margin-bottom: 8px;
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.volume-control-row input[type="range"] {
+    width: 100%;
+    accent-color: #ff9800;
+    cursor: pointer;
+}
+
+/* 설명 모달 */
+.dialog-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 30;
+}
+
+.dialog-card {
+    position: relative;
+    background: #232323;
+    border: 3px solid #ff9800;
+    border-radius: 12px;
+    padding: 20px 26px;
+    width: 360px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.dialog-card h2 {
+    font-family: 'Rye', cursive, sans-serif;
+    color: #ff9800;
+    font-size: 20px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.dialog-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 15px;
+}
+
+.key-badge {
+    background: #444;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #777;
+    font-weight: bold;
+    color: #ff9800;
+}
+
+.story-desc {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.4;
+}
+
+.mobile-controls-container {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 47px;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.touch-group-left, .touch-group-right {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.touch-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.touch-btn:active {
+    background: rgba(255, 152, 0, 0.7);
+    transform: scale(0.95);
+}
+
+/* 세로 모드 경고 오버레이 */
+.turn-device-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #111;
+    z-index: 999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.turn-device-overlay h2 {
+    font-family: 'Rye', cursive, sans-serif;
+    color: #ff9800;
+}
+
+.turn-icon {
+    font-size: 55px;
+    margin-bottom: 15px;
+    animation: rotateDevice 2s infinite ease-in-out;
+}
+
+@keyframes rotateDevice {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}

@@ -23,7 +23,7 @@ let bgmVolume = 0.5;
 /** @type {number} */
 let sfxVolume = 0.5;
 
-/** @type {Object.<string, HTMLAudioElement>} */
+/** Contains all background music and sound effects. */
 const AUDIO_HUB = {
     bgmMenu: new Audio('audio/bgm01.mp3'),
     bgmGame: new Audio('audio/bgm02.mp3'),
@@ -42,19 +42,21 @@ const AUDIO_HUB = {
     pepeHurt: new Audio('audio/hurt.mp3'),
     pepeDead: new Audio('audio/dead.mp3')
 };
+
 AUDIO_HUB.run.loop = true;
 
-/** Initializes game elements and audio preferences. */
+/** Initializes the game and audio preferences. */
 function init() {
     canvas = document.getElementById('canvas');
     loadMutePreference();
     loadVolumePreferences();
     bindTouchEvents();
+    initPlaylist();
     playBgm(AUDIO_HUB.bgmMenu);
     unlockAudioOnFirstInteraction();
 }
 
-/** Resumes audio after the first browser interaction. */
+/** Allows background music after user interaction. */
 function unlockAudioOnFirstInteraction() {
     const resume = () => {
         resumeCurrentBgm();
@@ -75,7 +77,7 @@ function loadMutePreference() {
     applyMuteState();
 }
 
-/** Toggles and stores the mute preference. */
+/** Toggles and saves the mute preference. */
 function toggleMute() {
     isMuted = !isMuted;
     localStorage.setItem('isMuted', isMuted);
@@ -84,7 +86,7 @@ function toggleMute() {
     if (!isMuted) resumeCurrentBgm();
 }
 
-/** Updates the sound button icon. */
+/** Updates the sound button text. */
 function updateMuteUI() {
     const soundBtn = document.getElementById('soundBtn');
     if (soundBtn) {
@@ -92,7 +94,7 @@ function updateMuteUI() {
     }
 }
 
-/** Applies mute settings to all audio tracks. */
+/** Applies mute state to all audio elements. */
 function applyMuteState() {
     Object.values(AUDIO_HUB).forEach(audio => {
         audio.muted = isMuted;
@@ -100,7 +102,7 @@ function applyMuteState() {
     if (isMuted) stopSoundEffects();
 }
 
-/** Loads stored BGM and SFX volume values. */
+/** Loads stored volume preferences. */
 function loadVolumePreferences() {
     const savedBgm = parseFloat(localStorage.getItem('bgmVolume'));
     const savedSfx = parseFloat(localStorage.getItem('sfxVolume'));
@@ -114,7 +116,7 @@ function loadVolumePreferences() {
 }
 
 /**
- * Restricts a volume value to the range 0–1.
+ * Keeps volume between zero and one.
  * @param {number} value
  * @returns {number}
  */
@@ -122,7 +124,7 @@ function clampVolume(value) {
     return Math.min(1, Math.max(0, value));
 }
 
-/** Updates the volume sliders. */
+/** Updates both volume sliders. */
 function syncVolumeSliders() {
     const bgmSlider = document.getElementById('bgmSlider');
     const sfxSlider = document.getElementById('sfxSlider');
@@ -131,7 +133,7 @@ function syncVolumeSliders() {
 }
 
 /**
- * Changes the background music volume.
+ * Updates the BGM volume.
  * @param {string} val
  */
 function changeBgmVolume(val) {
@@ -143,7 +145,7 @@ function changeBgmVolume(val) {
 }
 
 /**
- * Changes the sound effect volume.
+ * Updates the sound effect volume.
  * @param {string} val
  */
 function changeSfxVolume(val) {
@@ -154,7 +156,7 @@ function changeSfxVolume(val) {
 }
 
 /**
- * Starts a background music track.
+ * Plays a background music track.
  * @param {HTMLAudioElement} bgmTrack
  */
 function playBgm(bgmTrack) {
@@ -164,21 +166,21 @@ function playBgm(bgmTrack) {
     }
     currentBgm = bgmTrack;
     if (!currentBgm) return;
-    currentBgm.loop = true;
+    currentBgm.loop = !playlistActive || playlistRepeat === 'track';
     currentBgm.volume = bgmVolume;
     currentBgm.muted = isMuted;
     resumeCurrentBgm();
 }
 
-/** Resumes the active background music if allowed. */
+/** Resumes background music when allowed. */
 function resumeCurrentBgm() {
     if (!currentBgm || isMuted || isPaused) return;
     if (!currentBgm.paused) return;
-    currentBgm.play().catch(() => { });
+    currentBgm.play().catch(() => {});
 }
 
 /**
- * Plays a sound effect with the configured volume.
+ * Plays a sound effect.
  * @param {HTMLAudioElement} sound
  */
 function playSound(sound) {
@@ -186,10 +188,10 @@ function playSound(sound) {
     sound.volume = sfxVolume;
     sound.muted = isMuted;
     sound.currentTime = 0;
-    sound.play().catch(() => { });
+    sound.play().catch(() => {});
 }
 
-/** Stops all active sound effects. */
+/** Stops all sound effects except the current BGM. */
 function stopSoundEffects() {
     Object.values(AUDIO_HUB).forEach(audio => {
         if (audio === currentBgm) return;
@@ -198,7 +200,7 @@ function stopSoundEffects() {
     });
 }
 
-/** Toggles game pause state. */
+/** Toggles the game's pause state. */
 function togglePause() {
     if (!world || world.gameEnded) return;
     isPaused = !isPaused;
@@ -206,15 +208,15 @@ function togglePause() {
     handlePauseAudio();
 }
 
-/** Updates pause overlay and button icon. */
+/** Updates pause screen and button text. */
 function updatePauseUI() {
     const screen = document.getElementById('pauseScreen');
     const button = document.getElementById('pauseBtn');
     if (screen) screen.classList.toggle('d-none', !isPaused);
-    if (pauseBtn) pauseBtn.innerText = isPaused ? 'Resume' : 'Pause';
+    if (button) button.innerText = isPaused ? 'Resume' : 'Pause';
 }
 
-/** Handles audio when pausing or resuming. */
+/** Pauses or resumes game audio. */
 function handlePauseAudio() {
     if (isPaused) {
         if (currentBgm) currentBgm.pause();
@@ -237,17 +239,18 @@ function startGame() {
     document.getElementById('startScreen').classList.add('d-none');
     initLevel();
     world = new World(canvas, keyboard);
+    deactivatePlaylist();
     playBgm(AUDIO_HUB.bgmGame);
 }
 
-/** Clears active game intervals using the existing timer strategy. */
+/** Clears the existing game intervals. */
 function stopAllIntervals() {
     for (let i = 1; i < 9999; i++) {
         window.clearInterval(i);
     }
 }
 
-/** Restarts the game without reloading the page. */
+/** Restarts the game without reloading. */
 function restartGame() {
     stopAllIntervals();
     stopSoundEffects();
@@ -258,7 +261,7 @@ function restartGame() {
     playBgm(AUDIO_HUB.bgmGame);
 }
 
-/** Returns to the main menu. */
+/** Returns to the start screen. */
 function backToMainMenu() {
     stopAllIntervals();
     stopSoundEffects();
@@ -266,7 +269,7 @@ function backToMainMenu() {
     document.getElementById('restartScreen').classList.add('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
     world = null;
-    playBgm(AUDIO_HUB.bgmMenu);
+    resetPlaylist();
 }
 
 /** Opens the settings dialog. */
@@ -291,12 +294,12 @@ function closeSettingsOnBackdrop(event) {
     }
 }
 
-/** Opens the game instructions dialog. */
+/** Opens the game instructions. */
 function openInfoDialog() {
     document.getElementById('infoDialog').classList.remove('d-none');
 }
 
-/** Closes the game instructions dialog. */
+/** Closes the game instructions. */
 function closeInfoDialog() {
     document.getElementById('infoDialog').classList.add('d-none');
 }
@@ -321,7 +324,10 @@ function closeLegalNotice() {
     document.getElementById('legalDialog').classList.add('d-none');
 }
 
-/** Closes the legal notice when clicking outside. */
+/**
+ * Closes the legal notice when clicking outside.
+ * @param {MouseEvent} event
+ */
 function closeLegalOnBackdrop(event) {
     if (event.target.id === 'legalDialog') closeLegalNotice();
 }
@@ -331,111 +337,8 @@ function toggleFullscreen() {
     if (document.activeElement) document.activeElement.blur();
     const container = document.getElementById('gameContainer');
     if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(() => { });
+        container.requestFullscreen().catch(() => {});
     } else {
-        document.exitFullscreen().catch(() => { });
+        document.exitFullscreen().catch(() => {});
     }
 }
-
-/**
- * Binds a mobile touch button.
- * @param {string} btnId
- * @param {string} keyProperty
- */
-function bindTouchButton(btnId, keyProperty) {
-    const button = document.getElementById(btnId);
-    if (!button) return;
-    button.addEventListener('touchstart', event => {
-        event.preventDefault();
-        keyboard[keyProperty] = true;
-    }, { passive: false });
-    button.addEventListener('touchstart', event => {
-        event.preventDefault();
-        keyboard[keyProperty] = true;
-
-        if (keyProperty === 'D' && world && !isPaused) {
-            world.checkThrowObjects();
-            keyboard.D = false;
-        }
-    }, { passive: false });
-    button.addEventListener('contextmenu', event => event.preventDefault());
-}
-
-/** Binds mobile movement and action buttons. */
-function bindTouchEvents() {
-    bindTouchButton('btnLeft', 'LEFT');
-    bindTouchButton('btnRight', 'RIGHT');
-    bindTouchButton('btnJump', 'SPACE');
-    bindTouchButton('btnThrow', 'D');
-}
-
-/**
- * Updates keyboard state from a keyboard event.
- * @param {KeyboardEvent} event
- * @param {boolean} pressed
- */
-function updateKeyboardState(event, pressed) {
-    const keyMap = {
-        39: 'RIGHT',
-        37: 'LEFT',
-        38: 'UP',
-        40: 'DOWN',
-        32: 'SPACE',
-        68: 'D'
-    };
-    const property = keyMap[event.keyCode];
-    if (property) keyboard[property] = pressed;
-    if (event.keyCode === 32 && pressed) event.preventDefault();
-}
-
-window.addEventListener('keydown', (e) => {
-    const startScreen = document.getElementById('startScreen');
-    const isStartScreen = !startScreen.classList.contains('d-none');
-
-    if (isStartScreen && (e.code === 'Space' || e.code === 'Enter')) {
-        e.preventDefault();
-        if (!e.repeat && document.getElementById('infoDialog').classList.contains('d-none')
-            && document.getElementById('settingsDialog').classList.contains('d-none')) {
-            startGame();
-        }
-        return;
-    }
-
-    if (e.keyCode === 39) keyboard.RIGHT = true;
-    if (e.keyCode === 37) keyboard.LEFT = true;
-    if (e.keyCode === 38) keyboard.UP = true;
-    if (e.keyCode === 40) keyboard.DOWN = true;
-    if (e.keyCode === 32) {
-        e.preventDefault();
-        keyboard.SPACE = true;
-    }
-    if (e.keyCode === 68) keyboard.D = true;
-});
-
-window.addEventListener('keyup', event => {
-    updateKeyboardState(event, false);
-});
-
-document.addEventListener('click', (event) => {
-    const menu = document.querySelector('.game-menu');
-    if (menu && !menu.contains(event.target)) {
-        menu.open = false;
-    }
-});
-
-/** Shows Pepe running before the start screen. */
-function startLoadingAnimation() {
-    let frame = 21;
-    const pepe = document.getElementById('loadingPepe');
-
-    const animation = setInterval(() => {
-        pepe.src = `img/2_character_pepe/2_walk/W-${frame}.png`;
-        frame = frame < 26 ? frame + 1 : 21;
-    }, 120);
-
-    setTimeout(() => {
-        clearInterval(animation);
-        document.getElementById('loadingScreen').remove();
-    }, 1800);
-}
-

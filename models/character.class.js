@@ -1,3 +1,4 @@
+
 /**
  * Represents the playable hero Pepe.
  * @extends MovableObject
@@ -81,9 +82,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-57.png'
     ];
 
-    /**
-     * Creates and initializes the character animations and physics.
-     */
+    /** Initializes Pepe's images and animation loops. */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadImages(this.IMAGES_IDLE);
@@ -96,85 +95,61 @@ class Character extends MovableObject {
         this.animate();
     }
 
-    /**
-     * Starts interval timers for character movement and animation cycles.
-     */
+    /** Starts movement and animation intervals. */
     animate() {
         setInterval(() => this.processMovement(), 1000 / 60);
         setInterval(() => this.processAnimations(), 150);
     }
 
     /**
-     * Processes input checks, character position updates, and camera following.
+     * Handles movement and jump input.
+     * @returns {boolean}
      */
-    processMovement() {
-        if (!this.world || this.isDead()) return;
-        let isMoving = this.handleWalkAndJump();
-        if (isMoving || this.world.keyboard.D) {
-            this.resetIdleTimer();
-        }
-        this.updateCameraPosition();
-    }
-
-    /**
-     * Evaluates horizontal walking and jumping inputs.
-     * @returns {boolean} True if any movement action was performed.
-     */
+    /** Handles walking and jumping input. */
     handleWalkAndJump() {
-        let acted = false;
-        if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-            this.moveRight();
-            this.otherDirection = false;
-            acted = true;
-        }
-        if (this.world.keyboard.LEFT && this.x > 0) {
-            this.moveLeft();
-            this.otherDirection = true;
-            acted = true;
-        }
+        let movedRight = this.walkRight();
+        let movedLeft = this.walkLeft();
         if (this.world.keyboard.SPACE && !this.isAboveGround()) {
             this.jump();
-            acted = true;
+            return true;
         }
-        return acted;
+        return movedRight || movedLeft;
+    }
+
+    /** Moves Pepe to the right if possible. */
+    walkRight() {
+        if (!this.world.keyboard.RIGHT) return false;
+        if (this.x >= this.world.level.level_end_x) return false;
+        this.moveRight();
+        this.otherDirection = false;
+        return true;
+    }
+
+    /** Moves Pepe to the left if possible. */
+    walkLeft() {
+        if (!this.world.keyboard.LEFT || this.x <= 0) return false;
+        this.moveLeft();
+        this.otherDirection = true;
+        return true;
     }
 
     /** Updates the camera smoothly around the boss. */
-updateCameraPosition() {
-    let boss = this.world.level.enemies.find(e => e instanceof Endboss);
-    let offset = 100;
+    updateCameraPosition() {
+        let boss = this.world.level.enemies.find(e => e instanceof Endboss);
+        let offset = 100;
 
-    if (boss) {
-        let distance = this.x - (boss.x + boss.width / 2);
-        let progress = Math.max(0, Math.min(1, (distance + 250) / 500));
-        offset = 100 + progress * 440;
-    }
-
-    let maxCameraX = -(this.world.level.level_end_x - 620);
-    let targetCameraX = -this.x + offset;
-    this.world.camera_x = Math.max(maxCameraX, Math.min(0, targetCameraX));
-}
-
-    /**
-     * Resolves the visual state and plays corresponding sprite sequence.
-     */
-    processAnimations() {
-        if (this.isDead()) {
-            this.playDeathAnimation();
-        } else if (this.isHurt()) {
-            this.playAnimation(this.IMAGES_HURT);
-            this.resetIdleTimer();
-        } else if (this.isAboveGround()) {
-            this.playAnimation(this.IMAGES_JUMPING);
-            this.resetIdleTimer();
-        } else {
-            this.handleGroundState();
+        if (boss) {
+            let distance = this.x - (boss.x + boss.width / 2);
+            let progress = Math.max(0, Math.min(1, (distance + 250) / 500));
+            offset = 100 + progress * 440;
         }
+
+        let maxCameraX = -(this.world.level.level_end_x - 620);
+        let targetCameraX = -this.x + offset;
+        this.world.camera_x = Math.max(maxCameraX, Math.min(0, targetCameraX));
     }
 
-    /**
-     * Plays death animation frames sequentially until the final frame.
-     */
+    /** Plays Pepe's death animation. */
     playDeathAnimation() {
         let idx = Math.min(this.deadFrameIndex, this.IMAGES_DEAD.length - 1);
         this.img = this.imageCache[this.IMAGES_DEAD[idx]];
@@ -183,9 +158,7 @@ updateCameraPosition() {
         }
     }
 
-    /**
-     * Handles sprite switching while on the ground (walking vs idle).
-     */
+    /** Handles walking and idle animations. */
     handleGroundState() {
         if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
             this.playAnimation(this.IMAGES_WALKING);
@@ -199,16 +172,7 @@ updateCameraPosition() {
         }
     }
 
-    /**
-     * Resets the idle activity timestamp to current time.
-     */
-    resetIdleTimer() {
-        this.lastActionTime = new Date().getTime();
-    }
-
-    /**
-     * Decides between short breathing idle and long sleeping idle animation.
-     */
+    /** Shows idle or sleeping animation. */
     handleIdleAnimation() {
         let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
         if (timePassed > 4) {
@@ -221,9 +185,7 @@ updateCameraPosition() {
         }
     }
 
-    /**
-     * Sets vertical speed for jumping.
-     */
+    /** Makes Pepe jump and plays the jump sound. */
     jump() {
         this.speedY = 30;
         if (typeof playSound === 'function' && typeof AUDIO_HUB !== 'undefined') {
@@ -231,12 +193,9 @@ updateCameraPosition() {
         }
     }
 
-    /**
-     * Processes input checks, character position updates, and camera following.
-     */
+    /** Processes input and updates the camera. */
     processMovement() {
-        // 일시정지 중이거나 사망 시 이동 차단
-        if (!this.world || this.isDead() || (typeof isPaused !== 'undefined' && isPaused)) return;
+        if (!this.world || this.isDead() || isPaused) return;
         let isMoving = this.handleWalkAndJump();
         if (isMoving || this.world.keyboard.D) {
             this.resetIdleTimer();
@@ -244,9 +203,7 @@ updateCameraPosition() {
         this.updateCameraPosition();
     }
 
-    /**
-     * Resolves the visual state and plays corresponding sprite sequence.
-     */
+    /** Plays the correct animation for Pepe's state. */
     processAnimations() {
         if (isPaused) return AUDIO_HUB.run.pause();
         if (this.isDead() || this.isHurt() || this.isAboveGround()) {
@@ -262,9 +219,7 @@ updateCameraPosition() {
         }
     }
 
-    /**
-     * Resets the idle activity timestamp and stops snoring sound immediately.
-     */
+    /** Resets idle time and stops the snoring sound. */
     resetIdleTimer() {
         this.lastActionTime = new Date().getTime();
         if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && !AUDIO_HUB.pepeSnore.paused) {
