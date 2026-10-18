@@ -174,7 +174,7 @@ function playBgm(bgmTrack) {
 function resumeCurrentBgm() {
     if (!currentBgm || isMuted || isPaused) return;
     if (!currentBgm.paused) return;
-    currentBgm.play().catch(() => {});
+    currentBgm.play().catch(() => { });
 }
 
 /**
@@ -186,7 +186,7 @@ function playSound(sound) {
     sound.volume = sfxVolume;
     sound.muted = isMuted;
     sound.currentTime = 0;
-    sound.play().catch(() => {});
+    sound.play().catch(() => { });
 }
 
 /** Stops all active sound effects. */
@@ -321,9 +321,9 @@ function toggleFullscreen() {
     if (document.activeElement) document.activeElement.blur();
     const container = document.getElementById('gameContainer');
     if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(() => {});
+        container.requestFullscreen().catch(() => { });
     } else {
-        document.exitFullscreen().catch(() => {});
+        document.exitFullscreen().catch(() => { });
     }
 }
 
@@ -339,9 +339,14 @@ function bindTouchButton(btnId, keyProperty) {
         event.preventDefault();
         keyboard[keyProperty] = true;
     }, { passive: false });
-    button.addEventListener('touchend', event => {
+    button.addEventListener('touchstart', event => {
         event.preventDefault();
-        keyboard[keyProperty] = false;
+        keyboard[keyProperty] = true;
+
+        if (keyProperty === 'D' && world && !isPaused) {
+            world.checkThrowObjects();
+            keyboard.D = false;
+        }
     }, { passive: false });
     button.addEventListener('contextmenu', event => event.preventDefault());
 }
