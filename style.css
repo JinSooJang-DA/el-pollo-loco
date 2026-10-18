@@ -277,7 +277,6 @@ canvas {
     line-height: 1.4;
 }
 
-/* 모바일 온스크린 컨트롤 */
 .mobile-controls-container {
     display: none;
     position: absolute;
@@ -285,7 +284,7 @@ canvas {
     left: 0;
     width: 100%;
     box-sizing: border-box;
-    padding: 0 12px;
+    padding: 0 47px;
     justify-content: space-between;
     pointer-events: none;
     z-index: 20;
