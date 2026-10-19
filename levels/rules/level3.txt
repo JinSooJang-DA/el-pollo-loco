@@ -1,0 +1,10 @@
+LEVEL 2
+JUMP MASTER
+
+Defeat all chickens to summon the boss.
+
+BOSS HP: 50
+ATTACK: Bottles only!
+
+Aim carefully and finish the adventure!
+START LEVEL

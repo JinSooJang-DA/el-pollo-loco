@@ -1,0 +1,10 @@
+LEVEL 5
+THE FINAL SHOWDOWN
+
+Defeat all chickens to summon the final boss.
+
+BOSS HP: 100
+ATTACK: Bottles only!
+
+Aim carefully and finish the adventure!
+START LEVEL

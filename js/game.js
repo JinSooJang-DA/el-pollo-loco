@@ -1,25 +1,18 @@
 
 /** @type {HTMLCanvasElement} */
 let canvas;
-
 /** @type {World} */
 let world;
-
 /** @type {Keyboard} */
 let keyboard = new Keyboard();
-
 /** @type {boolean} */
 let isMuted = false;
-
 /** @type {boolean} */
 let isPaused = false;
-
 /** @type {HTMLAudioElement|null} */
 let currentBgm = null;
-
 /** @type {number} */
 let bgmVolume = 0.5;
-
 /** @type {number} */
 let sfxVolume = 0.5;
 
@@ -65,6 +58,7 @@ function unlockAudioOnFirstInteraction() {
         window.removeEventListener('click', resume);
         window.removeEventListener('keydown', resume);
     };
+
     window.addEventListener('click', resume);
     window.addEventListener('keydown', resume);
 }
@@ -72,9 +66,11 @@ function unlockAudioOnFirstInteraction() {
 /** Loads the saved mute preference. */
 function loadMutePreference() {
     const savedMute = localStorage.getItem('isMuted');
+
     if (savedMute !== null) {
         isMuted = savedMute === 'true';
     }
+
     updateMuteUI();
     applyMuteState();
 }
@@ -85,12 +81,14 @@ function toggleMute() {
     localStorage.setItem('isMuted', isMuted);
     updateMuteUI();
     applyMuteState();
+
     if (!isMuted) resumeCurrentBgm();
 }
 
 /** Updates the sound button text. */
 function updateMuteUI() {
     const soundBtn = document.getElementById('soundBtn');
+
     if (soundBtn) {
         soundBtn.innerText = isMuted ? 'Sound: Off' : 'Sound: On';
     }
@@ -101,6 +99,7 @@ function applyMuteState() {
     Object.values(AUDIO_HUB).forEach(audio => {
         audio.muted = isMuted;
     });
+
     if (isMuted) stopSoundEffects();
 }
 
@@ -108,12 +107,15 @@ function applyMuteState() {
 function loadVolumePreferences() {
     const savedBgm = parseFloat(localStorage.getItem('bgmVolume'));
     const savedSfx = parseFloat(localStorage.getItem('sfxVolume'));
+
     if (Number.isFinite(savedBgm)) {
         bgmVolume = clampVolume(savedBgm);
     }
+
     if (Number.isFinite(savedSfx)) {
         sfxVolume = clampVolume(savedSfx);
     }
+
     syncVolumeSliders();
 }
 
@@ -130,6 +132,7 @@ function clampVolume(value) {
 function syncVolumeSliders() {
     const bgmSlider = document.getElementById('bgmSlider');
     const sfxSlider = document.getElementById('sfxSlider');
+
     if (bgmSlider) bgmSlider.value = bgmVolume;
     if (sfxSlider) sfxSlider.value = sfxVolume;
 }
@@ -140,9 +143,12 @@ function syncVolumeSliders() {
  */
 function changeBgmVolume(val) {
     const volume = parseFloat(val);
+
     if (!Number.isFinite(volume)) return;
+
     bgmVolume = clampVolume(volume);
     localStorage.setItem('bgmVolume', bgmVolume);
+
     if (currentBgm) currentBgm.volume = bgmVolume;
 }
 
@@ -152,7 +158,9 @@ function changeBgmVolume(val) {
  */
 function changeSfxVolume(val) {
     const volume = parseFloat(val);
+
     if (!Number.isFinite(volume)) return;
+
     sfxVolume = clampVolume(volume);
     localStorage.setItem('sfxVolume', sfxVolume);
 }
@@ -166,11 +174,15 @@ function playBgm(bgmTrack) {
         currentBgm.pause();
         currentBgm.currentTime = 0;
     }
+
     currentBgm = bgmTrack;
+
     if (!currentBgm) return;
+
     currentBgm.loop = !playlistActive || playlistRepeat === 'track';
     currentBgm.volume = bgmVolume;
     currentBgm.muted = isMuted;
+
     resumeCurrentBgm();
 }
 
@@ -178,6 +190,7 @@ function playBgm(bgmTrack) {
 function resumeCurrentBgm() {
     if (!currentBgm || isMuted || isPaused) return;
     if (!currentBgm.paused) return;
+
     currentBgm.play().catch(() => { });
 }
 
@@ -187,9 +200,11 @@ function resumeCurrentBgm() {
  */
 function playSound(sound) {
     if (!sound || isMuted || isPaused) return;
+
     sound.volume = sfxVolume;
     sound.muted = isMuted;
     sound.currentTime = 0;
+
     sound.play().catch(() => { });
 }
 
@@ -197,6 +212,7 @@ function playSound(sound) {
 function stopSoundEffects() {
     Object.values(AUDIO_HUB).forEach(audio => {
         if (audio === currentBgm) return;
+
         audio.pause();
         audio.currentTime = 0;
     });
@@ -204,7 +220,8 @@ function stopSoundEffects() {
 
 /** Toggles the game's pause state. */
 function togglePause() {
-    if (!world || world.gameEnded) return;
+    if (!world || world.gameEnded || pendingLevelNumber !== null) return;
+
     isPaused = !isPaused;
     updatePauseUI();
     handlePauseAudio();
@@ -214,8 +231,12 @@ function togglePause() {
 function updatePauseUI() {
     const screen = document.getElementById('pauseScreen');
     const button = document.getElementById('pauseBtn');
+
     if (screen) screen.classList.toggle('d-none', !isPaused);
-    if (button) button.innerText = isPaused ? 'Resume' : 'Pause';
+
+    if (button) {
+        button.innerText = isPaused ? 'Resume' : 'Pause';
+    }
 }
 
 /** Pauses or resumes game audio. */
@@ -225,6 +246,7 @@ function handlePauseAudio() {
         stopSoundEffects();
         return;
     }
+
     resumeCurrentBgm();
 }
 
@@ -234,16 +256,52 @@ function resetPauseState() {
     updatePauseUI();
 }
 
-/** Starts a new game. */
+/**
+ * Initializes and starts the selected level.
+ * @param {number} levelNumber
+ */
+function startLevel(levelNumber) {
+    if (levelNumber < 1 || levelNumber > 5) return;
+
+    if (world) world.stopDrawing = true;
+
+    stopAllIntervals();
+    stopSoundEffects();
+
+    if (levelNumber === 1) {
+        // Level 1 안내문부터 게임 BGM 재생
+        playBgm(AUDIO_HUB.bgmGame);
+    }
+    // Level 2~5는 이전 레벨의 승리 BGM을 유지
+
+    showLevelRules(levelNumber);
+}
+
+/** Creates a fresh world only after the player accepts the rules. */
+function beginLevel(levelNumber) {
+    if (levelNumber === 1) initLevel();
+    else if (levelNumber === 2) initLevel2();
+    else if (levelNumber === 3) initLevel3();
+    else if (levelNumber === 4) initLevel4();
+    else if (levelNumber === 5) initLevel5();
+
+    resetPauseState();
+
+    world = new World(canvas, keyboard, levelNumber);
+    world.draw();
+
+    playBgm(AUDIO_HUB.bgmGame);
+}
+
+/** Starts a new game at Level 1. */
 function startGame() {
     stopSoundEffects();
     resetPauseState();
+
     document.getElementById('startScreen').classList.add('d-none');
-    initLevel();
-    initLevel0();
-    world = new World(canvas, keyboard);
+
     deactivatePlaylist();
-    playBgm(AUDIO_HUB.bgmGame);
+    startLevel(1);
 }
 
 /** Clears the existing game intervals. */
@@ -253,25 +311,32 @@ function stopAllIntervals() {
     }
 }
 
-/** Restarts the game without reloading. */
+/** Restarts the game from Level 1. */
 function restartGame() {
-    stopAllIntervals();
     stopSoundEffects();
     resetPauseState();
+
     document.getElementById('restartScreen').classList.add('d-none');
-    initLevel();
-    initLevel0();
-    world = new World(canvas, keyboard);
-    playBgm(AUDIO_HUB.bgmGame);
+
+    startLevel(1);
 }
 
 /** Returns to the start screen. */
 function backToMainMenu() {
+    cancelLevelRules();
+
+    // Stop rendering the active world.
+    if (world) {
+        world.stopDrawing = true;
+    }
+
     stopAllIntervals();
     stopSoundEffects();
     resetPauseState();
+
     document.getElementById('restartScreen').classList.add('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
+
     world = null;
     resetPlaylist();
 }
@@ -279,12 +344,14 @@ function backToMainMenu() {
 /** Opens the settings dialog. */
 function openSettingsDialog() {
     const dialog = document.getElementById('settingsDialog');
+
     if (dialog) dialog.classList.remove('d-none');
 }
 
 /** Closes the settings dialog. */
 function closeSettingsDialog() {
     const dialog = document.getElementById('settingsDialog');
+
     if (dialog) dialog.classList.add('d-none');
 }
 
@@ -333,13 +400,19 @@ function closeLegalNotice() {
  * @param {MouseEvent} event
  */
 function closeLegalOnBackdrop(event) {
-    if (event.target.id === 'legalDialog') closeLegalNotice();
+    if (event.target.id === 'legalDialog') {
+        closeLegalNotice();
+    }
 }
 
 /** Toggles fullscreen mode. */
 function toggleFullscreen() {
-    if (document.activeElement) document.activeElement.blur();
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
     const container = document.getElementById('gameContainer');
+
     if (!document.fullscreenElement) {
         container.requestFullscreen().catch(() => { });
     } else {

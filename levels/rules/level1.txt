@@ -1,0 +1,10 @@
+LEVEL 1
+THE ADVENTURE BEGINS
+
+Defeat all chickens to summon the boss.
+
+BOSS HP: 50
+ATTACK: Stomp or throw bottles.
+
+Learn the basics and survive!
+START LEVEL 1
