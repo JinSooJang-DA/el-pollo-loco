@@ -15,9 +15,11 @@ class World {
     throwableObjects = [];
     canThrow = true;
     availableBottles = 0;
+    bottleRespawnTime = 10000;
     maxBottles = 5;
     collectedCoins = 0;
     maxCoins = 5;
+    bossSpawned = false;
     gameEnded = false;
     stopDrawing = false;
 
@@ -31,6 +33,10 @@ class World {
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.level = level1;
+        this.bottleIcon = new Image();
+        this.bottleIcon.src = 'img/6_salsa_bottle/salsa_bottle.png';
+        this.coinIcon = new Image();
+        this.coinIcon.src = 'img/8_coin/coin_1.png';
         this.setWorld();
         this.draw();
         this.run();
@@ -50,6 +56,7 @@ class World {
         setInterval(() => {
             if (isPaused) return;
             this.checkCollisions();
+            this.checkBossSpawn();
             this.checkThrowObjects();
             this.checkGameOver();
             this.checkBossMusicTrigger();
@@ -65,6 +72,33 @@ class World {
             playBgm(AUDIO_HUB.bgmBoss);
         }
     }
+
+
+    checkBossSpawn() {
+        if (this.bossSpawned || this.gameEnded) return;
+
+        let remainingEnemies = this.level.enemies.filter(
+            enemy => !enemy.isDead()
+        );
+
+        if (remainingEnemies.length === 0) {
+            this.bossSpawned = true;
+
+            let boss = new Endboss();
+            let distance = 500;
+
+            if (this.character.otherDirection) {
+                boss.x = this.character.x - distance;
+            } else {
+                boss.x = this.character.x + distance;
+            }
+
+            boss.x = Math.max(0, Math.min(boss.x, this.level.level_end_x - boss.width));
+
+            this.level.enemies.push(boss);
+        }
+    }
+
 
     /**
      * Verifies victory and defeat conditions.
@@ -183,7 +217,7 @@ class World {
         }
         if (enemy instanceof Endboss) {
             if (Date.now() - enemy.lastHit < 2000) return;
-            this.hurtCharacter();
+            this.hurtCharacter(40);
         } else if (this.character.speedY < 0 || this.character.isAboveGround()) {
             this.stompEnemy(enemy);
         } else {
@@ -194,13 +228,24 @@ class World {
     /**
      * Inflicts damage onto Pepe, plays hurt sound, and updates health bar.
      */
-    hurtCharacter() {
+
+    hurtCharacter(damage = 20) {
         if (!this.character.isHurt() && !this.character.isDead()) {
-            this.character.hit();
+            if (this.collectedCoins > 0) {
+                this.collectedCoins--;
+                let percentage = (this.collectedCoins / this.maxCoins) * 100;
+                this.statusBarCoin.setPercentage(percentage);
+                this.character.lastHit = Date.now();
+            } else {
+                this.character.energy = Math.max(0, this.character.energy - damage);
+                this.character.lastHit = Date.now();
+                this.statusBar.setPercentage(this.character.energy);
+            }
+
             playSound(AUDIO_HUB.pepeHurt);
-            this.statusBar.setPercentage(this.character.energy);
         }
     }
+
 
     /**
      * Eliminates regular enemies jumped on from above and plays appropriate sound.
@@ -267,9 +312,14 @@ class World {
         if (typeof bottle.splash === 'function') bottle.splash();
         if (enemy instanceof Endboss) {
             enemy.hadFirstContact = true;
-            enemy.hit();
-            playSound(AUDIO_HUB.bossHurt);
-            this.statusBarEndboss.setPercentage(enemy.energy);
+
+            if (enemy.isHitOnHead(bottle)) {
+                if (Date.now() - enemy.lastHit >= 3000) {
+                    enemy.hit();
+                    playSound(AUDIO_HUB.bossHurt);
+                    this.statusBarEndboss.setPercentage(enemy.energy);
+                }
+            }
         } else {
             if (enemy instanceof SmallChicken) {
                 playSound(AUDIO_HUB.smallChickenDead);
@@ -299,14 +349,28 @@ class World {
      */
     checkCollectBottles() {
         if (!this.level.bottles) return;
+
         this.level.bottles.forEach((bottle, idx) => {
-            if (this.character.isColliding(bottle) && this.availableBottles < this.maxBottles) {
+            if (this.character.isColliding(bottle) &&
+                this.availableBottles < this.maxBottles) {
+
                 this.availableBottles++;
                 this.level.bottles.splice(idx, 1);
+
                 playSound(AUDIO_HUB.bottleCollect);
                 this.updateBottleBar();
+
+                this.respawnBottle(bottle);
             }
         });
+    }
+
+    respawnBottle(bottle) {
+        setTimeout(() => {
+            if (!this.gameEnded) {
+                this.level.bottles.push(bottle);
+            }
+        }, this.bottleRespawnTime);
     }
 
     /**
@@ -314,11 +378,13 @@ class World {
      */
     checkCollectCoins() {
         if (!this.level.coins) return;
+
         this.level.coins.forEach((coin, idx) => {
             if (this.character.isColliding(coin)) {
                 this.collectedCoins++;
                 this.level.coins.splice(idx, 1);
                 playSound(AUDIO_HUB.coinCollect);
+
                 let percentage = (this.collectedCoins / this.maxCoins) * 100;
                 this.statusBarCoin.setPercentage(percentage);
             }
@@ -390,12 +456,34 @@ class World {
      */
     drawStatusBars() {
         this.addToMap(this.statusBar);
-        this.addToMap(this.statusBarBottle);
-        this.addToMap(this.statusBarCoin);
+        // this.addToMap(this.statusBarBottle);
+        this.drawBottleCounter();
+        // this.addToMap(this.statusBarCoin);
+        this.drawCoinCounter();
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
         if (endboss && endboss.hadFirstContact) {
             this.addToMap(this.statusBarEndboss);
         }
+    }
+
+    drawBottleCounter() {
+        if (this.bottleIcon.complete && this.bottleIcon.naturalWidth > 0) {
+            this.ctx.drawImage(this.bottleIcon, 12, 86, 60, 60);
+        }
+
+        this.ctx.font = 'bold 22px Arial';
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillText('× ' + this.availableBottles, 60, 122);
+    }
+
+    drawCoinCounter() {
+        if (this.coinIcon.complete && this.coinIcon.naturalWidth > 0) {
+            this.ctx.drawImage(this.coinIcon, 18, 55, 52, 52);
+        }
+
+        this.ctx.font = 'bold 22px Arial';
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillText('× ' + this.collectedCoins, 60, 87);
     }
 
     /**

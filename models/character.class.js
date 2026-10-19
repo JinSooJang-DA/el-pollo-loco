@@ -10,6 +10,7 @@ class Character extends MovableObject {
     speed = 10;
     world;
     lastActionTime = new Date().getTime();
+    lastRecoveryTime = 0;
     deadFrameIndex = 0;
 
     offset = {
@@ -227,4 +228,21 @@ class Character extends MovableObject {
             AUDIO_HUB.pepeSnore.currentTime = 0;
         }
     }
+
+
+recoverHealth() {
+    let now = Date.now();
+
+    if (this.isDead() || this.energy >= 100) return;
+
+    if (now - this.lastHit < 5000) return;
+
+    if (now - this.lastRecoveryTime < 1000) return;
+
+    this.energy = Math.min(100, this.energy + 2);
+    this.lastRecoveryTime = now;
+
+    this.world.statusBar.setPercentage(this.energy);
+}
+
 }

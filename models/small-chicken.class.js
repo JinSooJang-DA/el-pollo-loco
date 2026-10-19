@@ -40,7 +40,15 @@ class SmallChicken extends MovableObject {
      */
     animate() {
         setInterval(() => {
-            if (!this.isDeadChicken) this.moveLeft();
+            if (this.isDeadChicken || isPaused || !world) return;
+
+            if (world.character.x < this.x) {
+                this.moveLeft();
+                this.otherDirection = false;
+            } else if (world.character.x > this.x) {
+                this.moveRight();
+                this.otherDirection = true;
+            }
         }, 1000 / 60);
 
         setInterval(() => {

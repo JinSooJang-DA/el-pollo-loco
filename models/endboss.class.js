@@ -3,14 +3,17 @@
  * @extends MovableObject
  */
 class Endboss extends MovableObject {
-    height = 400;
-    width = 250;
-    y = 55;
+    height = 285;
+    width = 178;
+    y = 170;
     speed = 3;
     energy = 100;
     hadFirstContact = false;
     deathAnimationFinished = false;
     animationStep = 0;
+    lastSpecialAttack = Date.now();
+    isPreparingAttack = false;
+    isCharging = false;
 
     offset = {
         top: 60,
@@ -65,11 +68,26 @@ class Endboss extends MovableObject {
         this.animate();
     }
 
+    isHitOnHead(bottle) {
+        let headX = this.otherDirection
+            ? this.x + this.width * 0.52
+            : this.x + this.width * 0.08;
+
+        let headY = this.y + this.height * 0.13;
+        let headWidth = this.width * 0.38;
+        let headHeight = this.height * 0.30;
+
+        return bottle.x + bottle.width > headX &&
+            bottle.x < headX + headWidth &&
+            bottle.y + bottle.height > headY &&
+            bottle.y < headY + headHeight;
+    }
+
     /**
      * Reduces boss energy when hit by a thrown bottle.
      */
     hit() {
-        this.energy -= 25;
+        this.energy -= 10;
         if (this.energy < 0) {
             this.energy = 0;
         } else {
@@ -94,18 +112,48 @@ class Endboss extends MovableObject {
     /**
      * Handles hurt, alert, and attack behaviors depending on current state.
      */
+
     handleBossActions() {
         this.checkContactTrigger();
+
         if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
         } else if (!this.hadFirstContact || this.animationStep < 10) {
             this.playAnimation(this.IMAGES_ALERT);
+        } else if (this.isPreparingAttack) {
+            this.playAnimation(this.IMAGES_ALERT);
+        } else if (this.isCharging) {
+            this.playAnimation(this.IMAGES_ATTACK);
+            this.chargeCharacter();
         } else {
             this.playAnimation(this.IMAGES_ATTACK);
             this.chaseCharacter();
+            this.checkSpecialAttack();
         }
+
         if (this.hadFirstContact) this.animationStep++;
     }
+
+
+
+    checkSpecialAttack() {
+        if (Date.now() - this.lastSpecialAttack < 4000) return;
+
+        this.isPreparingAttack = true;
+        this.lastSpecialAttack = Date.now();
+
+        setTimeout(() => {
+            if (this.isDead()) return;
+
+            this.isPreparingAttack = false;
+            this.isCharging = true;
+
+            setTimeout(() => {
+                this.isCharging = false;
+            }, 1000);
+        }, 1000);
+    }
+
 
     /**
      * Checks distance to character to trigger first boss contact.
@@ -155,10 +203,29 @@ class Endboss extends MovableObject {
 
         if (world.character.x > this.x + 50) {
             this.otherDirection = true;
-            this.x += 15;
+            this.x += 18;
         } else if (world.character.x < this.x - 50) {
             this.otherDirection = false;
-            this.x -= 15;
+            this.x -= 18;
         }
     }
+
+
+
+    chargeCharacter() {
+        if (!world || !world.character) return;
+
+        if (this.otherDirection) {
+            this.x += 54;
+        } else {
+            this.x -= 54;
+        }
+
+        this.x = Math.max(
+            0,
+            Math.min(this.x, world.level.level_end_x - this.width)
+        );
+    }
+
+
 }
