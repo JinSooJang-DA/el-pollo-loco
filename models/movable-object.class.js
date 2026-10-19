@@ -72,7 +72,7 @@ class MovableObject extends DrawableObject {
         if (this.energy <= 0) {
             this.energy = 0;
         } else {
-            this.lastHit = new Date().getTime(); // 피격 시점 기록 (필수!)
+            this.lastHit = new Date().getTime();
         }
     }
 
@@ -82,8 +82,8 @@ class MovableObject extends DrawableObject {
      */
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit;
-        timepassed = timepassed / 1000; // 초 단위로 변환
-        return timepassed < 1; // 1초 동안은 다시 다치지 않음 (무적 시간)
+        timepassed = timepassed / 1000;
+        return timepassed < 1;
     }
 
     /**
