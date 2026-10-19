@@ -32,7 +32,7 @@ class World {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.level = level1;
+        this.level = level0;
         this.bottleIcon = new Image();
         this.bottleIcon.src = 'img/6_salsa_bottle/salsa_bottle.png';
         this.coinIcon = new Image();
@@ -215,10 +215,45 @@ class World {
             this.hurtCharacter();
             return;
         }
+
         if (enemy instanceof Endboss) {
+            let pepeFeet = this.character.y + this.character.height
+                - this.character.offset.bottom;
+
+            let bossHead = enemy.y + enemy.height * 0.13;
+            let bossHeadBottom = enemy.y + enemy.height * 0.43;
+
+            let pepeLeft = this.character.x + this.character.offset.left;
+            let pepeRight = this.character.x + this.character.width
+                - this.character.offset.right;
+
+            let headLeft = enemy.otherDirection
+                ? enemy.x + enemy.width * 0.52
+                : enemy.x + enemy.width * 0.08;
+
+            let headRight = headLeft + enemy.width * 0.38;
+
+            let isStomping = this.character.speedY < 0 &&
+                pepeFeet >= bossHead &&
+                pepeFeet <= bossHeadBottom &&
+                pepeRight > headLeft &&
+                pepeLeft < headRight;
+
+            if (isStomping) {
+                if (Date.now() - enemy.lastHit >= 3000) {
+                    enemy.energy = Math.max(0, enemy.energy - 20);
+                    enemy.lastHit = Date.now();
+                    this.statusBarEndboss.setPercentage(enemy.energy);
+                    playSound(AUDIO_HUB.bossHurt);
+                    this.character.speedY = 15;
+                }
+                return;
+            }
+
             if (Date.now() - enemy.lastHit < 2000) return;
             this.hurtCharacter(40);
-        } else if (this.character.speedY < 0 || this.character.isAboveGround()) {
+        }
+        else if (this.character.speedY < 0 || this.character.isAboveGround()) {
             this.stompEnemy(enemy);
         } else {
             this.hurtCharacter();

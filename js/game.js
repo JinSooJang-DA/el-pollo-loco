@@ -240,6 +240,7 @@ function startGame() {
     resetPauseState();
     document.getElementById('startScreen').classList.add('d-none');
     initLevel();
+    initLevel0();
     world = new World(canvas, keyboard);
     deactivatePlaylist();
     playBgm(AUDIO_HUB.bgmGame);
@@ -259,6 +260,7 @@ function restartGame() {
     resetPauseState();
     document.getElementById('restartScreen').classList.add('d-none');
     initLevel();
+    initLevel0();
     world = new World(canvas, keyboard);
     playBgm(AUDIO_HUB.bgmGame);
 }
