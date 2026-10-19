@@ -98,16 +98,31 @@ class Endboss extends MovableObject {
     /**
      * Initiates main animation and state loop for the boss.
      */
+
     animate() {
         let mainInterval = setInterval(() => {
             if (this.isDead()) {
                 clearInterval(mainInterval);
+                clearInterval(moveInterval);
                 this.startDeathSequence();
             } else {
                 this.handleBossActions();
             }
         }, 150);
+
+        let moveInterval = setInterval(() => {
+            if (this.isDead()) return;
+            if (!this.hadFirstContact || this.animationStep < 10) return;
+            if (this.isHurt() || this.isPreparingAttack) return;
+
+            if (this.isCharging) {
+                this.chargeCharacter(18);
+            } else {
+                this.chaseCharacter(6);
+            }
+        }, 50);
     }
+
 
     /**
      * Handles hurt, alert, and attack behaviors depending on current state.
@@ -124,10 +139,8 @@ class Endboss extends MovableObject {
             this.playAnimation(this.IMAGES_ALERT);
         } else if (this.isCharging) {
             this.playAnimation(this.IMAGES_ATTACK);
-            this.chargeCharacter();
         } else {
             this.playAnimation(this.IMAGES_ATTACK);
-            this.chaseCharacter();
             this.checkSpecialAttack();
         }
 
@@ -198,27 +211,25 @@ class Endboss extends MovableObject {
     }
 
     /** Chases Pepe after the boss fight begins. */
-    chaseCharacter() {
+    chaseCharacter(step = 18) {
         if (!this.hadFirstContact || !world || !world.character) return;
 
         if (world.character.x > this.x + 50) {
             this.otherDirection = true;
-            this.x += 18;
+            this.x += step;
         } else if (world.character.x < this.x - 50) {
             this.otherDirection = false;
-            this.x -= 18;
+            this.x -= step;
         }
     }
 
-
-
-    chargeCharacter() {
+    chargeCharacter(step = 54) {
         if (!world || !world.character) return;
 
         if (this.otherDirection) {
-            this.x += 54;
+            this.x += step;
         } else {
-            this.x -= 54;
+            this.x -= step;
         }
 
         this.x = Math.max(
@@ -226,6 +237,4 @@ class Endboss extends MovableObject {
             Math.min(this.x, world.level.level_end_x - this.width)
         );
     }
-
-
 }
