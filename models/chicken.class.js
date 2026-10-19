@@ -7,6 +7,16 @@ class Chicken extends MovableObject {
     width = 65;
     y = 370;
     isDeadChicken = false;
+    maxEnergy = 3;
+    energy = 3;
+    lastStomp = 0;
+    stompCooldown = 300;
+    normalHeight = 50;
+    normalY = 370;
+    stompedHeight = 42;
+    stompedY = 378;
+    isStompReacting = false;
+
     walkInterval;
     animationInterval;
 
@@ -48,6 +58,22 @@ class Chicken extends MovableObject {
         this.animationInterval = setInterval(() => {
             if (!this.isDeadChicken) this.playAnimation(this.IMAGES_WALKING);
         }, 200);
+    }
+
+    showStompReaction() {
+        if (this.isDeadChicken || this.isStompReacting) return;
+
+        this.isStompReacting = true;
+        this.height = this.stompedHeight;
+        this.y = this.stompedY;
+
+        setTimeout(() => {
+            if (!this.isDeadChicken) {
+                this.height = this.normalHeight;
+                this.y = this.normalY;
+            }
+            this.isStompReacting = false;
+        }, 120);
     }
 
     /**

@@ -207,14 +207,28 @@ class World {
      * @param {Chicken|SmallChicken} enemy - Target enemy to stomp.
      */
     stompEnemy(enemy) {
-        if (enemy instanceof SmallChicken) {
-            playSound(AUDIO_HUB.smallChickenDead);
-        } else {
-            playSound(AUDIO_HUB.chickenDead);
+        if (!(enemy instanceof Chicken)) return;
+
+        let now = Date.now();
+
+        if (now - enemy.lastStomp < enemy.stompCooldown) {
+            return;
         }
-        if (typeof enemy.die === 'function') enemy.die();
+
+        enemy.lastStomp = now;
+        enemy.energy -= 1;
+
         this.character.speedY = 15;
-        this.removeEnemyAfterDelay(enemy, 500);
+
+        if (enemy.energy <= 0) {
+            enemy.energy = 0;
+            playSound(AUDIO_HUB.chickenDead1);
+            enemy.die();
+            this.removeEnemyAfterDelay(enemy, 500);
+        } else {
+            playSound(AUDIO_HUB.chickenStomp);
+            enemy.showStompReaction();
+        }
     }
 
     /**
@@ -339,7 +353,36 @@ class World {
         if (this.level.bottles) this.addObjectsToMap(this.level.bottles);
         if (this.level.coins) this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.enemies);
+        this.drawChickenHealthBars();
         this.addObjectsToMap(this.throwableObjects);
+    }
+
+    drawChickenHealthBars() {
+        this.level.enemies.forEach(enemy => {
+            if (!(enemy instanceof Chicken) || enemy.isDead()) {
+                return;
+            }
+
+            let barWidth = 50;
+            let barHeight = 6;
+            let x = enemy.x + (enemy.width - barWidth) / 2;
+            let y = enemy.y - 12;
+
+            let percentage = enemy.energy / enemy.maxEnergy;
+
+            this.ctx.fillStyle = '#555555';
+            this.ctx.fillRect(x, y, barWidth, barHeight);
+
+            if (percentage > 0.6) {
+                this.ctx.fillStyle = '#22c55e';
+            } else if (percentage > 0.3) {
+                this.ctx.fillStyle = '#eab308';
+            } else {
+                this.ctx.fillStyle = '#ef4444';
+            }
+
+            this.ctx.fillRect(x, y, barWidth * percentage, barHeight);
+        });
     }
 
     /**

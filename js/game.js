@@ -37,6 +37,8 @@ const AUDIO_HUB = {
     bottleCollect: new Audio('audio/bottle.mp3'),
     pepeSnore: new Audio('audio/snoring.mp3'),
     smallChickenDead: new Audio('audio/chick-dead.mp3'),
+    chickenStomp: new Audio('audio/chicken-stomp.mp3'),
+    chickenDead1: new Audio('audio/chicken-dead1.mp3'),
     chickenDead: new Audio('audio/chicken-dead.mp3'),
     bossHurt: new Audio('audio/boss-hurt.mp3'),
     pepeHurt: new Audio('audio/hurt.mp3'),
@@ -176,7 +178,7 @@ function playBgm(bgmTrack) {
 function resumeCurrentBgm() {
     if (!currentBgm || isMuted || isPaused) return;
     if (!currentBgm.paused) return;
-    currentBgm.play().catch(() => {});
+    currentBgm.play().catch(() => { });
 }
 
 /**
@@ -188,7 +190,7 @@ function playSound(sound) {
     sound.volume = sfxVolume;
     sound.muted = isMuted;
     sound.currentTime = 0;
-    sound.play().catch(() => {});
+    sound.play().catch(() => { });
 }
 
 /** Stops all sound effects except the current BGM. */
@@ -337,8 +339,8 @@ function toggleFullscreen() {
     if (document.activeElement) document.activeElement.blur();
     const container = document.getElementById('gameContainer');
     if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(() => {});
+        container.requestFullscreen().catch(() => { });
     } else {
-        document.exitFullscreen().catch(() => {});
+        document.exitFullscreen().catch(() => { });
     }
 }
