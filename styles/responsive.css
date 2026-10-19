@@ -112,15 +112,15 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 
     .touch-btn {
-        width: 42px;
-        height: 42px;
+        width: 54px;
+        height: 54px;
         font-size: 10px;
         flex-shrink: 0;
     }
 
     .touch-group-left,
     .touch-group-right {
-        gap: 8px;
+        gap: 20px;
     }
 
     /* Start button */
