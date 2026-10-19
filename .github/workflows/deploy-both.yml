@@ -1,0 +1,61 @@
+
+name: Deploy both games
+
+on:
+  push:
+    branches:
+      - extended
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout original
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: original
+
+      - name: Checkout extended
+        uses: actions/checkout@v4
+        with:
+          ref: extended
+          path: extended
+
+      - name: Prepare both games
+        run: |
+          mkdir -p dist/extended
+          cp -a original/. dist/
+          cp -a extended/. dist/extended/
+          rm -rf dist/.git dist/.github
+          rm -rf dist/extended/.git dist/extended/.github
+          touch dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
