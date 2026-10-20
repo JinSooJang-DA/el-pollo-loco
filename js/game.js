@@ -194,10 +194,17 @@ function playBgm(bgmTrack) {
 
 /** Resumes background music when allowed. */
 function resumeCurrentBgm() {
-    if (!currentBgm || isMuted || isPaused) return;
+    if (!currentBgm || isMuted || isPaused || isStoryVideoPlaying()) return;
+    if (currentBgm === AUDIO_HUB.bgmMenu && !isMainMenuVisible()) return;
     if (!currentBgm.paused) return;
 
     currentBgm.play().catch(() => { });
+}
+
+/** Returns whether the main menu is currently displayed. */
+function isMainMenuVisible() {
+    let startScreen = document.getElementById('startScreen');
+    return !startScreen || !startScreen.classList.contains('d-none');
 }
 
 /**

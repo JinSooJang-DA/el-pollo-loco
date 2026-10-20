@@ -71,7 +71,7 @@ function updatePlaylistLoop() {
 function togglePlaylistPlayback() {
     if (!playlistActive || !currentBgm) return;
     if (currentBgm.paused) {
-        currentBgm.play().catch(() => {});
+        resumeCurrentBgm();
     } else {
         currentBgm.pause();
     }

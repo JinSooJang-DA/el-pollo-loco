@@ -31,6 +31,7 @@ function getSoundPan(worldX) {
 
 function playSpatialSound(sound, worldX) {
     if (typeof isMuted !== 'undefined' && isMuted) return;
+    if (typeof isStoryVideoPlaying === 'function' && isStoryVideoPlaying()) return;
 
     let audioPath = typeof sound === 'string'
         ? sound
