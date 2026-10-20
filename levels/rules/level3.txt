@@ -1,10 +1,6 @@
-LEVEL 3
-JUMP MASTER
 
-Defeat all chickens to summon the boss.
+Hard
 
-BOSS HP: 50
-ATTACK: Bottles only!
-
-Aim carefully and finish the adventure!
-START LEVEL
+CHICKENS: 3 stomps or 2 bottles
+BOSS: Bottle attacks only
+Head stomps cause no damage

@@ -49,14 +49,28 @@ class Chicken extends MovableObject {
     }
 
     /** Runs movement and sprite animation timers. */
+
     animate() {
         this.walkInterval = setInterval(() => {
             if (this.isDeadChicken || isPaused || !world) return;
 
-            if (world.character.x < this.x) {
+            // Stop moving during the stomp reaction.
+            if (this.isStompReacting) return;
+
+            // Compare the center positions.
+            let chickenCenter = this.x + this.width / 2;
+            let pepeCenter = world.character.x +
+                world.character.width / 2;
+
+            let distance = pepeCenter - chickenCenter;
+
+            // Prevent rapid direction switching at close range.
+            if (Math.abs(distance) < 50) return;
+
+            if (distance < 0) {
                 this.moveLeft();
                 this.otherDirection = false;
-            } else if (world.character.x > this.x) {
+            } else {
                 this.moveRight();
                 this.otherDirection = true;
             }
@@ -68,6 +82,7 @@ class Chicken extends MovableObject {
             }
         }, 200);
     }
+
 
     showStompReaction() {
         if (this.isDeadChicken || this.isStompReacting) return;

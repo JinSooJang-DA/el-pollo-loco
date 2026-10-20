@@ -1,10 +1,6 @@
-LEVEL 4
-THE STOMP CHALLENGE
 
-Defeat all chickens to summon the boss.
+Very hard
 
-BOSS HP: 100
-ATTACK: Stomp only!
-
-Bottles cannot damage the boss.
-START LEVEL
+CHICKENS: 4 stomps or 2 bottles
+BOSS: Head stomps only
+BOSS COOLDOWN: 3 seconds

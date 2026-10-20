@@ -1,10 +1,6 @@
-LEVEL 2
-JUMP MASTER
 
-Defeat all chickens to summon the boss.
+Normal
 
-BOSS HP: 70
-ATTACK: Stomp only!
-
-Bottles cannot damage the boss.
-START LEVEL
+CHICKENS: 2 stomps or 1 bottle
+BOSS: Head stomps only
+BOSS COOLDOWN: 3 seconds

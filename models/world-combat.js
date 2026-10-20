@@ -38,22 +38,41 @@ World.prototype.handleEnemyContact = function (enemy) {
             pepeLeft < headRight;
 
         if (isStomping) {
-            if (this.getBossAttackMode() === 'bottle') {
-                this.character.speedY = 15;
+            let now = Date.now();
+
+            // All levels: same 3-second stomp cooldown.
+            if (now - (enemy.lastStompBounce || 0) < 3000) {
                 return;
             }
 
-            if (Date.now() - enemy.lastHit >= 3000) {
-                enemy.energy = Math.max(0, enemy.energy - 20);
-                enemy.lastHit = Date.now();
+            let attackMode = this.getBossAttackMode();
 
-                this.statusBarEndboss.setPercentage(
-                    (enemy.energy / enemy.maxEnergy) * 100
-                );
-
-                playSound(AUDIO_HUB.bossHurt);
-                this.character.speedY = 15;
+            // Levels 1, 2 and 4:
+            // Respect the existing boss damage cooldown.
+            if (attackMode !== 'bottle' &&
+                now - enemy.lastHit < 3000) {
+                return;
             }
+
+            // A successful stomp always gives the same bounce.
+            enemy.lastStompBounce = now;
+            this.character.speedY = 15;
+
+            // Levels 3 and 5: bounce without boss damage.
+            if (attackMode === 'bottle') {
+                return;
+            }
+
+            // Levels 1, 2 and 4: boss takes 20 damage.
+            enemy.energy = Math.max(0, enemy.energy - 20);
+            enemy.lastHit = now;
+
+            this.statusBarEndboss.setPercentage(
+                (enemy.energy / enemy.maxEnergy) * 100
+            );
+
+            // Stomping sounds remain centered.
+            playSound(AUDIO_HUB.bossHurt);
             return;
         }
 

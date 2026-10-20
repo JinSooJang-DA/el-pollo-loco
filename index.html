@@ -122,42 +122,41 @@
                 <h2 id="levelRulesTitle">LEVEL 1</h2>
                 <p id="levelRulesText">Loading level rules...</p>
                 <button id="levelRulesStartBtn" onclick="continueLevel()" disabled>
-                    START LEVEL
+                    START LEVEL · SPACE ↵
                 </button>
             </div>
         </div>
+
 
         <!-- Game instructions -->
         <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
             <div class="dialog-card">
                 <button class="dialog-close-btn" onclick="closeInfoDialog()">✕</button>
-                <h2>Game Controls &amp; Rules</h2>
+
+                <h2>🎮 How to Play</h2>
 
                 <div class="dialog-content">
-                    <div class="control-row">
-                        <span class="key-badge">⬅️ / ➡️</span>
-                        <span>Move Left / Right</span>
-                    </div>
+                    <h3>Controls</h3>
+                    <p><strong>← →</strong> Move</p>
+                    <p><strong>SPACE</strong> Jump / Stomp / Start Level</p>
+                    <p><strong>D</strong> Throw Bottle</p>
 
-                    <div class="control-row">
-                        <span class="key-badge">SPACE</span>
-                        <span>Jump (Stomp enemies)</span>
-                    </div>
+                    <h3>🐔 Chicken Combat</h3>
+                    <p>Stomp chickens or throw bottles.</p>
+                    <p>
+                        🐥 Baby chicks are too cute to stomp!
+                        Use bottles instead.
+                    </p>
 
-                    <div class="control-row">
-                        <span class="key-badge">D</span>
-                        <span>Throw Salsa Bottle</span>
-                    </div>
+                    <h3>❤️ Health & Coins</h3>
+                    <p>Coins restore health or protect you from damage.</p>
+
+                    <h3>👑 Boss Battles</h3>
+                    <p>Wait 3 seconds between successful attacks.</p>
                 </div>
-
-                <p class="story-desc">
-                    Help Pepe defeat the angry giant Chicken Boss!
-                    Collect bottles and coins across the desert.
-                    Watch out for baby chickens! You can't stomp them.
-                    Touching them will hurt Pepe!
-                </p>
             </div>
         </div>
+
 
         <!-- Game result screen -->
         <div id="restartScreen" class="overlay-screen d-none">

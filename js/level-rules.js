@@ -60,3 +60,27 @@ function cancelLevelRules() {
 
     document.getElementById('levelRulesScreen').classList.add('d-none');
 }
+
+/**
+ * Starts the pending level with SPACE.
+ * Only works while the level rules screen is visible.
+ */
+document.addEventListener('keydown', function(event) {
+    if (event.code !== 'Space') return;
+
+    const rulesScreen = document.getElementById('levelRulesScreen');
+    const startButton = document.getElementById('levelRulesStartBtn');
+
+    if (!rulesScreen || rulesScreen.classList.contains('d-none')) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if (event.repeat || !startButton || startButton.disabled) {
+        return;
+    }
+
+    continueLevel();
+}, true);

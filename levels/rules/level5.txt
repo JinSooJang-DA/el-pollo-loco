@@ -1,10 +1,6 @@
-LEVEL 5
-THE FINAL SHOWDOWN
 
-Defeat all chickens to summon the final boss.
+Final boss
 
-BOSS HP: 100
-ATTACK: Bottles only!
-
-Aim carefully and finish the adventure!
-START LEVEL
+CHICKENS: 5 stomps or 3 bottles
+BOSS: Bottle attacks only
+Head stomps cause no damage
