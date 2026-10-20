@@ -364,10 +364,10 @@
 .game-menu > summary,
 .bgm-menu > summary {
     box-sizing: border-box;
-    width: 120px;
-    height: 56px;
-    min-width: 120px;
-    min-height: 56px;
+    width: 108px;
+    height: 50px;
+    min-width: 108px;
+    min-height: 50px;
     padding: 0;
 
     display: flex;
