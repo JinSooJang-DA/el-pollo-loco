@@ -1,7 +1,7 @@
 
 /** World rendering methods. */
 
-World.prototype.draw = function() {
+World.prototype.draw = function () {
     if (this !== world || this.stopDrawing) return;
 
     if (!isPaused) {
@@ -21,7 +21,7 @@ World.prototype.draw = function() {
     requestAnimationFrame(() => this.draw());
 };
 
-World.prototype.drawWorldObjects = function() {
+World.prototype.drawWorldObjects = function () {
     this.addObjectsToMap(this.level.backgroundObjects);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
@@ -39,7 +39,7 @@ World.prototype.drawWorldObjects = function() {
     this.addObjectsToMap(this.throwableObjects);
 };
 
-World.prototype.drawChickenHealthBars = function() {
+World.prototype.drawChickenHealthBars = function () {
     this.level.enemies.forEach(enemy => {
         if (!(enemy instanceof Chicken) || enemy.isDead()) return;
 
@@ -64,7 +64,7 @@ World.prototype.drawChickenHealthBars = function() {
     });
 };
 
-World.prototype.drawStatusBars = function() {
+World.prototype.drawStatusBars = function () {
     this.addToMap(this.statusBar);
     this.drawBottleCounter();
     this.drawCoinCounter();
@@ -76,7 +76,7 @@ World.prototype.drawStatusBars = function() {
     }
 };
 
-World.prototype.drawBottleCounter = function() {
+World.prototype.drawBottleCounter = function () {
     if (this.bottleIcon.complete && this.bottleIcon.naturalWidth > 0) {
         this.ctx.drawImage(this.bottleIcon, 12, 86, 60, 60);
     }
@@ -86,7 +86,7 @@ World.prototype.drawBottleCounter = function() {
     this.ctx.fillText('× ' + this.availableBottles, 60, 122);
 };
 
-World.prototype.drawCoinCounter = function() {
+World.prototype.drawCoinCounter = function () {
     if (this.coinIcon.complete && this.coinIcon.naturalWidth > 0) {
         this.ctx.drawImage(this.coinIcon, 18, 55, 52, 52);
     }
@@ -96,24 +96,24 @@ World.prototype.drawCoinCounter = function() {
     this.ctx.fillText('× ' + this.collectedCoins, 60, 87);
 };
 
-World.prototype.addObjectsToMap = function(objects) {
+World.prototype.addObjectsToMap = function (objects) {
     if (objects) objects.forEach(o => this.addToMap(o));
 };
 
-World.prototype.addToMap = function(mo) {
+World.prototype.addToMap = function (mo) {
     if (mo.otherDirection) this.flipImage(mo);
     mo.draw(this.ctx);
     if (mo.otherDirection) this.flipImageBack(mo);
 };
 
-World.prototype.flipImage = function(mo) {
+World.prototype.flipImage = function (mo) {
     this.ctx.save();
     this.ctx.translate(mo.width, 0);
     this.ctx.scale(-1, 1);
     mo.x = mo.x * -1;
 };
 
-World.prototype.flipImageBack = function(mo) {
+World.prototype.flipImageBack = function (mo) {
     mo.x = mo.x * -1;
     this.ctx.restore();
 };

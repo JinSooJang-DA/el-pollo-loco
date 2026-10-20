@@ -23,6 +23,22 @@ class MovableObject extends DrawableObject {
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
+                // Remember Pepe's downward movement.
+                if (this instanceof Character && this.speedY < 0) {
+                    let feetBefore = this.y + this.height
+                        - this.offset.bottom;
+
+                    let feetAfter = feetBefore - this.speedY;
+
+                    this.lastFallStep = {
+                        from: feetBefore,
+                        to: feetAfter,
+                        left: this.x + this.offset.left,
+                        right: this.x + this.width - this.offset.right,
+                        time: Date.now()
+                    };
+                }
+
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
             } else {

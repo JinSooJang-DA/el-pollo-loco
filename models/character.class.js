@@ -12,7 +12,7 @@ class Character extends MovableObject {
     lastActionTime = new Date().getTime();
     lastRecoveryTime = 0;
     deadFrameIndex = 0;
-
+   
     offset = {
         top: 120,
         bottom: 30,
@@ -96,6 +96,17 @@ class Character extends MovableObject {
         this.animate();
     }
 
+    /** Remembers when Pepe lands after falling. */
+    handleGroundContact() {
+        let wasFalling = this.speedY < 0;
+
+        super.handleGroundContact();
+
+        if (wasFalling) {
+            this.lastLandingTime = Date.now();
+        }
+    }
+
     /** Starts movement and animation intervals. */
     animate() {
         setInterval(() => this.processMovement(), 1000 / 60);
@@ -136,36 +147,36 @@ class Character extends MovableObject {
 
     /** Updates the camera smoothly around the boss. */
 
-    
-updateCameraPosition() {
-    let screenWidth = this.world.canvas.width;
 
-    // Pepe's visible body center, considering the collision offsets.
-    let pepeCenter = this.x + this.offset.left +
-        (this.width - this.offset.left - this.offset.right) / 2;
+    updateCameraPosition() {
+        let screenWidth = this.world.canvas.width;
 
-    // Leave more space in the direction Pepe is facing.
-    let targetPosition = this.otherDirection
-        ? screenWidth * 0.85
-        : screenWidth * 0.15;
+        // Pepe's visible body center, considering the collision offsets.
+        let pepeCenter = this.x + this.offset.left +
+            (this.width - this.offset.left - this.offset.right) / 2;
 
-    let targetCameraX = targetPosition - pepeCenter;
+        // Leave more space in the direction Pepe is facing.
+        let targetPosition = this.otherDirection
+            ? screenWidth * 0.85
+            : screenWidth * 0.15;
 
-    // Keep the camera inside the level boundaries.
-    let maxScroll = Math.max(
-        0,
-        this.world.level.level_end_x + this.width - screenWidth
-    );
+        let targetCameraX = targetPosition - pepeCenter;
 
-    targetCameraX = Math.max(
-        -maxScroll,
-        Math.min(0, targetCameraX)
-    );
+        // Keep the camera inside the level boundaries.
+        let maxScroll = Math.max(
+            0,
+            this.world.level.level_end_x + this.width - screenWidth
+        );
 
-    // Smooth camera movement.
-    this.world.camera_x +=
-        (targetCameraX - this.world.camera_x) * 0.08;
-}
+        targetCameraX = Math.max(
+            -maxScroll,
+            Math.min(0, targetCameraX)
+        );
+
+        // Smooth camera movement.
+        this.world.camera_x +=
+            (targetCameraX - this.world.camera_x) * 0.08;
+    }
 
 
 

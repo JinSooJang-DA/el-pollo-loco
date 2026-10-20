@@ -91,14 +91,25 @@ World.prototype.handleEnemyContact = function (enemy) {
     let chickenLeft = enemy.x + enemy.offset.left;
     let chickenRight = enemy.x + enemy.width - enemy.offset.right;
 
-    let landsOnTop = this.character.speedY < 0 &&
-        pepeFeet >= chickenTop - 28 &&
-        pepeFeet <= chickenTop + 22 &&
+    let lastStep = this.character.lastFallStep;
+
+    let crossedChickenTop = lastStep &&
+        Date.now() - lastStep.time < 120 &&
+        lastStep.from <= chickenTop &&
+        lastStep.to >= chickenTop &&
+        lastStep.right > chickenLeft &&
+        lastStep.left < chickenRight;
+
+    let landsOnTop = crossedChickenTop &&
         pepeRight > chickenLeft &&
         pepeLeft < chickenRight;
 
-    if (landsOnTop) this.stompEnemy(enemy);
-    else this.hurtCharacter();
+    if (landsOnTop) {
+        this.character.lastFallStep = null;
+        this.stompEnemy(enemy);
+    } else {
+        this.hurtCharacter();
+    }
 };
 
 World.prototype.hurtCharacter = function (damage = 40) {

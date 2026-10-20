@@ -108,3 +108,16 @@ function retryCurrentLevel() {
 
     startLevel(levelNumber);
 }
+
+/** Continue the sombrero reward screen with Space. */
+document.addEventListener('keydown', function(event) {
+    if (event.code !== 'Space' || event.repeat) return;
+
+    let rewardScreen = document.getElementById('sombreroRewardScreen');
+
+    if (rewardScreen && !rewardScreen.classList.contains('d-none')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        continueAfterSombrero();
+    }
+}, true);
