@@ -171,6 +171,11 @@ function changeSfxVolume(val) {
  * @param {HTMLAudioElement} bgmTrack
  */
 function playBgm(bgmTrack) {
+    if (currentBgm === bgmTrack) {
+        resumeCurrentBgm();
+        return;
+    }
+
     if (currentBgm) {
         currentBgm.pause();
         currentBgm.currentTime = 0;
