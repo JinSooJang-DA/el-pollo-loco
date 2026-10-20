@@ -21,8 +21,10 @@ function updateSombreroCounter() {
     counter.innerHTML = '';
 
     for (let i = 0; i < sombreros; i++) {
-        let hat = document.createElement('span');
+        let hat = document.createElement('img');
+        hat.src = 'img/golden-sombrero-big.webp';
         hat.className = 'sombrero-icon';
+        hat.alt = 'Sombrero';
         hat.title = 'Extra life';
         counter.appendChild(hat);
     }

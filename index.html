@@ -164,6 +164,7 @@
         <div id="sombreroRewardScreen" class="overlay-screen d-none">
             <div class="level-rules-card">
                 <h2>ONE MORE ROUND!</h2>
+                <img id="sombreroRewardImage" src="img/golden-sombrero-big.webp" alt="Golden Sombrero">
                 <p>SOMBRERO +1</p>
                 <p>You earned an extra chance!</p>
                 <button onclick="continueAfterSombrero()">
@@ -178,7 +179,9 @@
 
             <div class="end-buttons-group">
                 <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
-                    RETRY LEVEL - 1 SOMBRERO
+                    <img src="img/golden-sombrero-big.webp" alt="">
+                    <span>RETRY LEVEL</span>
+                    <span>× 1</span>
                 </button>
                 <button id="restartBtn" onclick="restartGame()">
                     PLAY AGAIN
