@@ -56,7 +56,7 @@ function skipStoryVideo() {
     finishStoryVideo();
 }
 
-/** Hides the chapter, restores music and runs the next transition once. */
+/** Hides the chapter and runs the next transition once. */
 function finishStoryVideo() {
     if (!storyVideoActive || storyVideoFinishing) return;
 
@@ -73,11 +73,10 @@ function finishStoryVideo() {
     if (screen) screen.classList.add('d-none');
 
     clearGameplayInput();
-    resumeCurrentBgm();
     let onComplete = storyVideoComplete;
     storyVideoComplete = null;
-    if (typeof onComplete === 'function') onComplete();
     storyVideoFinishing = false;
+    if (typeof onComplete === 'function') onComplete();
 }
 
 /** Captures Space before gameplay input can receive it. */

@@ -160,8 +160,10 @@ class World {
 
         if (endboss && endboss.deathAnimationFinished && !this.gameEnded) {
             this.gameEnded = true;
+            this.stopDrawing = true;
+            stopAllIntervals();
+            if (currentBgm) currentBgm.pause();
             stopSoundEffects();
-            playBgm(AUDIO_HUB.bgmWin);
 
             finishCompletedLevel(this);
         }

@@ -54,24 +54,44 @@ function removeCollectedCoins(levelNumber) {
     });
 }
 
-/** Gives a reward for finishing with all three coins. */
+/** Continues the completed level after its story chapter. */
 function finishCompletedLevel(finishedWorld) {
     let nextLevel = finishedWorld.levelNumber + 1;
+
+    if (finishedWorld.levelNumber === 5) {
+        playStoryVideo(6, () => {
+            playStoryVideo(7, () => {
+                if (finishedWorld === world) {
+                    finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
+                    playBgm(AUDIO_HUB.bgmWin);
+                }
+            });
+        });
+        return;
+    }
+
+    playStoryVideo(nextLevel, () => {
+        showCompletedLevelResult(finishedWorld, nextLevel);
+    });
+}
+
+/** Shows a completed-level reward or the next level rules. */
+function showCompletedLevelResult(finishedWorld, nextLevel) {
+    if (finishedWorld !== world) return;
 
     if (finishedWorld.character.energy === 100) {
         sombreros++;
         updateSombreroCounter();
 
         rewardNextLevel = nextLevel;
-        finishedWorld.stopDrawing = true;
-        stopAllIntervals();
 
         document.getElementById('sombreroRewardScreen')
             .classList.remove('d-none');
+        playBgm(AUDIO_HUB.bgmGame);
         return;
     }
 
-    continueWithStoryVideo(nextLevel, finishedWorld);
+    startLevel(nextLevel);
 }
 
 /** Continues after the reward screen. */
@@ -82,20 +102,7 @@ function continueAfterSombrero() {
     let nextLevel = rewardNextLevel;
     rewardNextLevel = null;
 
-    continueWithStoryVideo(nextLevel, world);
-}
-
-/** Plays the next story chapter before showing the following level or result. */
-function continueWithStoryVideo(nextLevel, finishedWorld) {
-    let videoNumber = nextLevel <= 5 ? nextLevel : 7;
-
-    playStoryVideo(videoNumber, () => {
-        if (nextLevel <= 5) {
-            startLevel(nextLevel);
-        } else if (finishedWorld && finishedWorld === world) {
-            finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
-        }
-    });
+    if (nextLevel !== null) startLevel(nextLevel);
 }
 
 /** Spends one sombrero to retry the current level. */

@@ -269,11 +269,7 @@ function startLevel(levelNumber) {
     stopAllIntervals();
     stopSoundEffects();
 
-    if (levelNumber === 1) {
-        // Level 1 안내문부터 게임 BGM 재생
-        playBgm(AUDIO_HUB.bgmGame);
-    }
-    // Level 2~5는 이전 레벨의 승리 BGM을 유지
+    playBgm(AUDIO_HUB.bgmGame);
 
     showLevelRules(levelNumber);
 }
