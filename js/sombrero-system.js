@@ -71,11 +71,7 @@ function finishCompletedLevel(finishedWorld) {
         return;
     }
 
-    if (nextLevel <= 5) {
-        startLevel(nextLevel);
-    } else {
-        finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
-    }
+    continueWithStoryVideo(nextLevel, finishedWorld);
 }
 
 /** Continues after the reward screen. */
@@ -86,11 +82,20 @@ function continueAfterSombrero() {
     let nextLevel = rewardNextLevel;
     rewardNextLevel = null;
 
-    if (nextLevel <= 5) {
-        startLevel(nextLevel);
-    } else if (world) {
-        world.showEndScreen('img/You won, you lost/You win B.png');
-    }
+    continueWithStoryVideo(nextLevel, world);
+}
+
+/** Plays the next story chapter before showing the following level or result. */
+function continueWithStoryVideo(nextLevel, finishedWorld) {
+    let videoNumber = nextLevel <= 5 ? nextLevel : 7;
+
+    playStoryVideo(videoNumber, () => {
+        if (nextLevel <= 5) {
+            startLevel(nextLevel);
+        } else if (finishedWorld && finishedWorld === world) {
+            finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
+        }
+    });
 }
 
 /** Spends one sombrero to retry the current level. */

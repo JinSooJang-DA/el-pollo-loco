@@ -101,6 +101,7 @@ function applyMuteState() {
     });
 
     if (isMuted) stopSoundEffects();
+    if (typeof syncStoryVideoMute === 'function') syncStoryVideoMute();
 }
 
 /** Loads stored volume preferences. */
@@ -305,7 +306,7 @@ function startGame() {
 
     deactivatePlaylist();
     resetSombreroGame();
-    startLevel(1);
+    playStoryVideo(1, () => startLevel(1));
 }
 
 /** Clears the existing game intervals. */

@@ -184,6 +184,35 @@ canvas {
     transform: scale(1.05);
 }
 
+.story-video-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: #000;
+}
+
+.story-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.story-video-skip {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    padding: 8px 14px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.65);
+    border: 2px solid #fff;
+    border-radius: 20px;
+    font-family: 'Rye', cursive;
+    font-size: 14px;
+    cursor: pointer;
+}
+
 .volume-control-row {
     display: flex;
     flex-direction: column;

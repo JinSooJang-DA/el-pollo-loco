@@ -21,6 +21,7 @@ function bindTouchButton(btnId, keyProperty) {
 /** Activates a touch control. */
 function handleTouchStart(event, keyProperty) {
     event.preventDefault();
+    if (isStoryVideoPlaying()) return;
     keyboard[keyProperty] = true;
 
     if (keyProperty === 'D' && world && !isPaused) {
@@ -50,6 +51,7 @@ function bindTouchEvents() {
  * @param {boolean} pressed
  */
 function updateKeyboardState(event, pressed) {
+    if (isStoryVideoPlaying()) return;
     const keyMap = {
         39: 'RIGHT', 37: 'LEFT',
         38: 'UP', 40: 'DOWN',
