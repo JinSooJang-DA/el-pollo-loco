@@ -1,7 +1,7 @@
 
 /** World collision and combat methods. */
 
-World.prototype.checkCharacterCollisions = function() {
+World.prototype.checkCharacterCollisions = function () {
     this.level.enemies.forEach(enemy => {
         let isAlive = typeof enemy.isDead === 'function'
             ? !enemy.isDead() : !enemy.isDead;
@@ -12,7 +12,7 @@ World.prototype.checkCharacterCollisions = function() {
     });
 };
 
-World.prototype.handleEnemyContact = function(enemy) {
+World.prototype.handleEnemyContact = function (enemy) {
     if (enemy instanceof SmallChicken) {
         this.hurtCharacter();
         return;
@@ -82,7 +82,7 @@ World.prototype.handleEnemyContact = function(enemy) {
     else this.hurtCharacter();
 };
 
-World.prototype.hurtCharacter = function(damage = 40) {
+World.prototype.hurtCharacter = function (damage = 40) {
     if (this.character.isHurt() || this.character.isDead()) return;
 
     let coinsUsed = Math.min(
@@ -105,7 +105,7 @@ World.prototype.hurtCharacter = function(damage = 40) {
     playSound(AUDIO_HUB.pepeHurt);
 };
 
-World.prototype.stompEnemy = function(enemy) {
+World.prototype.stompEnemy = function (enemy) {
     if (!(enemy instanceof Chicken)) return;
 
     let now = Date.now();
@@ -126,7 +126,7 @@ World.prototype.stompEnemy = function(enemy) {
     }
 };
 
-World.prototype.removeEnemyAfterDelay = function(enemy, delay) {
+World.prototype.removeEnemyAfterDelay = function (enemy, delay) {
     let currentLevel = this.level;
 
     setTimeout(() => {
@@ -136,7 +136,7 @@ World.prototype.removeEnemyAfterDelay = function(enemy, delay) {
     }, delay);
 };
 
-World.prototype.checkBottleCollisions = function() {
+World.prototype.checkBottleCollisions = function () {
     this.throwableObjects.forEach(bottle => {
         if (bottle.isSplashed) return;
 
@@ -160,7 +160,7 @@ World.prototype.checkBottleCollisions = function() {
     });
 };
 
-World.prototype.handleBottleImpact = function(bottle, enemy) {
+World.prototype.handleBottleImpact = function (bottle, enemy) {
     if (enemy instanceof Endboss) {
         enemy.hadFirstContact = true;
 
@@ -169,14 +169,14 @@ World.prototype.handleBottleImpact = function(bottle, enemy) {
         if (enemy.isHitOnHead(bottle) &&
             Date.now() - enemy.lastHit >= 3000) {
             enemy.hit();
-            playSound(AUDIO_HUB.bossHurt);
+            playSpatialSound(AUDIO_HUB.bossHurt, enemy.x + enemy.width / 2);
 
             this.statusBarEndboss.setPercentage(
                 (enemy.energy / enemy.maxEnergy) * 100
             );
         }
     } else if (enemy instanceof SmallChicken) {
-        playSound(AUDIO_HUB.smallChickenDead);
+        playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
 
         if (typeof enemy.die === 'function') enemy.die();
         this.removeEnemyAfterDelay(enemy, 500);
@@ -185,17 +185,17 @@ World.prototype.handleBottleImpact = function(bottle, enemy) {
         enemy.energy = Math.max(0, enemy.energy - 2);
 
         if (enemy.energy === 0) {
-            playSound(AUDIO_HUB.chickenDead);
+            playSpatialSound(AUDIO_HUB.chickenDead, enemy.x + enemy.width / 2);
             enemy.die();
             this.removeEnemyAfterDelay(enemy, 500);
         } else {
-            playSound(AUDIO_HUB.chickenStomp);
+            playSpatialSound(AUDIO_HUB.chickenStomp, enemy.x + enemy.width / 2);
             enemy.showStompReaction();
         }
     }
 };
 
-World.prototype.removeBottleAfterDelay = function(bottle, delay) {
+World.prototype.removeBottleAfterDelay = function (bottle, delay) {
     setTimeout(() => {
         if (this !== world) return;
         let idx = this.throwableObjects.indexOf(bottle);
