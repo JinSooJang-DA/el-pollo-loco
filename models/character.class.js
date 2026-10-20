@@ -135,20 +135,39 @@ class Character extends MovableObject {
     }
 
     /** Updates the camera smoothly around the boss. */
-    updateCameraPosition() {
-        let boss = this.world.level.enemies.find(e => e instanceof Endboss);
-        let offset = 100;
 
-        if (boss) {
-            let distance = this.x - (boss.x + boss.width / 2);
-            let progress = Math.max(0, Math.min(1, (distance + 250) / 500));
-            offset = 100 + progress * 440;
-        }
+    
+updateCameraPosition() {
+    let screenWidth = this.world.canvas.width;
 
-        let maxCameraX = -(this.world.level.level_end_x - 620);
-        let targetCameraX = -this.x + offset;
-        this.world.camera_x = Math.max(maxCameraX, Math.min(0, targetCameraX));
-    }
+    // Pepe's visible body center, considering the collision offsets.
+    let pepeCenter = this.x + this.offset.left +
+        (this.width - this.offset.left - this.offset.right) / 2;
+
+    // Leave more space in the direction Pepe is facing.
+    let targetPosition = this.otherDirection
+        ? screenWidth * 0.85
+        : screenWidth * 0.15;
+
+    let targetCameraX = targetPosition - pepeCenter;
+
+    // Keep the camera inside the level boundaries.
+    let maxScroll = Math.max(
+        0,
+        this.world.level.level_end_x + this.width - screenWidth
+    );
+
+    targetCameraX = Math.max(
+        -maxScroll,
+        Math.min(0, targetCameraX)
+    );
+
+    // Smooth camera movement.
+    this.world.camera_x +=
+        (targetCameraX - this.world.camera_x) * 0.08;
+}
+
+
 
     /** Plays Pepe's death animation. */
     playDeathAnimation() {
@@ -230,19 +249,19 @@ class Character extends MovableObject {
     }
 
 
-recoverHealth() {
-    let now = Date.now();
+    recoverHealth() {
+        let now = Date.now();
 
-    if (this.isDead() || this.energy >= 100) return;
+        if (this.isDead() || this.energy >= 100) return;
 
-    if (now - this.lastHit < 5000) return;
+        if (now - this.lastHit < 5000) return;
 
-    if (now - this.lastRecoveryTime < 1000) return;
+        if (now - this.lastRecoveryTime < 1000) return;
 
-    this.energy = Math.min(100, this.energy + 2);
-    this.lastRecoveryTime = now;
+        this.energy = Math.min(100, this.energy + 2);
+        this.lastRecoveryTime = now;
 
-    this.world.statusBar.setPercentage(this.energy);
-}
+        this.world.statusBar.setPercentage(this.energy);
+    }
 
 }

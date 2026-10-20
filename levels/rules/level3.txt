@@ -1,4 +1,4 @@
-LEVEL 2
+LEVEL 3
 JUMP MASTER
 
 Defeat all chickens to summon the boss.

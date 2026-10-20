@@ -290,7 +290,9 @@ function beginLevel(levelNumber) {
     world = new World(canvas, keyboard, levelNumber);
     world.draw();
 
+    if (currentBgm !== AUDIO_HUB.bgmGame) {
     playBgm(AUDIO_HUB.bgmGame);
+}
 }
 
 /** Starts a new game at Level 1. */

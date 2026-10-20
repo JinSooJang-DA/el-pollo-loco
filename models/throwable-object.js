@@ -1,5 +1,6 @@
+
 /**
- * Represents a thrown salsa bottle flying in arc trajectory.
+ * Represents a thrown salsa bottle flying in an arc.
  * @extends MovableObject
  */
 class ThrowableObject extends MovableObject {
@@ -8,10 +9,10 @@ class ThrowableObject extends MovableObject {
     throwInterval;
 
     offset = {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
+        top: 15,
+        bottom: 15,
+        left: 10,
+        right: 10
     };
 
     IMAGES_ROTATING = [
@@ -31,40 +32,39 @@ class ThrowableObject extends MovableObject {
     ];
 
     /**
-     * Initializes thrown bottle position and flight path.
-     * @param {number} x - Starting horizontal coordinate.
-     * @param {number} y - Starting vertical coordinate.
-     * @param {boolean} otherDirection - Whether bottle travels to the left.
+     * Initializes the thrown bottle.
+     * @param {number} x
+     * @param {number} y
+     * @param {boolean} otherDirection
      */
     constructor(x, y, otherDirection) {
         super().loadImage(this.IMAGES_ROTATING[0]);
         this.loadImages(this.IMAGES_ROTATING);
         this.loadImages(this.IMAGES_SPLASH);
+
         this.x = x;
         this.y = y;
         this.otherDirection = otherDirection;
         this.height = 60;
         this.width = 50;
+
         this.throw();
         this.animate();
     }
 
-    /**
-     * Initiates upward velocity and continuous horizontal travel.
-     */
+    /** Starts bottle flight. */
     throw() {
         this.speedY = 30;
         this.applyGravity();
+
         this.throwInterval = setInterval(() => {
             if (!this.isSplashed) {
-                this.x += this.otherDirection ? -10 : 10;
+                this.x += this.otherDirection ? -8 : 8;
             }
         }, 25);
     }
 
-    /**
-     * Loops rotating or splash animation sequences.
-     */
+    /** Plays rotating or splash animation. */
     animate() {
         setInterval(() => {
             if (this.isSplashed) {
@@ -75,19 +75,14 @@ class ThrowableObject extends MovableObject {
         }, 60);
     }
 
-    /**
-     * Triggers bottle smash, stopping flight and falling physics.
-     */
+    /** Stops bottle movement after collision. */
     splash() {
         this.isSplashed = true;
         this.speedY = 0;
         clearInterval(this.throwInterval);
     }
 
-    /**
-     * Checks if bottle is airborne and eligible for gravity.
-     * @returns {boolean} True if bottle has not splashed yet.
-     */
+    /** Returns whether bottle is still airborne. */
     isAboveGround() {
         return !this.isSplashed;
     }

@@ -1,3 +1,4 @@
+
 /**
  * Represents a standard walking chicken enemy.
  * @extends MovableObject
@@ -21,10 +22,10 @@ class Chicken extends MovableObject {
     animationInterval;
 
     offset = {
-        top: 5,
+        top: 8,
         bottom: 5,
-        left: 5,
-        right: 5
+        left: 8,
+        right: 8
     };
 
     IMAGES_WALKING = [
@@ -47,9 +48,7 @@ class Chicken extends MovableObject {
         this.animate();
     }
 
-    /**
-     * Runs movement and sprite animation timers.
-     */
+    /** Runs movement and sprite animation timers. */
     animate() {
         this.walkInterval = setInterval(() => {
             if (this.isDeadChicken || isPaused || !world) return;
@@ -64,7 +63,9 @@ class Chicken extends MovableObject {
         }, 1000 / 60);
 
         this.animationInterval = setInterval(() => {
-            if (!this.isDeadChicken) this.playAnimation(this.IMAGES_WALKING);
+            if (!this.isDeadChicken) {
+                this.playAnimation(this.IMAGES_WALKING);
+            }
         }, 200);
     }
 
@@ -84,9 +85,7 @@ class Chicken extends MovableObject {
         }, 120);
     }
 
-    /**
-     * Kills chicken, swaps to dead texture, and clears timers.
-     */
+    /** Kills chicken and stops its animation timers. */
     die() {
         this.isDeadChicken = true;
         this.loadImage(this.IMAGE_DEAD);
@@ -94,10 +93,7 @@ class Chicken extends MovableObject {
         clearInterval(this.animationInterval);
     }
 
-    /**
-     * Checks if this enemy is dead.
-     * @returns {boolean} True if dead, false otherwise.
-     */
+    /** Returns whether the chicken has died. */
     isDead() {
         return this.isDeadChicken;
     }
