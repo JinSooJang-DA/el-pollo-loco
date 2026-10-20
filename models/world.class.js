@@ -20,7 +20,7 @@ class World {
     bottleRespawnTime = 10000;
     maxBottles = 5;
     collectedCoins = 0;
-    maxCoins = 5;
+    maxCoins = 4;
     bossSpawned = false;
     gameEnded = false;
     stopDrawing = false;
@@ -163,11 +163,7 @@ class World {
             stopSoundEffects();
             playBgm(AUDIO_HUB.bgmWin);
 
-            if (this.levelNumber < 5) {
-                startLevel(this.levelNumber + 1);
-            } else {
-                this.showEndScreen('img/You won, you lost/You win B.png');
-            }
+            finishCompletedLevel(this);
         }
     }
 
@@ -181,6 +177,13 @@ class World {
         let restartScreen = document.getElementById('restartScreen');
 
         this.setEndScreenImage(endScreenImg, imagePath);
+
+        let retryButton = document.getElementById('retryLevelBtn');
+
+        if (retryButton) {
+            let canRetry = this.character.isDead() && sombreros > 0;
+            retryButton.classList.toggle('d-none', !canRetry);
+        }
 
         if (restartScreen) restartScreen.classList.remove('d-none');
     }

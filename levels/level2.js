@@ -21,7 +21,12 @@ function initLevel2() {
         level1.clouds,
         level1.backgroundObjects,
         level1.bottles,
-        level1.coins
+        [
+            new Coin(450, 220),
+            new Coin(1200, 260),
+            new Coin(1900, 200),
+            new Coin(2600, 250)
+        ]
     );
 
     level2.level_end_x = 719 * 4;

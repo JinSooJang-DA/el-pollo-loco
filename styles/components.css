@@ -243,3 +243,90 @@
     flex: 1;
     font-size: 9px;
 }
+
+
+/* Sombreros below the Menu button */
+#sombreroCounter {
+    position: absolute;
+    top: 85px;
+    right: 20px;
+    left: auto;
+    transform: none;
+    z-index: 1;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 180px;
+
+    pointer-events: none;
+}
+
+/* Keep game characters in front of the sombrero display */
+#canvas {
+    position: relative;
+    z-index: 2;
+}
+
+/* Temporary sombrero icon */
+.sombrero-icon {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 24px;
+}
+
+/* Hat crown */
+.sombrero-icon::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 8px;
+    top: 0;
+
+    background: #f6a623;
+    border: 2px solid #6b390e;
+    border-radius: 12px 12px 3px 3px;
+    box-sizing: border-box;
+}
+
+/* Hat brim */
+.sombrero-icon::after {
+    content: '';
+    position: absolute;
+    width: 34px;
+    height: 7px;
+    left: 0;
+    bottom: 1px;
+
+    background: #f6a623;
+    border: 2px solid #6b390e;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+#sombreroStack {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 220px;
+
+    pointer-events: none;
+}
+
+#sombreroStack img {
+    width: 42px;
+    height: auto;
+    display: block;
+}

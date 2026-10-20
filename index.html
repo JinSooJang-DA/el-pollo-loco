@@ -43,6 +43,7 @@
     <script src="levels/level5.js"></script>
     <script src="js/level-rules.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/sombrero-system.js"></script>
     <script src="js/bgm-player.js"></script>
     <script src="js/game-input.js"></script>
 </head>
@@ -52,6 +53,7 @@
 
     <div class="game-container" id="gameContainer">
 
+        <div id="sombreroCounter">SOMBRERO x 0</div>
         <!-- Collapsible navigation menu -->
         <details class="game-menu">
             <summary>Menu</summary>
@@ -158,11 +160,26 @@
         </div>
 
 
+        <!-- Sombrero reward screen -->
+        <div id="sombreroRewardScreen" class="overlay-screen d-none">
+            <div class="level-rules-card">
+                <h2>ONE MORE ROUND!</h2>
+                <p>SOMBRERO +1</p>
+                <p>You earned an extra chance!</p>
+                <button onclick="continueAfterSombrero()">
+                    CONTINUE
+                </button>
+            </div>
+        </div>
+
         <!-- Game result screen -->
         <div id="restartScreen" class="overlay-screen d-none">
             <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
 
             <div class="end-buttons-group">
+                <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
+                    RETRY LEVEL - 1 SOMBRERO
+                </button>
                 <button id="restartBtn" onclick="restartGame()">
                     PLAY AGAIN
                 </button>

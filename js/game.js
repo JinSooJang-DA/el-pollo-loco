@@ -285,6 +285,7 @@ function beginLevel(levelNumber) {
     else if (levelNumber === 4) initLevel4();
     else if (levelNumber === 5) initLevel5();
 
+    removeCollectedCoins(levelNumber);
     resetPauseState();
 
     world = new World(canvas, keyboard, levelNumber);
@@ -303,6 +304,7 @@ function startGame() {
     document.getElementById('startScreen').classList.add('d-none');
 
     deactivatePlaylist();
+    resetSombreroGame();
     startLevel(1);
 }
 
@@ -320,6 +322,7 @@ function restartGame() {
 
     document.getElementById('restartScreen').classList.add('d-none');
 
+    resetSombreroGame();
     startLevel(1);
 }
 

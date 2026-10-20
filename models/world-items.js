@@ -1,7 +1,7 @@
 
 /** World item collection and throwing methods. */
 
-World.prototype.checkThrowObjects = function() {
+World.prototype.checkThrowObjects = function () {
     if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
         let offset = this.character.otherDirection ? 0 : 60;
 
@@ -19,12 +19,12 @@ World.prototype.checkThrowObjects = function() {
     }
 };
 
-World.prototype.updateBottleBar = function() {
+World.prototype.updateBottleBar = function () {
     let percentage = (this.availableBottles / this.maxBottles) * 100;
     this.statusBarBottle.setPercentage(percentage);
 };
 
-World.prototype.cooldownThrow = function() {
+World.prototype.cooldownThrow = function () {
     this.canThrow = false;
 
     setTimeout(() => {
@@ -34,14 +34,14 @@ World.prototype.cooldownThrow = function() {
     }, 1000);
 };
 
-World.prototype.checkCollisions = function() {
+World.prototype.checkCollisions = function () {
     this.checkCharacterCollisions();
     this.checkBottleCollisions();
     this.checkCollectBottles();
     this.checkCollectCoins();
 };
 
-World.prototype.checkCollectBottles = function() {
+World.prototype.checkCollectBottles = function () {
     if (!this.level.bottles) return;
 
     this.level.bottles.forEach((bottle, idx) => {
@@ -56,7 +56,7 @@ World.prototype.checkCollectBottles = function() {
     });
 };
 
-World.prototype.respawnBottle = function(bottle) {
+World.prototype.respawnBottle = function (bottle) {
     let currentLevel = this.level;
 
     setTimeout(() => {
@@ -67,7 +67,7 @@ World.prototype.respawnBottle = function(bottle) {
     }, this.bottleRespawnTime);
 };
 
-World.prototype.checkCollectCoins = function() {
+World.prototype.checkCollectCoins = function () {
     if (!this.level.coins) return;
 
     this.level.coins.forEach((coin, idx) => {
@@ -92,6 +92,7 @@ World.prototype.checkCollectCoins = function() {
             return;
         }
 
+        rememberCollectedCoin(this.levelNumber, coin);
         this.level.coins.splice(idx, 1);
         playSound(AUDIO_HUB.coinCollect);
     });
