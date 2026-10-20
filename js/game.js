@@ -200,7 +200,7 @@ function resumeCurrentBgm() {
  * @param {HTMLAudioElement} sound
  */
 function playSound(sound) {
-    if (!sound || isMuted || isPaused) return;
+    if (!sound || isMuted || isPaused || isStoryVideoPlaying()) return;
 
     sound.volume = sfxVolume;
     sound.muted = isMuted;

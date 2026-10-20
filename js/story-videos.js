@@ -40,6 +40,7 @@ function playStoryVideo(videoNumber, onComplete) {
     storyVideoComplete = onComplete;
     clearGameplayInput();
     if (currentBgm) currentBgm.pause();
+    stopSoundEffects();
 
     screen.classList.remove('d-none');
     video.src = `videos/loco-0${videoNumber}.mp4`;
