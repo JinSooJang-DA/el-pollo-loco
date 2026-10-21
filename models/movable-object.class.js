@@ -30,13 +30,19 @@ class MovableObject extends DrawableObject {
 
                     let feetAfter = feetBefore - this.speedY;
 
-                    this.lastFallStep = {
+                    let fallStep = {
                         from: feetBefore,
                         to: feetAfter,
                         left: this.x + this.offset.left,
                         right: this.x + this.width - this.offset.right,
                         time: Date.now()
                     };
+
+                    this.lastFallStep = fallStep;
+                    this.lastFallSteps = [
+                        ...(this.lastFallSteps || []),
+                        fallStep
+                    ].filter(step => fallStep.time - step.time < 120);
                 }
 
                 this.y -= this.speedY;
