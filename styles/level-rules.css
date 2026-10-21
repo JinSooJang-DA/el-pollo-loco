@@ -62,7 +62,8 @@
     transition: transform 0.15s ease;
 }
 
-#levelRulesStartBtn {
+#levelRulesStartBtn,
+#sombreroRewardScreen .level-action-button {
     margin-top: 10px;
     color: #fff1cf;
     background:
@@ -76,12 +77,14 @@
     transition: filter 0.2s ease, transform 0.15s ease;
 }
 
-#levelRulesStartBtn:hover {
+#levelRulesStartBtn:hover,
+#sombreroRewardScreen .level-action-button:hover {
     filter: brightness(1.12);
     transform: scale(1.05);
 }
 
-#levelRulesStartBtn:active {
+#levelRulesStartBtn:active,
+#sombreroRewardScreen .level-action-button:active {
     filter: brightness(0.9);
     transform: scale(0.98);
 }
@@ -118,21 +121,4 @@
     margin: 0;
     object-fit: contain;
     filter: none;
-}
-
-#sombreroRewardScreen .level-action-button {
-    padding: 10px 30px;
-    color: white;
-    background: linear-gradient(180deg, #ff9800, #e65100);
-    border: 3px solid #fff;
-    border-radius: 35px;
-}
-
-#sombreroRewardScreen .level-action-button:hover {
-    background: linear-gradient(180deg, #ff9800, #e65100);
-    transform: scale(1.05);
-}
-
-#sombreroRewardScreen .level-action-button:active {
-    transform: scale(0.98);
 }

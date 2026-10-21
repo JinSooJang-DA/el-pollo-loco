@@ -492,28 +492,3 @@
 #sombreroRewardImage + p {
     margin-top: 4px;
 }
-
-/* Sombrero reward CONTINUE button */
-#sombreroRewardScreen button {
-    background: #ff8900;
-    color: white;
-    border: 3px solid white;
-    border-radius: 30px;
-
-    padding: 10px 32px;
-    font-family: 'Rye', cursive;
-    font-size: 18px;
-    cursor: pointer;
-
-    transition: transform 0.15s ease,
-                background-color 0.15s ease;
-}
-
-#sombreroRewardScreen button:hover {
-    background: #e97800;
-    transform: scale(1.05);
-}
-
-#sombreroRewardScreen button:active {
-    transform: scale(0.98);
-}

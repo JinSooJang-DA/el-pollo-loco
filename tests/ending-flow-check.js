@@ -12,6 +12,7 @@ const sombrero = read('js/sombrero-system.js');
 const world = read('models/world.class.js');
 const baseStyles = read('styles/base.css');
 const componentStyles = read('styles/components.css');
+const levelRulesStyles = read('styles/level-rules.css');
 
 function expect(condition, message) {
     if (!condition) throw new Error(message);
@@ -52,6 +53,9 @@ expect(baseStyles.includes("end/end-background.webp") &&
     baseStyles.includes('transition: opacity 1.5s ease') &&
     baseStyles.includes('body:has(#restartScreen:not(.d-none) #endCredits:not(.d-none))::after'),
     'ending crossfades to its dedicated outer background');
+expect(/#levelRulesStartBtn,\s*#sombreroRewardScreen \.level-action-button/.test(levelRulesStyles) &&
+    !componentStyles.includes('#sombreroRewardScreen button'),
+    'sombrero continue button reuses the level action western style');
 expect(game.includes('playStoryVideo(1, () => startLevel(1))'),
     'start game opens story chapter 1 before level 1');
 expect(storyVideos.includes('videos/loco-0${videoNumber}.mp4'),
@@ -115,3 +119,18 @@ resultWorld.setEndScreenImage = () => {};
 resultWorld.showEndScreen('', false);
 expect(endVideoStops === 1 && elements.endCredits.classList.contains('d-none'),
     'non-victory result stops and hides the ending video');
+
+const rewardScreen = { classList: classList() };
+let continuedLevel = null;
+const sombreroContext = {
+    document: {
+        getElementById: id => id === 'sombreroRewardScreen' ? rewardScreen : null,
+        addEventListener() {}
+    },
+    startLevel(levelNumber) { continuedLevel = levelNumber; }
+};
+vm.createContext(sombreroContext);
+vm.runInContext(sombrero, sombreroContext);
+vm.runInContext('rewardNextLevel = 3; continueAfterSombrero();', sombreroContext);
+expect(rewardScreen.classList.contains('d-none') && continuedLevel === 3,
+    'sombrero continue hides the reward and starts the stored next level');
