@@ -163,6 +163,11 @@ class World {
     checkCharacterCollisions() {
         this.level.enemies.forEach((enemy) => {
             let isAlive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
+
+            // Preserve the previous collision-pass top for moving hitboxes.
+            enemy.previousCollisionTop = enemy.lastCollisionTop;
+            enemy.lastCollisionTop = enemy.y + enemy.offset.top;
+
             if (isAlive && this.character.isColliding(enemy)) {
                 this.handleEnemyContact(enemy);
             }
@@ -184,10 +189,34 @@ class World {
         if (enemy instanceof Endboss) {
             if (Date.now() - enemy.lastHit < 2000) return;
             this.hurtCharacter();
-        } else if (this.character.speedY < 0 || this.character.isAboveGround()) {
-            this.stompEnemy(enemy);
         } else {
-            this.hurtCharacter();
+            let chickenTop = enemy.y + enemy.offset.top;
+            let chickenLeft = enemy.x + enemy.offset.left;
+            let chickenRight = enemy.x + enemy.width - enemy.offset.right;
+            let pepeLeft = this.character.x + this.character.offset.left;
+            let pepeRight = this.character.x + this.character.width -
+                this.character.offset.right;
+            let collisionTops = [chickenTop, enemy.previousCollisionTop]
+                .filter((top, index, tops) =>
+                    Number.isFinite(top) && tops.indexOf(top) === index
+                );
+            let recentFallSteps = this.character.lastFallSteps ||
+                [this.character.lastFallStep].filter(Boolean);
+            let landsOnTop = recentFallSteps.some(lastStep =>
+                Date.now() - lastStep.time < 120 &&
+                collisionTops.some(top =>
+                    lastStep.from <= top && lastStep.to >= top
+                ) &&
+                lastStep.right > chickenLeft && lastStep.left < chickenRight
+            ) && pepeRight > chickenLeft && pepeLeft < chickenRight;
+
+            if (landsOnTop) {
+                this.character.lastFallStep = null;
+                this.character.lastFallSteps = [];
+                this.stompEnemy(enemy);
+            } else {
+                this.hurtCharacter();
+            }
         }
     }
 

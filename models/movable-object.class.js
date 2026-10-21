@@ -23,6 +23,23 @@ class MovableObject extends DrawableObject {
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
+                if (this instanceof Character && this.speedY < 0) {
+                    let feetBefore = this.y + this.height - this.offset.bottom;
+                    let fallStep = {
+                        from: feetBefore,
+                        to: feetBefore - this.speedY,
+                        left: this.x + this.offset.left,
+                        right: this.x + this.width - this.offset.right,
+                        time: Date.now()
+                    };
+
+                    this.lastFallStep = fallStep;
+                    this.lastFallSteps = [
+                        ...(this.lastFallSteps || []),
+                        fallStep
+                    ].filter(step => fallStep.time - step.time < 120);
+                }
+
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
             } else {
