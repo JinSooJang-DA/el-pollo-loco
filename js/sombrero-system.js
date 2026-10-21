@@ -79,7 +79,8 @@ function finishCompletedLevel(finishedWorld) {
 function showCompletedLevelResult(finishedWorld, nextLevel) {
     if (finishedWorld !== world) return;
 
-    if (finishedWorld.character.energy === 100) {
+    if (finishedWorld.levelNumber !== 1 &&
+        finishedWorld.character.energy === 100) {
         sombreros++;
         updateSombreroCounter();
 
