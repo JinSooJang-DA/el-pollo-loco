@@ -29,6 +29,11 @@ h1 {
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
 }
 
+body:has(#startScreen:not(.d-none)) h1,
+body:has(#endCredits:not(.d-none)) h1 {
+    display: none;
+}
+
 .game-container {
     position: relative;
     width: 720px;
@@ -121,8 +126,9 @@ canvas {
 
 .start-screen-layout {
     background: transparent;
+    align-items: flex-end;
     justify-content: flex-end;
-    padding-bottom: 35px;
+    padding: 0 42px 34px;
     box-sizing: border-box;
 }
 
@@ -146,6 +152,81 @@ canvas {
 .end-buttons-group {
     display: flex;
     gap: 15px;
+    z-index: 2;
+}
+
+.end-credits {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #21120e;
+}
+
+.end-bg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.credits-copy {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.credit-entry {
+    position: absolute;
+    width: min(78%, 560px);
+    margin: 0;
+    color: #fff8df;
+    font-family: 'Rye', cursive, sans-serif;
+    font-size: clamp(18px, 3.2vw, 32px);
+    line-height: 1.35;
+    text-align: center;
+    text-shadow: 0 3px 10px #160700, 0 0 16px rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    animation: credit-cycle 13.5s ease-in-out infinite;
+}
+
+.credit-entry span,
+.credit-entry strong {
+    display: block;
+}
+
+.credit-entry span {
+    margin-bottom: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 0.52em;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+}
+
+.credit-entry strong {
+    font-weight: 400;
+}
+
+.credit-entry:nth-child(2) {
+    animation-delay: -4.5s;
+}
+
+.credit-entry:nth-child(3) {
+    animation-delay: -9s;
+}
+
+@keyframes credit-cycle {
+    0%, 8% { opacity: 0; transform: translateY(14px); }
+    15%, 25% { opacity: 1; transform: translateY(0); }
+    33%, 100% { opacity: 0; transform: translateY(-14px); }
+}
+
+#restartScreen:has(.end-credits:not(.d-none)) {
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 0 24px 18px;
+    box-sizing: border-box;
 }
 
 .d-none {

@@ -61,7 +61,7 @@ function finishCompletedLevel(finishedWorld) {
     if (finishedWorld.levelNumber === 5) {
         playStoryVideo(6, () => {
             if (finishedWorld === world) {
-                finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
+                finishedWorld.showEndScreen('img/You won, you lost/You win B.png', true);
                 playBgm(AUDIO_HUB.bgmWin);
             }
         });

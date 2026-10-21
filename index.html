@@ -108,9 +108,9 @@
 
         <!-- Start screen -->
         <div id="startScreen" class="overlay-screen start-screen-layout">
-            <video class="start-bg" autoplay muted loop playsinline
+            <video id="startVideo" class="start-bg" autoplay muted loop playsinline
                 poster="img/9_intro_outro_screens/start/startscreen_1.webp">
-                <source src="img/9_intro_outro_screens/start/intro.mp4" type="video/mp4">
+                <source src="videos/stat-video.mp4" type="video/mp4">
             </video>
 
             <button id="startBtn" onclick="startGame()">
@@ -188,6 +188,27 @@
         <!-- Game result screen -->
         <div id="restartScreen" class="overlay-screen d-none">
             <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
+
+            <div id="endCredits" class="end-credits d-none" aria-label="End credits">
+                <video id="endVideo" class="end-bg" autoplay muted loop playsinline
+                    poster="img/You won, you lost/You win B.png">
+                    <source src="videos/end-video.mp4" type="video/mp4">
+                </video>
+                <div class="credits-copy" aria-live="polite">
+                    <p class="credit-entry">
+                        <span>EDUCATIONAL FRONTEND PROJECT</span>
+                        <strong>DEVELOPER AKADEMIE</strong>
+                    </p>
+                    <p class="credit-entry">
+                        <span>BACKGROUND MUSIC</span>
+                        <strong>CREATED BY THE DEVELOPER WITH AI</strong>
+                    </p>
+                    <p class="credit-entry">
+                        <span>SOUND EFFECTS</span>
+                        <strong>PIXABAY &amp; FREE SOUND GENERATION TOOLS</strong>
+                    </p>
+                </div>
+            </div>
 
             <div class="end-buttons-group">
                 <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">

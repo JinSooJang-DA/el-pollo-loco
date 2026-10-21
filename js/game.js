@@ -47,8 +47,10 @@ function init() {
     loadVolumePreferences();
     bindTouchEvents();
     initPlaylist();
+    playStartVideo();
     playBgm(AUDIO_HUB.bgmMenu);
     unlockAudioOnFirstInteraction();
+    showLocalEndingPreview();
 }
 
 /** Allows background music after user interaction. */
@@ -310,6 +312,8 @@ function startGame() {
     stopSoundEffects();
     resetPauseState();
 
+    stopStartVideo();
+
     document.getElementById('startScreen').classList.add('d-none');
 
     deactivatePlaylist();
@@ -328,6 +332,8 @@ function stopAllIntervals() {
 function restartGame() {
     stopSoundEffects();
     resetPauseState();
+
+    stopEndVideo();
 
     document.getElementById('restartScreen').classList.add('d-none');
 
@@ -349,6 +355,8 @@ function backToMainMenu() {
 
     document.getElementById('startScreen').classList.remove('d-none');
 
+    playStartVideo();
+
     world = null;
     resetPlaylist();
 }
@@ -358,11 +366,66 @@ function closeGameOverlays() {
     cancelLevelRules();
     cancelSombreroReward();
     cancelStoryVideo();
+    stopEndVideo();
     resetPauseState();
 
     ['restartScreen', 'settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {
         document.getElementById(id).classList.add('d-none');
     });
+}
+
+/** Plays the muted start-screen background when the browser permits it. */
+function playStartVideo() {
+    let video = document.getElementById('startVideo');
+    if (!video) return;
+
+    video.muted = true;
+    video.play().catch(() => { });
+}
+
+/** Stops the start-screen background before the opening story begins. */
+function stopStartVideo() {
+    let video = document.getElementById('startVideo');
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+}
+
+/** Plays the muted credits background when the victory screen is shown. */
+function playEndVideo() {
+    let video = document.getElementById('endVideo');
+    if (!video) return;
+
+    video.muted = true;
+    video.play().catch(() => { });
+}
+
+/** Stops the credits background before leaving the victory screen. */
+function stopEndVideo() {
+    let video = document.getElementById('endVideo');
+    if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
+}
+
+/** Shows the ending locally without exposing a test control to players. */
+function showLocalEndingPreview() {
+    let isLocalHost = location.hostname === '127.0.0.1' ||
+        location.hostname === 'localhost';
+    let isEndingPreview = new URLSearchParams(location.search)
+        .get('preview') === 'ending';
+
+    if (!isLocalHost || !isEndingPreview) return;
+
+    document.getElementById('startScreen').classList.add('d-none');
+    document.getElementById('restartScreen').classList.remove('d-none');
+    document.getElementById('endScreenImg').classList.add('d-none');
+    document.getElementById('endCredits').classList.remove('d-none');
+    stopStartVideo();
+    playEndVideo();
+    playBgm(AUDIO_HUB.bgmWin);
 }
 
 /** Opens the settings dialog. */

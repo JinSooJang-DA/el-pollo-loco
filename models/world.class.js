@@ -169,7 +169,7 @@ class World {
         }
     }
 
-    showEndScreen(imagePath) {
+    showEndScreen(imagePath, isVictory = false) {
         if (this !== world) return;
 
         this.stopDrawing = true;
@@ -177,8 +177,17 @@ class World {
 
         let endScreenImg = document.getElementById('endScreenImg');
         let restartScreen = document.getElementById('restartScreen');
+        let endCredits = document.getElementById('endCredits');
 
-        this.setEndScreenImage(endScreenImg, imagePath);
+        if (isVictory) {
+            endScreenImg.classList.add('d-none');
+            endCredits.classList.remove('d-none');
+            playEndVideo();
+        } else {
+            stopEndVideo();
+            endCredits.classList.add('d-none');
+            this.setEndScreenImage(endScreenImg, imagePath);
+        }
 
         let retryButton = document.getElementById('retryLevelBtn');
 
