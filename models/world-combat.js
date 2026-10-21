@@ -6,6 +6,11 @@ World.prototype.checkCharacterCollisions = function () {
         let isAlive = typeof enemy.isDead === 'function'
             ? !enemy.isDead() : !enemy.isDead;
 
+        // Keep the previous collision-pass top. A stomp reaction changes a
+        // chicken's hitbox briefly, independently of gravity's 40ms updates.
+        enemy.previousCollisionTop = enemy.lastCollisionTop;
+        enemy.lastCollisionTop = enemy.y + enemy.offset.top;
+
         if (isAlive && this.character.isColliding(enemy)) {
             this.handleEnemyContact(enemy);
         }
@@ -91,22 +96,31 @@ World.prototype.handleEnemyContact = function (enemy) {
     let chickenLeft = enemy.x + enemy.offset.left;
     let chickenRight = enemy.x + enemy.width - enemy.offset.right;
 
-    let lastStep = this.character.lastFallStep;
+    let recentFallSteps = this.character.lastFallSteps ||
+        [this.character.lastFallStep].filter(Boolean);
 
-    let crossedChickenTop = lastStep &&
+    let collisionTops = [chickenTop, enemy.previousCollisionTop]
+        .filter((top, index, tops) =>
+            Number.isFinite(top) && tops.indexOf(top) === index
+        );
+
+    let crossedChickenTop = recentFallSteps.some(lastStep =>
         Date.now() - lastStep.time < 120 &&
-        lastStep.from <= chickenTop &&
-        lastStep.to >= chickenTop &&
-        lastStep.right > chickenLeft &&
-        lastStep.left < chickenRight;
+        collisionTops.some(top =>
+            lastStep.from <= top && lastStep.to >= top
+        ) &&
+        lastStep.right > chickenLeft && lastStep.left < chickenRight
+    );
 
     let landsOnTop = crossedChickenTop &&
         pepeRight > chickenLeft &&
         pepeLeft < chickenRight;
 
     if (landsOnTop) {
-        this.character.lastFallStep = null;
-        this.stompEnemy(enemy);
+        if (this.stompEnemy(enemy)) {
+            this.character.lastFallStep = null;
+            this.character.lastFallSteps = [];
+        }
     } else {
         this.hurtCharacter();
     }
@@ -136,10 +150,10 @@ World.prototype.hurtCharacter = function (damage = 40) {
 };
 
 World.prototype.stompEnemy = function (enemy) {
-    if (!(enemy instanceof Chicken)) return;
+    if (!(enemy instanceof Chicken)) return false;
 
     let now = Date.now();
-    if (now - enemy.lastStomp < enemy.stompCooldown) return;
+    if (now - enemy.lastStomp < enemy.stompCooldown) return false;
 
     enemy.lastStomp = now;
     enemy.energy -= 1;
@@ -154,6 +168,8 @@ World.prototype.stompEnemy = function (enemy) {
         playSound(AUDIO_HUB.chickenStomp);
         enemy.showStompReaction();
     }
+
+    return true;
 };
 
 World.prototype.removeEnemyAfterDelay = function (enemy, delay) {
