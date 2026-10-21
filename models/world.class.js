@@ -51,8 +51,8 @@ class World {
                 // 병아리: 기존 속도 유지
                 enemy.speed *= speedMultiplier;
             } else if (enemy instanceof Chicken) {
-                // 일반닭: 기본 속도 2배 + 레벨별 증가
-                enemy.speed *= 2 * speedMultiplier;
+                // 일반닭: 레벨별 증가
+                enemy.speed *= speedMultiplier;
 
                 // 일반닭 체력은 기존 레벨별 설정 유지
                 enemy.energy = this.levelNumber;

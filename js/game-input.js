@@ -94,6 +94,7 @@ function getFocusableControls(scope) {
 /** Moves focus to the first visible existing Menu control. */
 function focusGameMenuControl() {
     const menu = document.querySelector('.game-menu');
+    if (!menu?.open) return;
     const controls = getFocusableControls(menu);
     const firstAction = controls.find(control => control.tagName === 'BUTTON');
     (firstAction || controls[0])?.focus();
@@ -120,6 +121,11 @@ function keepFocusInScope(event, scope) {
 
 /** Keeps keyboard focus out of background controls while a dialog is visible. */
 function handleMenuFocus(event) {
+    if (isMenuCreditsOpen()) {
+        keepFocusInScope(event, document.getElementById('restartScreen'));
+        return;
+    }
+
     const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
         .map(id => document.getElementById(id))
         .find(dialog => dialog && !dialog.classList.contains('d-none'));
@@ -150,6 +156,8 @@ function clearGameMenuInput() {
 
 /** Keeps the native Menu dropdown and existing pause state in sync. */
 function syncGameMenuPause(menu) {
+    if (isMenuCreditsOpen()) return;
+
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
 
@@ -161,13 +169,16 @@ function syncGameMenuPause(menu) {
         return;
     }
 
+    // Release keyboard focus when the menu closes.
+    if (menu.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+
     if (isStartScreenVisible || isGameplayFlowOverlayVisible()) {
-        requestAnimationFrame(() => menu.querySelector('summary')?.focus());
         return;
     }
 
     if (isPaused) togglePause();
-    requestAnimationFrame(() => menu.querySelector('summary')?.focus());
 }
 
 /** Opens or closes the existing Menu dropdown. */
@@ -213,6 +224,13 @@ function closeMenuDialog() {
 /** Handles Escape without changing story, level, reward, or ending flow. */
 function handleGameMenuEscape(event) {
     if (event.key !== 'Escape' || event.repeat) return;
+    if (isMenuCreditsOpen()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closeMenuCredits();
+        return;
+    }
+
     if (closeMenuDialog()) {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -241,6 +259,19 @@ function initGameMenuControls() {
     document.addEventListener('keydown', handleMenuFocus, true);
 }
 
+// Space is reserved for jumping, not menu activation.
+document.addEventListener('keydown', event => {
+    if (event.code === 'Space') {
+        event.preventDefault();
+    }
+}, true);
+
+document.addEventListener('keyup', event => {
+    if (event.code === 'Space') {
+        event.preventDefault();
+    }
+}, true);
+
 /**
  * Starts the game using Enter or Space.
  * @param {KeyboardEvent} event
@@ -249,7 +280,7 @@ function initGameMenuControls() {
 function handleStartKey(event) {
     const startScreen = document.getElementById('startScreen');
     if (startScreen.classList.contains('d-none')) return false;
-    if (event.code !== 'Enter' && event.code !== 'Space') return false;
+    if (event.code !== 'Enter') return false;
     if (isMenuControlTarget(event.target)) return false;
     event.preventDefault();
     const infoClosed = document.getElementById('infoDialog').classList.contains('d-none');

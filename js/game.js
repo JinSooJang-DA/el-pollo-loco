@@ -15,6 +15,8 @@ let currentBgm = null;
 let bgmVolume = 0.5;
 /** @type {number} */
 let sfxVolume = 0.5;
+/** @type {'start'|'game'|null} */
+let menuCreditsOrigin = null;
 
 /** Contains all background music and sound effects. */
 const AUDIO_HUB = {
@@ -172,10 +174,11 @@ function changeSfxVolume(val) {
 /**
  * Plays a background music track.
  * @param {HTMLAudioElement} bgmTrack
+ * @param {boolean} [allowWhilePaused=false]
  */
-function playBgm(bgmTrack) {
+function playBgm(bgmTrack, allowWhilePaused = false) {
     if (currentBgm === bgmTrack) {
-        resumeCurrentBgm();
+        resumeCurrentBgm(allowWhilePaused);
         return;
     }
 
@@ -192,12 +195,12 @@ function playBgm(bgmTrack) {
     currentBgm.volume = bgmVolume;
     currentBgm.muted = isMuted;
 
-    resumeCurrentBgm();
+    resumeCurrentBgm(allowWhilePaused);
 }
 
 /** Resumes background music when allowed. */
-function resumeCurrentBgm() {
-    if (!currentBgm || isMuted || isPaused || isStoryVideoPlaying()) return;
+function resumeCurrentBgm(allowWhilePaused = false) {
+    if (!currentBgm || isMuted || (!allowWhilePaused && isPaused) || isStoryVideoPlaying()) return;
     if (currentBgm === AUDIO_HUB.bgmMenu && !isMainMenuVisible()) return;
     if (!currentBgm.paused) return;
 
@@ -409,6 +412,77 @@ function stopEndVideo() {
 
     video.pause();
     video.currentTime = 0;
+}
+
+/** Returns whether the shared credits screen was opened from the Menu. */
+function isMenuCreditsOpen() {
+    return menuCreditsOrigin !== null;
+}
+
+/** Opens the existing credits screen without marking the game as completed. */
+function openMenuCredits() {
+    if (isMenuCreditsOpen()) return;
+
+    const openedFromStart = isMainMenuVisible();
+    const openedFromGame = world && !world.gameEnded;
+    if (!openedFromStart && !openedFromGame) return;
+
+    menuCreditsOrigin = openedFromStart ? 'start' : 'game';
+
+    const menu = document.querySelector('.game-menu');
+    const restartScreen = document.getElementById('restartScreen');
+    const endCredits = document.getElementById('endCredits');
+    const endScreenImage = document.getElementById('endScreenImg');
+    const backButton = document.getElementById('menuCreditsBackBtn');
+
+    if (menu) menu.open = false;
+    if (endScreenImage) endScreenImage.classList.add('d-none');
+    if (restartScreen) {
+        restartScreen.classList.add('menu-credits-mode');
+        restartScreen.classList.remove('d-none');
+    }
+    if (endCredits) endCredits.classList.remove('d-none');
+    if (backButton) backButton.classList.remove('d-none');
+
+    document.getElementById('pauseScreen')?.classList.add('d-none');
+    stopStartVideo();
+    stopSoundEffects();
+    playEndVideo();
+    AUDIO_HUB.bgmLost.pause();
+    AUDIO_HUB.bgmLost.currentTime = 0;
+    playBgm(AUDIO_HUB.bgmLost, true);
+    requestAnimationFrame(() => backButton?.focus());
+}
+
+/** Closes Menu credits and restores the original Menu and BGM state. */
+function closeMenuCredits() {
+    const origin = menuCreditsOrigin;
+    if (!origin) return;
+
+    menuCreditsOrigin = null;
+
+    const restartScreen = document.getElementById('restartScreen');
+    const endCredits = document.getElementById('endCredits');
+    const backButton = document.getElementById('menuCreditsBackBtn');
+
+    stopEndVideo();
+    if (endCredits) endCredits.classList.add('d-none');
+    if (backButton) backButton.classList.add('d-none');
+    if (restartScreen) {
+        restartScreen.classList.remove('menu-credits-mode');
+        restartScreen.classList.add('d-none');
+    }
+
+    if (origin === 'start') {
+        playStartVideo();
+        playBgm(AUDIO_HUB.bgmMenu);
+    } else {
+        updatePauseUI();
+        playBgm(AUDIO_HUB.bgmGame);
+    }
+
+    setGameMenuOpen(true);
+    requestAnimationFrame(() => document.getElementById('creditsBtn')?.focus());
 }
 
 /** Shows the ending locally without exposing a test control to players. */

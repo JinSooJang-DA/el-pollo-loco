@@ -117,6 +117,17 @@ expect(componentStyles.includes('.game-container:has(#restartScreen:not(.d-none)
     componentStyles.includes('.game-container:has(#startScreen.d-none) .bgm-menu') &&
     componentStyles.includes('display: none;'),
     'non-start screens hide top BGM and ending hides top Menu');
+expect(index.includes('id="creditsBtn"') && index.includes('onclick="openMenuCredits()"') &&
+    index.includes('id="menuCreditsBackBtn"') && index.includes('onclick="closeMenuCredits()"'),
+    'Menu exposes keyboard-accessible Credits and Back controls without duplicating credit markup');
+expect(game.includes('function openMenuCredits()') && game.includes('function closeMenuCredits()') &&
+    game.includes("playBgm(AUDIO_HUB.bgmLost, true)") &&
+    game.includes('AUDIO_HUB.bgmLost.currentTime = 0;') &&
+    game.includes('playBgm(AUDIO_HUB.bgmMenu);') &&
+    game.includes('playBgm(AUDIO_HUB.bgmGame);') &&
+    gameInput.includes('if (isMenuCreditsOpen())') &&
+    componentStyles.includes('#restartScreen.menu-credits-mode'),
+    'Menu credits uses BGM04, restores the source BGM, and keeps Escape focus-aware');
 expect(baseStyles.includes("end/end-background.webp") &&
     baseStyles.includes('transition: opacity 1.5s ease') &&
     baseStyles.includes('body:has(#restartScreen:not(.d-none) #endCredits:not(.d-none))::after'),
@@ -256,3 +267,96 @@ vm.runInContext(sombrero, sombreroContext);
 vm.runInContext('rewardNextLevel = 3; continueAfterSombrero();', sombreroContext);
 expect(rewardScreen.classList.contains('d-none') && continuedLevel === 3,
     'sombrero continue hides the reward and starts the stored next level');
+
+class TestAudio {
+    constructor(src) {
+        this.src = src;
+        this.paused = true;
+        this.currentTime = 0;
+        this.loop = false;
+        this.volume = 1;
+        this.muted = false;
+    }
+
+    play() {
+        this.paused = false;
+        return Promise.resolve();
+    }
+
+    pause() {
+        this.paused = true;
+    }
+}
+
+function createMenuCreditElement() {
+    return {
+        classList: classList(),
+        paused: true,
+        currentTime: 0,
+        focus() { this.focused = true; },
+        play() { this.paused = false; return Promise.resolve(); },
+        pause() { this.paused = true; }
+    };
+}
+
+const menuCreditElements = {
+    startScreen: createMenuCreditElement(),
+    restartScreen: createMenuCreditElement(),
+    endCredits: createMenuCreditElement(),
+    endScreenImg: createMenuCreditElement(),
+    menuCreditsBackBtn: createMenuCreditElement(),
+    pauseScreen: createMenuCreditElement(),
+    startVideo: createMenuCreditElement(),
+    endVideo: createMenuCreditElement(),
+    creditsBtn: createMenuCreditElement(),
+    pauseBtn: createMenuCreditElement()
+};
+menuCreditElements.startScreen.classList.remove('d-none');
+
+const menuCreditMenu = { open: true };
+const menuCreditContext = {
+    Audio: TestAudio,
+    Keyboard: class { },
+    document: {
+        getElementById: id => menuCreditElements[id] || null,
+        querySelector: selector => selector === '.game-menu' ? menuCreditMenu : null
+    },
+    window: { addEventListener() { }, removeEventListener() { }, clearInterval() { } },
+    localStorage: { getItem() { return null; }, setItem() { } },
+    requestAnimationFrame(callback) { callback(); },
+    isStoryVideoPlaying() { return false; },
+    playlistActive: false,
+    playlistRepeat: 'track',
+    setGameMenuOpen(isOpen) { menuCreditMenu.open = isOpen; }
+};
+vm.createContext(menuCreditContext);
+vm.runInContext(`${game}
+globalThis.menuCreditApi = {
+    open: openMenuCredits,
+    close: closeMenuCredits,
+    getCurrent: () => currentBgm,
+    getAudioHub: () => AUDIO_HUB,
+    setGameOrigin: () => {
+        document.getElementById('startScreen').classList.add('d-none');
+        world = { gameEnded: false };
+        isPaused = true;
+    },
+    isPaused: () => isPaused
+};`, menuCreditContext);
+
+menuCreditContext.menuCreditApi.open();
+expect(menuCreditContext.menuCreditApi.getCurrent() === menuCreditContext.menuCreditApi.getAudioHub().bgmLost &&
+    !menuCreditElements.restartScreen.classList.contains('d-none') &&
+    !menuCreditElements.endCredits.classList.contains('d-none'),
+    'start Menu credits starts BGM04 and reuses the ending credits screen');
+menuCreditContext.menuCreditApi.close();
+expect(menuCreditContext.menuCreditApi.getCurrent() === menuCreditContext.menuCreditApi.getAudioHub().bgmMenu &&
+    menuCreditMenu.open && menuCreditElements.creditsBtn.focused,
+    'closing start Menu credits restores BGM01 and Credits focus');
+
+menuCreditContext.menuCreditApi.setGameOrigin();
+menuCreditContext.menuCreditApi.open();
+menuCreditContext.menuCreditApi.close();
+expect(menuCreditContext.menuCreditApi.getCurrent() === menuCreditContext.menuCreditApi.getAudioHub().bgmGame &&
+    menuCreditContext.menuCreditApi.isPaused(),
+    'closing gameplay Menu credits selects BGM02 while retaining the existing pause state');

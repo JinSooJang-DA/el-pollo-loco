@@ -65,6 +65,7 @@
                 <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()">Sound: On</button>
                 <button class="nav-icon-btn" onclick="openImpressum()">Legal Notice</button>
                 <button class="nav-icon-btn" onclick="openInfoDialog()">How to Play</button>
+                <button id="creditsBtn" class="nav-icon-btn" onclick="openMenuCredits()">Credits</button>
                 <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
             </div>
         </details>
@@ -101,8 +102,10 @@
         <!-- Pause screen -->
         <div id="pauseScreen" class="overlay-screen d-none">
             <h2 class="pause-title">GAME PAUSED</h2>
-            <button id="resumeBtn" onclick="togglePause()">
+            <button id="resumeBtn" class="western-action-button western-start-button" onclick="togglePause()">
                 RESUME GAME
+            </button>
+            RESUME GAME
             </button>
         </div>
 
@@ -123,8 +126,7 @@
             aria-labelledby="levelRulesTitle">
             <div class="level-rules-card">
                 <h2 id="levelRulesTitle">LEVEL 1</h2>
-                <img id="levelRulesImage" class="level-rules-image" src="img/tip-lv1.webp"
-                    alt="Level 1 tip">
+                <img id="levelRulesImage" class="level-rules-image" src="img/tip-lv1.webp" alt="Level 1 tip">
                 <p id="levelRulesText">Loading level rules...</p>
                 <button id="levelRulesStartBtn" class="level-action-button" onclick="continueLevel()" disabled>
                     START LEVEL · SPACE ↵
@@ -284,7 +286,8 @@
                     </p>
                     <p class="credit-entry" style="--credit-delay: -72s">
                         <span class="credit-role">FINAL COMEDY CARD</span>
-                        <strong class="credit-name">NO CHICKENS WERE INTENTIONALLY HARMED IN THE MAKING OF THIS GAME.</strong>
+                        <strong class="credit-name">NO CHICKENS WERE INTENTIONALLY HARMED IN THE MAKING OF THIS
+                            GAME.</strong>
                     </p>
                     <p class="credit-entry" style="--credit-delay: -76.5s">
                         <span class="credit-role">THE END</span>
@@ -295,6 +298,10 @@
             </div>
 
             <div class="end-buttons-group">
+                <button id="menuCreditsBackBtn" class="western-action-button western-ending-button d-none" type="button"
+                    onclick="closeMenuCredits()">
+                    BACK TO MENU
+                </button>
                 <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
                     <img src="img/golden-sombrero-big.webp" alt="">
                     <span>RETRY LEVEL</span>
@@ -314,7 +321,8 @@
         <div id="settingsDialog" class="dialog-overlay d-none" role="dialog" aria-modal="true"
             aria-labelledby="settingsDialogTitle" onclick="closeSettingsOnBackdrop(event)">
             <div class="dialog-card">
-                <button class="dialog-close-btn" aria-label="Close volume settings" onclick="closeSettingsDialog()">✕</button>
+                <button class="dialog-close-btn" aria-label="Close volume settings"
+                    onclick="closeSettingsDialog()">✕</button>
                 <h2 id="settingsDialogTitle">Volume Settings</h2>
 
                 <div class="dialog-content">

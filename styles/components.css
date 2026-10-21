@@ -460,6 +460,13 @@
     display: none;
 }
 
+/* The Menu credits view reuses the ending screen but exposes only its Back action. */
+#restartScreen.menu-credits-mode #retryLevelBtn,
+#restartScreen.menu-credits-mode #restartBtn,
+#restartScreen.menu-credits-mode #homeBtn {
+    display: none;
+}
+
 .game-container:has(#startScreen:not(.d-none)) .game-menu > summary:focus-visible,
 .game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary:focus-visible,
 .game-container:has(#startScreen.d-none):has(#endCredits.d-none) .game-menu > summary:focus-visible {
