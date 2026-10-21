@@ -8,6 +8,14 @@ let level1;
  * Initializes Level 1 with enemies, clouds, backgrounds, bottles, and coins.
  */
 function initLevel() {
+    const coinHeights = [50, 51, 51, 52, 52];
+
+    for (let i = coinHeights.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [coinHeights[i], coinHeights[j]] =
+            [coinHeights[j], coinHeights[i]];
+    }
     level1 = new Level(
         [
             new Chicken(700),
@@ -60,10 +68,11 @@ function initLevel() {
         ],
 
         [
-            new Coin(350, 260),
-            new Coin(1050, 210),
-            new Coin(1800, 260),
-            new Coin(2550, 210)
+            new Coin(350, coinHeights[0]),
+            new Coin(850, coinHeights[1]),
+            new Coin(1350, coinHeights[2]),
+            new Coin(1850, coinHeights[3]),
+            new Coin(2550, coinHeights[4])
         ]
 
     );
