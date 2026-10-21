@@ -54,11 +54,17 @@ function removeCollectedCoins(levelNumber) {
     });
 }
 
-/** Gives a reward for finishing with all three coins. */
+/** Rewards flawless clears except level 1 and the final level. */
 function finishCompletedLevel(finishedWorld) {
     let nextLevel = finishedWorld.levelNumber + 1;
 
-    if (finishedWorld.character.energy === 100) {
+    if (finishedWorld.levelNumber === 5) {
+        finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
+        return;
+    }
+
+    if (finishedWorld.levelNumber !== 1 &&
+        finishedWorld.character.energy === 100) {
         sombreros++;
         updateSombreroCounter();
 

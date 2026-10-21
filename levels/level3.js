@@ -10,6 +10,14 @@ let level3;
  */
 function initLevel3() {
     initLevel();
+    const coinHeights = [50, 51, 51, 52, 52];
+
+    for (let i = coinHeights.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [coinHeights[i], coinHeights[j]] =
+            [coinHeights[j], coinHeights[i]];
+    }
 
     level3 = new Level(
         [
@@ -24,10 +32,11 @@ function initLevel3() {
         level1.backgroundObjects,
         level1.bottles,
         [
-            new Coin(350, 190),
-            new Coin(1100, 260),
-            new Coin(1750, 210),
-            new Coin(2650, 230)
+            new Coin(350, coinHeights[0]),
+            new Coin(1100, coinHeights[1]),
+            new Coin(1750, coinHeights[2]),
+            new Coin(2250, coinHeights[3]),
+            new Coin(2650, coinHeights[4])
         ]
     );
 
