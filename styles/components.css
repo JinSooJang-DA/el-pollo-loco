@@ -385,6 +385,40 @@
     transform: translateY(4px);
 }
 
+/* Keep compact top controls limited to the start screen and active game UI. */
+.game-container:has(#startScreen:not(.d-none)) .game-menu > summary,
+.game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary,
+.game-container:has(#startScreen.d-none):has(#endCredits.d-none) .game-menu > summary {
+    width: 76px;
+    min-width: 76px;
+    min-height: 35px;
+    height: 35px;
+    padding: 0 9px;
+    border-width: 2px;
+    border-radius: 9px;
+    box-shadow:
+        inset 0 2px 0 #e4a858,
+        inset 0 -2px 0 #5a2c12,
+        0 3px 0 #351808;
+    font-size: 15px;
+}
+
+/* The playlist belongs to the start screen. Game music is still controlled in Menu. */
+.game-container:has(#startScreen.d-none) .bgm-menu {
+    display: none;
+}
+
+.game-container:has(#restartScreen:not(.d-none) #endCredits:not(.d-none)) .game-menu {
+    display: none;
+}
+
+.game-container:has(#startScreen:not(.d-none)) .game-menu > summary:focus-visible,
+.game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary:focus-visible,
+.game-container:has(#startScreen.d-none):has(#endCredits.d-none) .game-menu > summary:focus-visible {
+    outline: 3px solid #f2cf83;
+    outline-offset: 3px;
+}
+
 
 /* Sombreros directly below the Menu button */
 #sombreroCounter {

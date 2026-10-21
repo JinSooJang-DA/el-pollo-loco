@@ -7,11 +7,7 @@
         box-sizing: border-box;
         justify-content: center;
 
-        background-color: #59331d;
-        background-image: url('../img/9_intro_outro_screens/start/intro-backdrop.webp');
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
+        background-color: transparent;
     }
 
     /* Title stays at the top */
@@ -124,9 +120,10 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 
     /* Start button */
-    #startBtn {
-        padding: 10px 24px;
-        font-size: clamp(13px, 4vh, 19px);
+    .western-start-button {
+        min-width: 142px;
+        padding: 8px 16px;
+        font-size: clamp(14px, 3.6vh, 18px);
     }
 
     .start-screen-layout {
@@ -139,10 +136,10 @@ screen and (orientation: portrait) and (max-width: 600px) {
         max-width: 90%;
     }
 
-    #restartBtn,
-    #homeBtn {
-        padding: 10px 20px;
-        font-size: clamp(12px, 3.5vh, 18px);
+    .western-ending-button {
+        min-height: 40px;
+        padding: 7px 11px;
+        font-size: clamp(12px, 3vh, 14px);
         white-space: nowrap;
     }
 
@@ -151,8 +148,21 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 
     .credit-entry {
-        width: 72%;
-        font-size: clamp(15px, 4.4vh, 24px);
+        width: 100%;
+        font-size: clamp(14px, 4.1vh, 22px);
+    }
+
+    .credits-copy {
+        inset: 20% 16% 19%;
+    }
+
+    .credit-role {
+        font-size: 0.46em;
+        letter-spacing: 0.12em;
+    }
+
+    .credit-note {
+        font-size: 0.58em;
     }
 
     /* Hide touch controls outside gameplay */
