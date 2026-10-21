@@ -58,8 +58,187 @@ function updateKeyboardState(event, pressed) {
         32: 'SPACE', 68: 'D'
     };
     const property = keyMap[event.keyCode];
+
+    if (isMenuControlTarget(event.target)) return;
+
+    if (property && isGameMenuOpen()) {
+        if (pressed) event.preventDefault();
+        return;
+    }
     if (property) keyboard[property] = pressed;
     if (event.keyCode === 32 && pressed) event.preventDefault();
+}
+
+/** Returns whether the existing Menu dropdown is currently open. */
+function isGameMenuOpen() {
+    const menu = document.querySelector('.game-menu');
+    return Boolean(menu && menu.open);
+}
+
+/** Returns whether a native control should keep its own keyboard behavior. */
+function isMenuControlTarget(target) {
+    return target instanceof Element && Boolean(target.closest(
+        'button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])'
+    ));
+}
+
+/** Returns visible, enabled controls inside a keyboard scope. */
+function getFocusableControls(scope) {
+    if (!scope) return [];
+
+    return Array.from(scope.querySelectorAll(
+        'summary, button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(control => control.getClientRects().length > 0);
+}
+
+/** Moves focus to the first visible existing Menu control. */
+function focusGameMenuControl() {
+    const menu = document.querySelector('.game-menu');
+    const controls = getFocusableControls(menu);
+    const firstAction = controls.find(control => control.tagName === 'BUTTON');
+    (firstAction || controls[0])?.focus();
+}
+
+/** Keeps Tab navigation within an open Menu or dialog. */
+function keepFocusInScope(event, scope) {
+    if (event.key !== 'Tab') return;
+
+    const controls = getFocusableControls(scope);
+    if (!controls.length) return;
+
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !scope.contains(active))) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && (active === last || !scope.contains(active))) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
+/** Keeps keyboard focus out of background controls while a dialog is visible. */
+function handleMenuFocus(event) {
+    const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
+        .map(id => document.getElementById(id))
+        .find(dialog => dialog && !dialog.classList.contains('d-none'));
+    if (visibleDialog) {
+        keepFocusInScope(event, visibleDialog.querySelector('.dialog-card'));
+        return;
+    }
+
+    const menu = document.querySelector('.game-menu');
+    if (menu?.open) keepFocusInScope(event, menu);
+}
+
+/** Returns whether a game-flow overlay must keep Escape unavailable. */
+function isGameplayFlowOverlayVisible() {
+    return ['storyVideoScreen', 'levelRulesScreen', 'sombreroRewardScreen', 'restartScreen']
+        .some(id => {
+            const screen = document.getElementById(id);
+            return screen && !screen.classList.contains('d-none');
+        });
+}
+
+/** Clears held gameplay controls before a Menu pause can resume. */
+function clearGameMenuInput() {
+    ['LEFT', 'RIGHT', 'UP', 'DOWN', 'SPACE', 'D'].forEach(key => {
+        keyboard[key] = false;
+    });
+}
+
+/** Keeps the native Menu dropdown and existing pause state in sync. */
+function syncGameMenuPause(menu) {
+    const startScreen = document.getElementById('startScreen');
+    const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
+
+    if (menu.open) {
+        clearGameMenuInput();
+        requestAnimationFrame(focusGameMenuControl);
+        if (isStartScreenVisible || isGameplayFlowOverlayVisible()) return;
+        if (!isPaused) togglePause();
+        return;
+    }
+
+    if (isStartScreenVisible || isGameplayFlowOverlayVisible()) {
+        requestAnimationFrame(() => menu.querySelector('summary')?.focus());
+        return;
+    }
+
+    if (isPaused) togglePause();
+    requestAnimationFrame(() => menu.querySelector('summary')?.focus());
+}
+
+/** Opens or closes the existing Menu dropdown. */
+function setGameMenuOpen(isOpen) {
+    const menu = document.querySelector('.game-menu');
+    if (!menu) return;
+
+    if (menu.open === isOpen) {
+        if (isOpen) focusGameMenuControl();
+        return;
+    }
+
+    menu.open = isOpen;
+    syncGameMenuPause(menu);
+}
+
+/** Closes an open dialog and returns focus to the parent Menu. */
+function closeMenuDialog() {
+    const bgmMenu = document.getElementById('bgmMenu');
+    if (bgmMenu && bgmMenu.open) {
+        bgmMenu.open = false;
+        setGameMenuOpen(true);
+        return true;
+    }
+
+    const dialogs = [
+        ['settingsDialog', closeSettingsDialog],
+        ['infoDialog', closeInfoDialog],
+        ['legalDialog', closeLegalNotice]
+    ];
+    const openDialog = dialogs.find(([id]) => {
+        const dialog = document.getElementById(id);
+        return dialog && !dialog.classList.contains('d-none');
+    });
+
+    if (!openDialog) return false;
+    openDialog[1]();
+    setGameMenuOpen(true);
+    requestAnimationFrame(focusGameMenuControl);
+    return true;
+}
+
+/** Handles Escape without changing story, level, reward, or ending flow. */
+function handleGameMenuEscape(event) {
+    if (event.key !== 'Escape' || event.repeat) return;
+    if (closeMenuDialog()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+    }
+
+    if (isGameplayFlowOverlayVisible()) return;
+
+    const startScreen = document.getElementById('startScreen');
+    const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
+    const canControlGameplayMenu = world && !world.gameEnded && pendingLevelNumber === null;
+    if (!isStartScreenVisible && !canControlGameplayMenu) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setGameMenuOpen(!isGameMenuOpen());
+}
+
+/** Connects existing Menu clicks and Escape to the same pause lifecycle. */
+function initGameMenuControls() {
+    const menu = document.querySelector('.game-menu');
+    if (!menu) return;
+
+    menu.addEventListener('toggle', () => syncGameMenuPause(menu));
+    document.addEventListener('keydown', handleGameMenuEscape, true);
+    document.addEventListener('keydown', handleMenuFocus, true);
 }
 
 /**
@@ -71,6 +250,7 @@ function handleStartKey(event) {
     const startScreen = document.getElementById('startScreen');
     if (startScreen.classList.contains('d-none')) return false;
     if (event.code !== 'Enter' && event.code !== 'Space') return false;
+    if (isMenuControlTarget(event.target)) return false;
     event.preventDefault();
     const infoClosed = document.getElementById('infoDialog').classList.contains('d-none');
     const settingsClosed = document.getElementById('settingsDialog').classList.contains('d-none');

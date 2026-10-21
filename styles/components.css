@@ -17,14 +17,19 @@
 #infoDialog .dialog-card {
     box-sizing: border-box;
     width: min(90%, 520px);
-    height: auto;
-    max-height: 95%;
-    overflow-y: auto;
+    max-height: min(92%, 540px);
     padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* Compact spacing */
 #infoDialog .dialog-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 6px 4px;
     text-align: center;
 }
 
@@ -41,7 +46,50 @@
 
 #infoDialog .dialog-card h2 {
     margin: 0 0 12px;
+    padding-right: 28px;
     font-size: 24px;
+}
+
+#infoDialog .guide-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+#infoDialog .guide-icon,
+#infoDialog .guide-icon-pair {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+}
+
+#infoDialog .guide-icon {
+    object-fit: contain;
+}
+
+#infoDialog .guide-icon-pair {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#infoDialog .guide-icon-pair .guide-icon {
+    width: 22px;
+    height: 22px;
+}
+
+#infoDialog .guide-copy-with-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+#infoDialog .guide-copy-with-icon .guide-icon {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
 }
 
 /* Pepe loading animation */

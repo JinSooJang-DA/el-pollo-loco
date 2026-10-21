@@ -144,9 +144,9 @@
         <!-- Game instructions -->
         <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
             <div class="dialog-card">
-                <button class="dialog-close-btn" onclick="closeInfoDialog()">✕</button>
+                <button class="dialog-close-btn" aria-label="Close How to Play" onclick="closeInfoDialog()">✕</button>
 
-                <h2>🎮 How to Play</h2>
+                <h2>How to Play</h2>
 
                 <div class="dialog-content">
                     <h3>Controls</h3>
@@ -154,17 +154,37 @@
                     <p><strong>SPACE</strong> Jump / Stomp / Start Level</p>
                     <p><strong>D</strong> Throw Bottle</p>
 
-                    <h3>🐔 Chicken Combat</h3>
+                    <h3>Menu &amp; Accessibility</h3>
+                    <p><strong>ESC</strong> Open / Close Menu</p>
+                    <p><strong>TAB / SHIFT + TAB</strong> Navigate Menu</p>
+                    <p><strong>ENTER / SPACE</strong> Select</p>
+                    <p><strong>LEFT / RIGHT</strong> Adjust Volume (in Settings)</p>
+
+                    <h3 class="guide-section-heading">
+                        <img class="guide-icon" src="img/3_enemies_chicken/chicken_normal/1_walk/1_w.png"
+                            alt="Chicken enemy">
+                        Chicken Combat
+                    </h3>
                     <p>Stomp chickens or throw bottles.</p>
-                    <p>
-                        🐥 Baby chicks are too cute to stomp!
-                        Use bottles instead.
+                    <p class="guide-copy-with-icon">
+                        <img class="guide-icon" src="img/3_enemies_chicken/chicken_small/1_walk/1_w.png"
+                            alt="Baby chick enemy">
+                        <span>Baby chicks are too cute to stomp! Use bottles instead.</span>
                     </p>
 
-                    <h3>❤️ Health & Coins</h3>
+                    <h3 class="guide-section-heading">
+                        <span class="guide-icon-pair">
+                            <img class="guide-icon" src="img/7_statusbars/3_icons/icon_health.png" alt="Health icon">
+                            <img class="guide-icon" src="img/7_statusbars/3_icons/icon_coin.png" alt="Coin icon">
+                        </span>
+                        Health &amp; Coins
+                    </h3>
                     <p>Coins restore health or protect you from damage.</p>
 
-                    <h3>👑 Boss Battles</h3>
+                    <h3 class="guide-section-heading">
+                        <img class="guide-icon" src="img/4_enemie_boss_chicken/1_walk/G1.png" alt="Boss chicken">
+                        Boss Battles
+                    </h3>
                     <p>Wait 3 seconds between successful attacks.</p>
                 </div>
             </div>
@@ -291,10 +311,11 @@
         </div>
 
         <!-- Volume settings -->
-        <div id="settingsDialog" class="dialog-overlay d-none" onclick="closeSettingsOnBackdrop(event)">
+        <div id="settingsDialog" class="dialog-overlay d-none" role="dialog" aria-modal="true"
+            aria-labelledby="settingsDialogTitle" onclick="closeSettingsOnBackdrop(event)">
             <div class="dialog-card">
-                <button class="dialog-close-btn" onclick="closeSettingsDialog()">✕</button>
-                <h2>Volume Settings</h2>
+                <button class="dialog-close-btn" aria-label="Close volume settings" onclick="closeSettingsDialog()">✕</button>
+                <h2 id="settingsDialogTitle">Volume Settings</h2>
 
                 <div class="dialog-content">
                     <div class="volume-control-row">
@@ -315,7 +336,7 @@
         <!-- Legal Notice dialog -->
         <div id="legalDialog" class="dialog-overlay d-none" onclick="closeLegalOnBackdrop(event)">
             <div class="dialog-card legal-card">
-                <button class="dialog-close-btn" onclick="closeLegalNotice()">✕</button>
+                <button class="dialog-close-btn" aria-label="Close legal notice" onclick="closeLegalNotice()">✕</button>
                 <h2>Legal Notice</h2>
 
                 <div class="legal-content">

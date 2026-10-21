@@ -13,6 +13,7 @@ const world = read('models/world.class.js');
 const baseStyles = read('styles/base.css');
 const componentStyles = read('styles/components.css');
 const levelRulesStyles = read('styles/level-rules.css');
+const gameInput = read('js/game-input.js');
 
 function expect(condition, message) {
     if (!condition) throw new Error(message);
@@ -37,6 +38,25 @@ expect(index.includes('BASED ON THE ORIGINAL GAME TUTORIAL BY') &&
     index.includes('GAME DESIGN &amp; EXTENDED DEVELOPMENT') &&
     index.includes('PROGRAMMING &amp; AI ASSISTANCE'),
     'ending credits Junus Ergin\'s tutorial contribution and the extended development correctly');
+expect(!/🎮|🐔|🐥|❤️|👑/.test(index) &&
+    index.includes('Menu &amp; Accessibility') &&
+    index.includes('ESC</strong> Open / Close Menu') &&
+    index.includes('TAB / SHIFT + TAB</strong> Navigate Menu') &&
+    index.includes('ENTER / SPACE</strong> Select') &&
+    index.includes('LEFT / RIGHT</strong> Adjust Volume (in Settings)'),
+    'How to Play documents keyboard Menu and Settings controls without emoji');
+expect(index.includes('img/3_enemies_chicken/chicken_normal/1_walk/1_w.png') &&
+    index.includes('img/3_enemies_chicken/chicken_small/1_walk/1_w.png') &&
+    index.includes('img/7_statusbars/3_icons/icon_health.png') &&
+    index.includes('img/7_statusbars/3_icons/icon_coin.png') &&
+    index.includes('img/4_enemie_boss_chicken/1_walk/G1.png'),
+    'How to Play reuses the project chicken, health, coin, and boss assets');
+expect(componentStyles.includes('#infoDialog .dialog-content') &&
+    componentStyles.includes('overflow-y: auto;') &&
+    componentStyles.includes('#infoDialog .dialog-card') &&
+    componentStyles.includes('overflow: hidden;') &&
+    componentStyles.includes('guide-section-heading'),
+    'How to Play scrolls only its content while the close button remains available');
 const expectedDelays = Array.from({ length: 18 }, (_, index) =>
     `--credit-delay: -${index * 4.5}s`);
 expectedDelays[0] = '--credit-delay: 0s';
@@ -56,6 +76,60 @@ expect(baseStyles.includes("end/end-background.webp") &&
 expect(/#levelRulesStartBtn,\s*#sombreroRewardScreen \.level-action-button/.test(levelRulesStyles) &&
     !componentStyles.includes('#sombreroRewardScreen button'),
     'sombrero continue button reuses the level action western style');
+expect(game.includes('initGameMenuControls();') &&
+    gameInput.includes("event.key !== 'Escape' || event.repeat") &&
+    gameInput.includes('menu.addEventListener(\'toggle\'') &&
+    gameInput.includes("document.getElementById('bgmMenu')") &&
+    gameInput.includes('clearGameMenuInput();'),
+    'Escape reuses the Menu pause lifecycle and clears held gameplay input');
+expect(gameInput.includes('isMenuControlTarget(event.target)') &&
+    gameInput.includes('keepFocusInScope(event,') &&
+    gameInput.includes('requestAnimationFrame(focusGameMenuControl)') &&
+    game.includes("document.getElementById('bgmSlider')?.focus()") &&
+    game.includes('returnFocusToOpenGameMenu();'),
+    'Menu keeps focus contained while native buttons and volume ranges retain keyboard behavior');
+
+class KeyboardTestElement {
+    constructor(isControl) {
+        this.isControl = isControl;
+    }
+
+    closest() {
+        return this.isControl ? this : null;
+    }
+}
+
+const keyboardTestContext = {
+    Element: KeyboardTestElement,
+    keyboard: {},
+    isStoryVideoPlaying: () => false,
+    document: {
+        addEventListener() { },
+        querySelector(selector) {
+            return selector === '.game-menu' ? { open: true } : null;
+        }
+    },
+    window: { addEventListener() { } }
+};
+vm.runInNewContext(gameInput, keyboardTestContext);
+
+let sliderDefaultPrevented = false;
+keyboardTestContext.updateKeyboardState({
+    keyCode: 39,
+    target: new KeyboardTestElement(true),
+    preventDefault() { sliderDefaultPrevented = true; }
+}, true);
+expect(!keyboardTestContext.keyboard.RIGHT && !sliderDefaultPrevented,
+    'range arrow keys keep their native volume behavior and do not move Pepe');
+
+let gameDefaultPrevented = false;
+keyboardTestContext.updateKeyboardState({
+    keyCode: 39,
+    target: new KeyboardTestElement(false),
+    preventDefault() { gameDefaultPrevented = true; }
+}, true);
+expect(!keyboardTestContext.keyboard.RIGHT && gameDefaultPrevented,
+    'game movement remains blocked while the Menu is open');
 expect(game.includes('playStoryVideo(1, () => startLevel(1))'),
     'start game opens story chapter 1 before level 1');
 expect(storyVideos.includes('videos/loco-0${videoNumber}.mp4'),

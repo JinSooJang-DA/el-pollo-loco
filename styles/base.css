@@ -415,6 +415,14 @@ canvas {
     cursor: pointer;
 }
 
+/* Keep every existing keyboard control visibly focused in the Western UI. */
+.game-container button:focus-visible,
+.game-container summary:focus-visible,
+.game-container input[type='range']:focus-visible {
+    outline: 3px solid #f2cf83;
+    outline-offset: 3px;
+}
+
 .control-row {
     display: flex;
     justify-content: space-between;

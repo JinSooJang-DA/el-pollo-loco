@@ -46,6 +46,7 @@ function init() {
     loadMutePreference();
     loadVolumePreferences();
     bindTouchEvents();
+    initGameMenuControls();
     initPlaylist();
     playStartVideo();
     playBgm(AUDIO_HUB.bgmMenu);
@@ -432,7 +433,10 @@ function showLocalEndingPreview() {
 function openSettingsDialog() {
     const dialog = document.getElementById('settingsDialog');
 
-    if (dialog) dialog.classList.remove('d-none');
+    if (dialog) {
+        dialog.classList.remove('d-none');
+        requestAnimationFrame(() => document.getElementById('bgmSlider')?.focus());
+    }
 }
 
 /** Closes the settings dialog. */
@@ -440,6 +444,7 @@ function closeSettingsDialog() {
     const dialog = document.getElementById('settingsDialog');
 
     if (dialog) dialog.classList.add('d-none');
+    returnFocusToOpenGameMenu();
 }
 
 /**
@@ -460,6 +465,7 @@ function openInfoDialog() {
 /** Closes the game instructions. */
 function closeInfoDialog() {
     document.getElementById('infoDialog').classList.add('d-none');
+    returnFocusToOpenGameMenu();
 }
 
 /**
@@ -480,6 +486,16 @@ function openImpressum() {
 /** Closes the legal notice. */
 function closeLegalNotice() {
     document.getElementById('legalDialog').classList.add('d-none');
+    returnFocusToOpenGameMenu();
+}
+
+/** Returns keyboard focus to the existing parent Menu after a dialog closes. */
+function returnFocusToOpenGameMenu() {
+    const menu = document.querySelector('.game-menu');
+
+    if (menu?.open && typeof focusGameMenuControl === 'function') {
+        requestAnimationFrame(focusGameMenuControl);
+    }
 }
 
 /**

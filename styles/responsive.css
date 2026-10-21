@@ -171,6 +171,41 @@ screen and (orientation: portrait) and (max-width: 600px) {
         display: none !important;
     }
 
+    /* Keep the close button fixed while only How to Play content scrolls. */
+    #infoDialog .dialog-card {
+        width: min(94%, 520px);
+        max-height: calc(100% - 18px);
+        padding: 12px 18px;
+    }
+
+    #infoDialog .dialog-card h2 {
+        margin-bottom: 7px;
+        font-size: 20px;
+    }
+
+    #infoDialog .dialog-content h3 {
+        margin: 7px 0 3px;
+        font-size: 16px;
+    }
+
+    #infoDialog .dialog-content p {
+        margin: 3px 0;
+        font-size: 13px;
+    }
+
+    #infoDialog .guide-icon,
+    #infoDialog .guide-icon-pair {
+        width: 24px;
+        height: 24px;
+        flex-basis: 24px;
+    }
+
+    #infoDialog .guide-icon-pair .guide-icon,
+    #infoDialog .guide-copy-with-icon .guide-icon {
+        width: 20px;
+        height: 20px;
+    }
+
     .legal-card {
         max-height: 85%;
         padding: 12px 18px;
