@@ -3,19 +3,19 @@
  * @extends MovableObject
  */
 class Coin extends MovableObject {
-    width = 100;
-    height = 100;
+    width = 30;
+    height = 30;
 
     offset = {
-        top: 30,
-        bottom: 30,
-        left: 30,
-        right: 30
+        top: 5,
+        bottom: 5,
+        left: 5,
+        right: 5
     };
 
     IMAGES = [
-        'img/8_coin/coin_1.png',
-        'img/8_coin/coin_2.png'
+        'img/coin-full.webp',
+        'img/coin-side.webp'
     ];
 
     /**

@@ -31,6 +31,12 @@ class World {
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.level = level1;
+
+        this.bottleIcon = new Image();
+        this.bottleIcon.src = 'img/salsa-hud.webp';
+        this.coinIcon = new Image();
+        this.coinIcon.src = 'img/coin-full.webp';
+
         this.setWorld();
         this.draw();
         this.run();
@@ -376,12 +382,38 @@ class World {
      */
     drawStatusBars() {
         this.addToMap(this.statusBar);
-        this.addToMap(this.statusBarBottle);
-        this.addToMap(this.statusBarCoin);
+        this.drawBottleCounter();
+        this.drawCoinCounter();
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
         if (endboss && endboss.hadFirstContact) {
             this.addToMap(this.statusBarEndboss);
         }
+    }
+
+    /**
+     * Draws the bottle HUD icon and current bottle count.
+     */
+    drawBottleCounter() {
+        if (this.bottleIcon.complete && this.bottleIcon.naturalWidth > 0) {
+            this.ctx.drawImage(this.bottleIcon, 18, 100, 28, 40);
+        }
+
+        this.ctx.font = 'bold 22px Arial';
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillText('× ' + this.availableBottles, 60, 122);
+    }
+
+    /**
+     * Draws the coin HUD icon and current coin count.
+     */
+    drawCoinCounter() {
+        if (this.coinIcon.complete && this.coinIcon.naturalWidth > 0) {
+            this.ctx.drawImage(this.coinIcon, 18, 65, 30, 30);
+        }
+
+        this.ctx.font = 'bold 22px Arial';
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillText('× ' + this.collectedCoins, 60, 87);
     }
 
     /**
