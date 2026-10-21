@@ -67,6 +67,9 @@ class Chicken extends MovableObject {
             // Stop only after the collision boxes actually touch.
             if (this.isColliding(world.character)) return;
 
+            // Keep the current direction while both centers are very close.
+            if (Math.abs(distance) < 50) return;
+
             if (distance < 0) {
                 this.moveLeft();
                 this.otherDirection = false;
