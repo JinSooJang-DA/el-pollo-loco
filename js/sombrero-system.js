@@ -105,6 +105,13 @@ function continueAfterSombrero() {
     if (nextLevel !== null) startLevel(nextLevel);
 }
 
+/** Closes a pending reward without advancing to the next level. */
+function cancelSombreroReward() {
+    document.getElementById('sombreroRewardScreen')
+        .classList.add('d-none');
+    rewardNextLevel = null;
+}
+
 /** Spends one sombrero to retry the current level. */
 function retryCurrentLevel() {
     if (!world || !world.gameEnded || sombreros < 1) return;

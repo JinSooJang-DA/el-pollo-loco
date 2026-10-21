@@ -337,7 +337,7 @@ function restartGame() {
 
 /** Returns to the start screen. */
 function backToMainMenu() {
-    cancelLevelRules();
+    closeGameOverlays();
 
     // Stop rendering the active world.
     if (world) {
@@ -346,13 +346,23 @@ function backToMainMenu() {
 
     stopAllIntervals();
     stopSoundEffects();
-    resetPauseState();
 
-    document.getElementById('restartScreen').classList.add('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
 
     world = null;
     resetPlaylist();
+}
+
+/** Closes game overlays and cancels their pending continue actions. */
+function closeGameOverlays() {
+    cancelLevelRules();
+    cancelSombreroReward();
+    cancelStoryVideo();
+    resetPauseState();
+
+    ['restartScreen', 'settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {
+        document.getElementById(id).classList.add('d-none');
+    });
 }
 
 /** Opens the settings dialog. */

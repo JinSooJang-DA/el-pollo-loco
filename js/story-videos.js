@@ -56,6 +56,24 @@ function skipStoryVideo() {
     finishStoryVideo();
 }
 
+/** Closes a story chapter without running its next-level callback. */
+function cancelStoryVideo() {
+    storyVideoActive = false;
+    storyVideoFinishing = false;
+    storyVideoComplete = null;
+
+    let screen = document.getElementById('storyVideoScreen');
+    let video = document.getElementById('storyVideo');
+    if (video) {
+        video.pause();
+        video.onended = null;
+        video.onerror = null;
+    }
+    if (screen) screen.classList.add('d-none');
+
+    clearGameplayInput();
+}
+
 /** Hides the chapter and runs the next transition once. */
 function finishStoryVideo() {
     if (!storyVideoActive || storyVideoFinishing) return;
