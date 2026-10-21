@@ -78,7 +78,7 @@ World.prototype.drawStatusBars = function () {
 
 World.prototype.drawBottleCounter = function () {
     if (this.bottleIcon.complete && this.bottleIcon.naturalWidth > 0) {
-        this.ctx.drawImage(this.bottleIcon, 12, 86, 60, 60);
+        this.ctx.drawImage(this.bottleIcon, 18, 100, 28, 40);
     }
 
     this.ctx.font = 'bold 22px Arial';
@@ -88,7 +88,7 @@ World.prototype.drawBottleCounter = function () {
 
 World.prototype.drawCoinCounter = function () {
     if (this.coinIcon.complete && this.coinIcon.naturalWidth > 0) {
-        this.ctx.drawImage(this.coinIcon, 18, 55, 52, 52);
+        this.ctx.drawImage(this.coinIcon, 18, 65, 30, 30);
     }
 
     this.ctx.font = 'bold 22px Arial';

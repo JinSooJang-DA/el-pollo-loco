@@ -38,9 +38,9 @@ class World {
         else if (levelNumber === 5) this.level = level5;
 
         this.bottleIcon = new Image();
-        this.bottleIcon.src = 'img/6_salsa_bottle/salsa_bottle.png';
+        this.bottleIcon.src = 'img/salsa-hud.webp';
         this.coinIcon = new Image();
-        this.coinIcon.src = 'img/8_coin/coin_1.png';
+        this.coinIcon.src = 'img/coin-full.webp';
 
 
 
