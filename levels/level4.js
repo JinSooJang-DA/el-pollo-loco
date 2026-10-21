@@ -6,7 +6,7 @@
 let level4;
 
 /**
- * Initializes Level 4 with eight enemies.
+ * Initializes Level 4 with fifteen enemies.
  */
 function initLevel4() {
     initLevel();
@@ -21,14 +21,21 @@ function initLevel4() {
 
     level4 = new Level(
         [
-            new Chicken(500),
-            new SmallChicken(800),
-            new Chicken(1100),
-            new SmallChicken(1400),
+            new Chicken(420),
+            new SmallChicken(580),
+            new Chicken(740),
+            new Chicken(900),
+            new SmallChicken(1060),
+            new Chicken(1220),
+            new Chicken(1380),
+            new SmallChicken(1540),
             new Chicken(1700),
-            new SmallChicken(2000),
-            new Chicken(2300),
-            new SmallChicken(2600)
+            new Chicken(1860),
+            new SmallChicken(2020),
+            new Chicken(2180),
+            new Chicken(2340),
+            new SmallChicken(2420),
+            new Chicken(2640)
         ],
         level1.clouds,
         level1.backgroundObjects,

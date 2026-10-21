@@ -22,7 +22,7 @@ World.prototype.draw = function () {
 };
 
 World.prototype.drawWorldObjects = function () {
-    this.addObjectsToMap(this.level.backgroundObjects);
+    this.drawBackgroundObjects();
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
 
@@ -37,6 +37,16 @@ World.prototype.drawWorldObjects = function () {
     this.addObjectsToMap(this.level.enemies);
     this.drawChickenHealthBars();
     this.addObjectsToMap(this.throwableObjects);
+};
+
+/** Draws background tiles on whole pixels to prevent seams during camera movement. */
+World.prototype.drawBackgroundObjects = function () {
+    let pixelCorrection = Math.round(this.camera_x) - this.camera_x;
+
+    this.ctx.save();
+    this.ctx.translate(pixelCorrection, 0);
+    this.addObjectsToMap(this.level.backgroundObjects);
+    this.ctx.restore();
 };
 
 World.prototype.drawChickenHealthBars = function () {

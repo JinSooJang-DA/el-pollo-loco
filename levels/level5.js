@@ -6,7 +6,7 @@
 let level5;
 
 /**
- * Initializes Level 5 with ten enemies.
+ * Initializes Level 5 with eighteen enemies before the boss encounter.
  */
 function initLevel5() {
     initLevel();
@@ -21,16 +21,24 @@ function initLevel5() {
 
     level5 = new Level(
         [
-            new Chicken(700),
-            new SmallChicken(900),
-            new Chicken(1100),
-            new SmallChicken(1300),
-            new Chicken(1500),
-            new SmallChicken(1700),
-            new Chicken(1900),
-            new SmallChicken(2100),
-            new Chicken(2300),
-            new SmallChicken(2500)
+            new Chicken(350),
+            new SmallChicken(460),
+            new Chicken(570),
+            new Chicken(680),
+            new SmallChicken(790),
+            new Chicken(900),
+            new Chicken(1010),
+            new SmallChicken(1120),
+            new Chicken(1230),
+            new Chicken(1340),
+            new SmallChicken(1450),
+            new Chicken(1560),
+            new Chicken(1670),
+            new SmallChicken(1780),
+            new Chicken(1890),
+            new Chicken(2000),
+            new SmallChicken(2110),
+            new Chicken(2220)
         ],
         level1.clouds,
         level1.backgroundObjects,

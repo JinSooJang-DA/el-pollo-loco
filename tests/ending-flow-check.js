@@ -10,6 +10,7 @@ const game = read('js/game.js');
 const storyVideos = read('js/story-videos.js');
 const sombrero = read('js/sombrero-system.js');
 const world = read('models/world.class.js');
+const worldRender = read('models/world-render.js');
 const baseStyles = read('styles/base.css');
 const componentStyles = read('styles/components.css');
 const levelRulesStyles = read('styles/level-rules.css');
@@ -19,6 +20,53 @@ function expect(condition, message) {
     if (!condition) throw new Error(message);
     console.log(`PASS ${message}`);
 }
+
+function getEnemyLayout(file) {
+    return [...read(file).matchAll(/new (Chicken|SmallChicken)\((\d+)\)/g)]
+        .map(([, type, x]) => ({ type, x: Number(x) }));
+}
+
+function expectEnemyLayout(file, chickenCount, smallChickenCount) {
+    const enemies = getEnemyLayout(file);
+    const positions = enemies.map(enemy => enemy.x);
+    const chickenTotal = enemies.filter(enemy => enemy.type === 'Chicken').length;
+    const smallChickenTotal = enemies.filter(enemy => enemy.type === 'SmallChicken').length;
+
+    expect(chickenTotal === chickenCount && smallChickenTotal === smallChickenCount &&
+        new Set(positions).size === positions.length,
+    `${file} has ${chickenCount} chickens, ${smallChickenCount} chicks, and unique positions`);
+}
+
+const bottlePositions = [...read('levels/level1.js').matchAll(/new Bottle\((\d+)\)/g)]
+    .map(([, x]) => Number(x));
+
+function expectChicksNearBottles(file) {
+    const chickPositions = getEnemyLayout(file)
+        .filter(enemy => enemy.type === 'SmallChicken')
+        .map(enemy => enemy.x);
+    const eachChickHasNearbyBottle = chickPositions.every(chickX =>
+        bottlePositions.some(bottleX => Math.abs(bottleX - chickX) <= 120));
+
+    expect(bottlePositions.length >= chickPositions.length && eachChickHasNearbyBottle,
+        `${file} keeps each chick within reach of the existing bottle supply`);
+}
+
+expectEnemyLayout('levels/level1.js', 4, 2);
+expectEnemyLayout('levels/level2.js', 6, 3);
+expectEnemyLayout('levels/level3.js', 8, 4);
+expectEnemyLayout('levels/level4.js', 10, 5);
+expectEnemyLayout('levels/level5.js', 12, 6);
+expectChicksNearBottles('levels/level1.js');
+expectChicksNearBottles('levels/level2.js');
+expectChicksNearBottles('levels/level3.js');
+expectChicksNearBottles('levels/level4.js');
+expectChicksNearBottles('levels/level5.js');
+expect(getEnemyLayout('levels/level5.js').at(-1).x === 2220,
+    'Level 5 keeps its last regular enemy clear of the boss approach');
+expect(worldRender.includes('drawBackgroundObjects()') &&
+    worldRender.includes('Math.round(this.camera_x) - this.camera_x') &&
+    worldRender.includes('this.ctx.translate(pixelCorrection, 0)'),
+    'background tiles use pixel-aligned rendering without changing camera movement');
 
 expect(/id="startVideo"[\s\S]*videos\/stat-video\.mp4/.test(index),
     'start screen uses stat-video.mp4');

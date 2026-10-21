@@ -5,7 +5,7 @@
 let level1;
 
 /**
- * Initializes Level 1 with enemies, clouds, backgrounds, bottles, and coins.
+ * Initializes Level 1 with six enemies, clouds, backgrounds, bottles, and coins.
  */
 function initLevel() {
     const coinHeights = [50, 51, 51, 52, 52];
@@ -18,8 +18,12 @@ function initLevel() {
     }
     level1 = new Level(
         [
-            new Chicken(700),
-            new SmallChicken(1100)
+            new Chicken(600),
+            new SmallChicken(900),
+            new Chicken(1200),
+            new Chicken(1500),
+            new SmallChicken(1800),
+            new Chicken(2250)
         ],
         [
             new Cloud()
