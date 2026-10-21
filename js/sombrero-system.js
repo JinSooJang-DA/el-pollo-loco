@@ -60,12 +60,10 @@ function finishCompletedLevel(finishedWorld) {
 
     if (finishedWorld.levelNumber === 5) {
         playStoryVideo(6, () => {
-            playStoryVideo(7, () => {
-                if (finishedWorld === world) {
-                    finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
-                    playBgm(AUDIO_HUB.bgmWin);
-                }
-            });
+            if (finishedWorld === world) {
+                finishedWorld.showEndScreen('img/You won, you lost/You win B.png');
+                playBgm(AUDIO_HUB.bgmWin);
+            }
         });
         return;
     }
@@ -130,7 +128,7 @@ function retryCurrentLevel() {
 }
 
 /** Continue the sombrero reward screen with Space. */
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.code !== 'Space' || event.repeat) return;
 
     let rewardScreen = document.getElementById('sombreroRewardScreen');
