@@ -69,10 +69,14 @@ class Chicken extends MovableObject {
 
             if (distance < 0) {
                 this.moveLeft();
-                this.otherDirection = false;
+                if (Math.abs(distance) >= 50) {
+                    this.otherDirection = false;
+                }
             } else {
                 this.moveRight();
-                this.otherDirection = true;
+                if (Math.abs(distance) >= 50) {
+                    this.otherDirection = true;
+                }
             }
         }, 1000 / 60);
 
