@@ -123,8 +123,10 @@
             aria-labelledby="levelRulesTitle">
             <div class="level-rules-card">
                 <h2 id="levelRulesTitle">LEVEL 1</h2>
+                <img id="levelRulesImage" class="level-rules-image" src="img/tip-lv1.webp"
+                    alt="Level 1 tip">
                 <p id="levelRulesText">Loading level rules...</p>
-                <button id="levelRulesStartBtn" onclick="continueLevel()" disabled>
+                <button id="levelRulesStartBtn" class="level-action-button" onclick="continueLevel()" disabled>
                     START LEVEL · SPACE ↵
                 </button>
             </div>
@@ -173,10 +175,11 @@
         <div id="sombreroRewardScreen" class="overlay-screen d-none">
             <div class="level-rules-card">
                 <h2>ONE MORE ROUND!</h2>
-                <img id="sombreroRewardImage" src="img/golden-sombrero-big.webp" alt="Golden Sombrero">
+                <img id="sombreroRewardImage" class="level-rules-image" src="img/sombrero-reward.webp"
+                    alt="Sombrero reward">
                 <p>SOMBRERO +1</p>
                 <p>You earned an extra chance!</p>
-                <button onclick="continueAfterSombrero()">
+                <button class="level-action-button" onclick="continueAfterSombrero()">
                     CONTINUE
                 </button>
             </div>

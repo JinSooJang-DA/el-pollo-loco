@@ -9,10 +9,13 @@ async function showLevelRules(levelNumber) {
 
     let screen = document.getElementById('levelRulesScreen');
     let title = document.getElementById('levelRulesTitle');
+    let image = document.getElementById('levelRulesImage');
     let content = document.getElementById('levelRulesText');
     let button = document.getElementById('levelRulesStartBtn');
 
     title.textContent = 'LEVEL ' + levelNumber;
+    image.src = 'img/tip-lv' + levelNumber + '.webp';
+    image.alt = 'Level ' + levelNumber + ' tip';
     content.textContent = 'Loading level rules...';
     button.textContent = 'START LEVEL ' + levelNumber;
     button.disabled = true;
