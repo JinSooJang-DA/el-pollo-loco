@@ -64,8 +64,8 @@ class Chicken extends MovableObject {
 
             let distance = pepeCenter - chickenCenter;
 
-            // Prevent rapid direction switching at close range.
-            if (Math.abs(distance) < 50) return;
+            // Stop only after the collision boxes actually touch.
+            if (this.isColliding(world.character)) return;
 
             if (distance < 0) {
                 this.moveLeft();
