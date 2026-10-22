@@ -120,8 +120,12 @@ World.prototype.handleEnemyContact = function (enemy) {
         if (this.stompEnemy(enemy)) {
             this.character.lastFallStep = null;
             this.character.lastFallSteps = [];
+            // Gravity updates every 40 ms but contacts are checked every
+            // 50 ms. Pepe can still overlap this (or a neighboring) chicken
+            // while the automatic stomp bounce has already started.
+            this.character.stompBounceUntil = Date.now() + 200;
         }
-    } else {
+    } else if (Date.now() >= (this.character.stompBounceUntil || 0)) {
         this.hurtCharacter();
     }
 };
