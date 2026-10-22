@@ -109,7 +109,7 @@ function moveMenuFocus(event, controls) {
     if (!controls.length) return;
 
     let currentIndex = controls.indexOf(document.activeElement);
-    let direction = event.key === 'ArrowDown' ? 1 : -1;
+    let direction = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
     let nextIndex = currentIndex + direction;
 
     if (currentIndex === -1) {
@@ -122,6 +122,28 @@ function moveMenuFocus(event, controls) {
 
     event.preventDefault();
     controls[nextIndex].focus();
+}
+
+/** Returns the visible existing actions shown after a game ends. */
+function getGameOverButtons() {
+    const restartScreen = document.getElementById('restartScreen');
+    if (!restartScreen || restartScreen.classList.contains('d-none')) return [];
+
+    return ['retryLevelBtn', 'restartBtn', 'homeBtn']
+        .map(id => document.getElementById(id))
+        .filter(button => button && button.getClientRects().length > 0);
+}
+
+/** Moves between result actions without changing their click behavior. */
+function handleGameOverArrowNavigation(event) {
+    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+    if (!isArrowKey) return false;
+
+    const buttons = getGameOverButtons();
+    if (!buttons.includes(document.activeElement)) return false;
+
+    moveMenuFocus(event, buttons);
+    return true;
 }
 
 /** Returns the three visible controls on the start screen. */
@@ -204,6 +226,8 @@ function handleArrowNavigation(event) {
     const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
     if (!isArrowKey) return;
 
+    if (handleGameOverArrowNavigation(event)) return;
+
     if (scrollDialogContent(event)) return;
 
     const settings = document.getElementById('settingsDialog');
@@ -235,25 +259,7 @@ function handleArrowNavigation(event) {
     if (!bgmMenu?.open && !gameMenu?.open) handleStartScreenArrowNavigation(event);
 }
 
-/** Activates the focused game-over button only once per key press. */
-function handleGameOverKey(event) {
-    if ((event.key !== 'Enter' && event.key !== ' ') || event.repeat) return;
-
-    const restartScreen = document.getElementById('restartScreen');
-    const endCredits = document.getElementById('endCredits');
-    const button = document.activeElement;
-    const isGameOverScreen = restartScreen && !restartScreen.classList.contains('d-none') &&
-        endCredits && endCredits.classList.contains('d-none');
-    const isFocusedButton = button && restartScreen.contains(button) &&
-        button.tagName === 'BUTTON' && !button.disabled;
-
-    if (!isGameOverScreen || !isFocusedButton) return;
-
-    event.preventDefault();
-    button.click();
-}
-
-/** Focuses the useful button when the loss screen becomes visible. */
+/** Focuses Retry Level when available, otherwise Play Again. */
 function focusGameOverButton(canRetry) {
     const buttonId = canRetry ? 'retryLevelBtn' : 'restartBtn';
     requestAnimationFrame(() => document.getElementById(buttonId)?.focus());
@@ -433,7 +439,6 @@ function initGameMenuControls() {
     document.addEventListener('keydown', handleGameMenuEscape, true);
     document.addEventListener('keydown', handleMenuFocus, true);
     document.addEventListener('keydown', handleArrowNavigation, true);
-    document.addEventListener('keydown', handleGameOverKey, true);
 }
 
 // Keep Space for jumping outside native controls.

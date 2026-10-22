@@ -190,15 +190,15 @@ class World {
         }
 
         let retryButton = document.getElementById('retryLevelBtn');
+        let canRetry = this.character.isDead() && sombreros > 0;
 
         if (retryButton) {
-            let canRetry = this.character.isDead() && sombreros > 0;
             retryButton.classList.toggle('d-none', !canRetry);
         }
 
         if (restartScreen) restartScreen.classList.remove('d-none');
 
-        if (!isVictory && typeof focusGameOverButton === 'function') {
+        if (typeof focusGameOverButton === 'function') {
             focusGameOverButton(canRetry);
         }
     }
