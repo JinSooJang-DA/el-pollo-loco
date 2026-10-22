@@ -119,24 +119,6 @@ canvas {
     text-shadow: 2px 2px 4px #000;
 }
 
-#resumeBtn {
-    font-family: 'Rye', cursive, sans-serif;
-    padding: 12px 36px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(180deg, #ff9800, #e65100);
-    border: 3px solid #fff;
-    border-radius: 35px;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
-    transition: transform 0.15s ease;
-}
-
-#resumeBtn:hover {
-    transform: scale(1.05);
-}
-
 .overlay-screen {
     position: absolute;
     top: 0;
