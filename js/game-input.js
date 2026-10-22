@@ -91,6 +91,174 @@ function getFocusableControls(scope) {
     )).filter(control => control.getClientRects().length > 0);
 }
 
+/** Returns visible buttons inside a menu. */
+function getMenuButtons(menu) {
+    return getFocusableControls(menu).filter(control => control.tagName === 'BUTTON');
+}
+
+/** Returns controls that stay available while Menu Credits are open. */
+function getMenuCreditsControls() {
+    const bgmMenu = document.getElementById('bgmMenu');
+    const backButton = document.getElementById('menuCreditsBackBtn');
+    return [...getFocusableControls(bgmMenu), backButton]
+        .filter(control => control && control.getClientRects().length > 0);
+}
+
+/** Moves focus through a list of controls and wraps at both ends. */
+function moveMenuFocus(event, controls) {
+    if (!controls.length) return;
+
+    let currentIndex = controls.indexOf(document.activeElement);
+    let direction = event.key === 'ArrowDown' ? 1 : -1;
+    let nextIndex = currentIndex + direction;
+
+    if (currentIndex === -1) {
+        nextIndex = direction === 1 ? 0 : controls.length - 1;
+    } else if (nextIndex < 0) {
+        nextIndex = controls.length - 1;
+    } else if (nextIndex >= controls.length) {
+        nextIndex = 0;
+    }
+
+    event.preventDefault();
+    controls[nextIndex].focus();
+}
+
+/** Returns the three visible controls on the start screen. */
+function getStartScreenControls() {
+    const bgmMenu = document.getElementById('bgmMenu');
+    const gameMenu = document.querySelector('.game-menu');
+    const startButton = document.getElementById('startBtn');
+
+    return [
+        bgmMenu?.querySelector('summary'),
+        gameMenu?.querySelector('summary'),
+        startButton
+    ].filter(control => control && control.getClientRects().length > 0);
+}
+
+/** Moves focus between the BGM, Menu, and Start Game controls. */
+function handleStartScreenArrowNavigation(event) {
+    const controls = getStartScreenControls();
+    if (!controls.includes(document.activeElement)) return;
+
+    const bgmButton = controls[0];
+    const menuButton = controls[1];
+    const startButton = controls[2];
+    let nextButton = null;
+
+    if (event.key === 'ArrowLeft') nextButton = bgmButton;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') nextButton = menuButton;
+    if (event.key === 'ArrowDown') nextButton = startButton;
+
+    if (!nextButton) return;
+    event.preventDefault();
+    nextButton.focus();
+}
+
+/** Moves focus between BGM and Back to Menu in Menu Credits. */
+function handleMenuCreditsArrowNavigation(event) {
+    const controls = getMenuCreditsControls();
+    if (!controls.includes(document.activeElement)) return;
+
+    const bgmButton = controls[0];
+    const backButton = controls[controls.length - 1];
+    const isBgmDirection = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
+    const nextButton = isBgmDirection ? bgmButton : backButton;
+
+    event.preventDefault();
+    nextButton.focus();
+}
+
+/** Returns the scrollable content of the visible information dialog. */
+function getScrollableDialogContent() {
+    const dialogs = [
+        ['infoDialog', '.dialog-content'],
+        ['legalDialog', '.legal-content']
+    ];
+    const visibleDialog = dialogs.find(([id]) => {
+        const dialog = document.getElementById(id);
+        return dialog && !dialog.classList.contains('d-none');
+    });
+
+    if (!visibleDialog) return null;
+    return document.getElementById(visibleDialog[0])?.querySelector(visibleDialog[1]);
+}
+
+/** Scrolls open information text with the Up and Down arrow keys. */
+function scrollDialogContent(event) {
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
+
+    const content = getScrollableDialogContent();
+    if (!content) return false;
+
+    const distance = Math.max(80, content.clientHeight * 0.7);
+    content.scrollBy(0, event.key === 'ArrowDown' ? distance : -distance);
+    event.preventDefault();
+    return true;
+}
+
+/** Handles arrow-key navigation for start screen, Menu, BGM, and volume controls. */
+function handleArrowNavigation(event) {
+    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+    const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
+    if (!isArrowKey) return;
+
+    if (scrollDialogContent(event)) return;
+
+    const settings = document.getElementById('settingsDialog');
+    if (settings && !settings.classList.contains('d-none') && isVerticalArrow) {
+        moveMenuFocus(event, [
+            document.getElementById('bgmSlider'),
+            document.getElementById('sfxSlider')
+        ].filter(Boolean));
+        return;
+    }
+
+    const bgmMenu = document.getElementById('bgmMenu');
+    if (bgmMenu?.open && isVerticalArrow) {
+        moveMenuFocus(event, getMenuButtons(bgmMenu));
+        return;
+    }
+
+    if (isMenuCreditsOpen()) {
+        handleMenuCreditsArrowNavigation(event);
+        return;
+    }
+
+    const gameMenu = document.querySelector('.game-menu');
+    if (gameMenu?.open && isVerticalArrow) {
+        moveMenuFocus(event, getMenuButtons(gameMenu));
+        return;
+    }
+
+    if (!bgmMenu?.open && !gameMenu?.open) handleStartScreenArrowNavigation(event);
+}
+
+/** Activates the focused game-over button only once per key press. */
+function handleGameOverKey(event) {
+    if ((event.key !== 'Enter' && event.key !== ' ') || event.repeat) return;
+
+    const restartScreen = document.getElementById('restartScreen');
+    const endCredits = document.getElementById('endCredits');
+    const button = document.activeElement;
+    const isGameOverScreen = restartScreen && !restartScreen.classList.contains('d-none') &&
+        endCredits && endCredits.classList.contains('d-none');
+    const isFocusedButton = button && restartScreen.contains(button) &&
+        button.tagName === 'BUTTON' && !button.disabled;
+
+    if (!isGameOverScreen || !isFocusedButton) return;
+
+    event.preventDefault();
+    button.click();
+}
+
+/** Focuses the useful button when the loss screen becomes visible. */
+function focusGameOverButton(canRetry) {
+    const buttonId = canRetry ? 'retryLevelBtn' : 'restartBtn';
+    requestAnimationFrame(() => document.getElementById(buttonId)?.focus());
+}
+
 /** Moves focus to the first visible existing Menu control. */
 function focusGameMenuControl() {
     const menu = document.querySelector('.game-menu');
@@ -102,18 +270,22 @@ function focusGameMenuControl() {
 
 /** Keeps Tab navigation within an open Menu or dialog. */
 function keepFocusInScope(event, scope) {
-    if (event.key !== 'Tab') return;
+    keepFocusInControls(event, getFocusableControls(scope));
+}
 
-    const controls = getFocusableControls(scope);
+/** Keeps Tab navigation inside a supplied list of controls. */
+function keepFocusInControls(event, controls) {
+    if (event.key !== 'Tab') return;
     if (!controls.length) return;
 
     const first = controls[0];
     const last = controls[controls.length - 1];
     const active = document.activeElement;
-    if (event.shiftKey && (active === first || !scope.contains(active))) {
+    const isOutsideControls = !controls.includes(active);
+    if (event.shiftKey && (active === first || isOutsideControls)) {
         event.preventDefault();
         last.focus();
-    } else if (!event.shiftKey && (active === last || !scope.contains(active))) {
+    } else if (!event.shiftKey && (active === last || isOutsideControls)) {
         event.preventDefault();
         first.focus();
     }
@@ -122,7 +294,7 @@ function keepFocusInScope(event, scope) {
 /** Keeps keyboard focus out of background controls while a dialog is visible. */
 function handleMenuFocus(event) {
     if (isMenuCreditsOpen()) {
-        keepFocusInScope(event, document.getElementById('restartScreen'));
+        keepFocusInControls(event, getMenuCreditsControls());
         return;
     }
 
@@ -169,14 +341,17 @@ function syncGameMenuPause(menu) {
         return;
     }
 
-    // Release keyboard focus when the menu closes.
+    // Keep the closed start-screen Menu button focused after a dialog closes.
+    if (isStartScreenVisible) {
+        return;
+    }
+
+    // Release keyboard focus when the gameplay menu closes.
     if (menu.contains(document.activeElement)) {
         document.activeElement.blur();
     }
 
-    if (isStartScreenVisible || isGameplayFlowOverlayVisible()) {
-        return;
-    }
+    if (isGameplayFlowOverlayVisible()) return;
 
     if (isPaused) togglePause();
 }
@@ -200,7 +375,7 @@ function closeMenuDialog() {
     const bgmMenu = document.getElementById('bgmMenu');
     if (bgmMenu && bgmMenu.open) {
         bgmMenu.open = false;
-        setGameMenuOpen(true);
+        requestAnimationFrame(() => bgmMenu.querySelector('summary')?.focus());
         return true;
     }
 
@@ -216,8 +391,6 @@ function closeMenuDialog() {
 
     if (!openDialog) return false;
     openDialog[1]();
-    setGameMenuOpen(true);
-    requestAnimationFrame(focusGameMenuControl);
     return true;
 }
 
@@ -246,7 +419,9 @@ function handleGameMenuEscape(event) {
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    setGameMenuOpen(!isGameMenuOpen());
+    const wasMenuOpen = isGameMenuOpen();
+    setGameMenuOpen(!wasMenuOpen);
+    if (wasMenuOpen) focusGameMenuButton();
 }
 
 /** Connects existing Menu clicks and Escape to the same pause lifecycle. */
@@ -257,17 +432,19 @@ function initGameMenuControls() {
     menu.addEventListener('toggle', () => syncGameMenuPause(menu));
     document.addEventListener('keydown', handleGameMenuEscape, true);
     document.addEventListener('keydown', handleMenuFocus, true);
+    document.addEventListener('keydown', handleArrowNavigation, true);
+    document.addEventListener('keydown', handleGameOverKey, true);
 }
 
-// Space is reserved for jumping, not menu activation.
+// Keep Space for jumping outside native controls.
 document.addEventListener('keydown', event => {
-    if (event.code === 'Space') {
+    if (event.code === 'Space' && !isMenuControlTarget(event.target)) {
         event.preventDefault();
     }
 }, true);
 
 document.addEventListener('keyup', event => {
-    if (event.code === 'Space') {
+    if (event.code === 'Space' && !isMenuControlTarget(event.target)) {
         event.preventDefault();
     }
 }, true);
@@ -305,8 +482,9 @@ window.addEventListener('keyup', event => {
 document.addEventListener('click', event => {
     const gameMenu = document.querySelector('.game-menu');
     const bgmMenu = document.querySelector('.bgm-menu');
+    const isDialogClick = event.target.closest('.dialog-overlay');
 
-    if (gameMenu && !gameMenu.contains(event.target)) {
+    if (gameMenu && !gameMenu.contains(event.target) && !isDialogClick) {
         gameMenu.open = false;
     }
 

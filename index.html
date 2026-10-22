@@ -148,15 +148,17 @@
 
                 <h2>How to Play</h2>
 
-                <div class="dialog-content">
+                <div class="dialog-content" tabindex="0" role="region" aria-label="How to Play content">
                     <h3>Controls</h3>
                     <p><strong>← →</strong> Move</p>
                     <p><strong>SPACE</strong> Jump / Stomp / Start Level</p>
                     <p><strong>D</strong> Throw Bottle</p>
 
                     <h3>Menu &amp; Accessibility</h3>
-                    <p><strong>ESC</strong> Open / Close Menu</p>
-                    <p><strong>TAB / SHIFT + TAB</strong> Navigate Menu</p>
+                    <p><strong>ESC</strong> Open / Close Menu / Go Back</p>
+                    <p><strong>TAB / SHIFT + TAB</strong> Navigate Buttons and Controls</p>
+                    <p><strong>ARROW KEYS</strong> Navigate Menus and Screen Buttons</p>
+                    <p><strong>↑ / ↓</strong> Scroll How to Play and Legal Notice</p>
                     <p><strong>ENTER / SPACE</strong> Select</p>
                     <p><strong>LEFT / RIGHT</strong> Adjust Volume (in Settings)</p>
 
@@ -345,7 +347,7 @@
                 <button class="dialog-close-btn" aria-label="Close legal notice" onclick="closeLegalNotice()">✕</button>
                 <h2>Legal Notice</h2>
 
-                <div class="legal-content">
+                <div class="legal-content" tabindex="0" role="region" aria-label="Legal notice content">
                     <h3>Project Information</h3>
                     <p>
                         <strong>Project:</strong> El Pollo Loco - Jump & Run Game

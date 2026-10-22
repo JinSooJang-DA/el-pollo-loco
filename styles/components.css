@@ -33,6 +33,43 @@
     text-align: center;
 }
 
+/* Slim western-style scrollbars for readable dialog content. */
+#infoDialog .dialog-content,
+.legal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #c58a3a rgba(48, 28, 13, 0.9);
+    scroll-behavior: smooth;
+}
+
+#infoDialog .dialog-content::-webkit-scrollbar,
+.legal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#infoDialog .dialog-content::-webkit-scrollbar-track,
+.legal-content::-webkit-scrollbar-track {
+    background: rgba(48, 28, 13, 0.9);
+    border-radius: 8px;
+}
+
+#infoDialog .dialog-content::-webkit-scrollbar-thumb,
+.legal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(#e0ad55, #8a4d20);
+    border: 1px solid #f6d47b;
+    border-radius: 8px;
+}
+
+#infoDialog .dialog-content::-webkit-scrollbar-thumb:hover,
+.legal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(#f2c46e, #a96028);
+}
+
+#infoDialog .dialog-content:focus-visible,
+.legal-content:focus-visible {
+    outline: 2px solid #f6d47b;
+    outline-offset: 3px;
+}
+
 #infoDialog .dialog-content h3 {
     margin: 10px 0 4px;
     font-size: 18px;

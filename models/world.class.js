@@ -197,6 +197,10 @@ class World {
         }
 
         if (restartScreen) restartScreen.classList.remove('d-none');
+
+        if (!isVictory && typeof focusGameOverButton === 'function') {
+            focusGameOverButton(canRetry);
+        }
     }
 
     setEndScreenImage(imgElement, imagePath) {

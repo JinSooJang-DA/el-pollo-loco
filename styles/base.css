@@ -405,6 +405,12 @@ canvas {
     outline-offset: 3px;
 }
 
+/* Keep the selected top Menu and BGM buttons visible after closing a dialog. */
+.game-container summary:focus {
+    outline: 3px solid #f2cf83;
+    outline-offset: 3px;
+}
+
 .control-row {
     display: flex;
     justify-content: space-between;

@@ -518,7 +518,7 @@ function closeSettingsDialog() {
     const dialog = document.getElementById('settingsDialog');
 
     if (dialog) dialog.classList.add('d-none');
-    returnFocusToOpenGameMenu();
+    closeMenuAfterDialog();
 }
 
 /**
@@ -533,13 +533,15 @@ function closeSettingsOnBackdrop(event) {
 
 /** Opens the game instructions. */
 function openInfoDialog() {
-    document.getElementById('infoDialog').classList.remove('d-none');
+    const dialog = document.getElementById('infoDialog');
+    dialog.classList.remove('d-none');
+    requestAnimationFrame(() => dialog.querySelector('.dialog-content')?.focus());
 }
 
 /** Closes the game instructions. */
 function closeInfoDialog() {
     document.getElementById('infoDialog').classList.add('d-none');
-    returnFocusToOpenGameMenu();
+    closeMenuAfterDialog();
 }
 
 /**
@@ -554,22 +556,34 @@ function closeOnBackdrop(event) {
 
 /** Opens the legal notice inside the game. */
 function openImpressum() {
-    document.getElementById('legalDialog').classList.remove('d-none');
+    const dialog = document.getElementById('legalDialog');
+    dialog.classList.remove('d-none');
+    requestAnimationFrame(() => dialog.querySelector('.legal-content')?.focus());
 }
 
 /** Closes the legal notice. */
 function closeLegalNotice() {
     document.getElementById('legalDialog').classList.add('d-none');
-    returnFocusToOpenGameMenu();
+    closeMenuAfterDialog();
 }
 
-/** Returns keyboard focus to the existing parent Menu after a dialog closes. */
-function returnFocusToOpenGameMenu() {
+/** Focuses the Menu text button at the top of the game screen. */
+function focusGameMenuButton() {
+    document.querySelector('.game-menu > summary')?.focus();
+}
+
+/** Closes the parent Menu and restores the correct screen-specific focus. */
+function closeMenuAfterDialog() {
     const menu = document.querySelector('.game-menu');
 
-    if (menu?.open && typeof focusGameMenuControl === 'function') {
-        requestAnimationFrame(focusGameMenuControl);
+    if (menu) menu.open = false;
+
+    if (isMainMenuVisible()) {
+        requestAnimationFrame(focusGameMenuButton);
+        return;
     }
+
+    document.activeElement?.blur();
 }
 
 /**

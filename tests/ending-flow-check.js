@@ -88,8 +88,10 @@ expect(index.includes('BASED ON THE ORIGINAL GAME TUTORIAL BY') &&
     'ending credits Junus Ergin\'s tutorial contribution and the extended development correctly');
 expect(!/🎮|🐔|🐥|❤️|👑/.test(index) &&
     index.includes('Menu &amp; Accessibility') &&
-    index.includes('ESC</strong> Open / Close Menu') &&
-    index.includes('TAB / SHIFT + TAB</strong> Navigate Menu') &&
+    index.includes('ESC</strong> Open / Close Menu / Go Back') &&
+    index.includes('TAB / SHIFT + TAB</strong> Navigate Buttons and Controls') &&
+    index.includes('ARROW KEYS</strong> Navigate Menus and Screen Buttons') &&
+    index.includes('↑ / ↓</strong> Scroll How to Play and Legal Notice') &&
     index.includes('ENTER / SPACE</strong> Select') &&
     index.includes('LEFT / RIGHT</strong> Adjust Volume (in Settings)'),
     'How to Play documents keyboard Menu and Settings controls without emoji');
@@ -145,16 +147,64 @@ expect(gameInput.includes('isMenuControlTarget(event.target)') &&
     gameInput.includes('keepFocusInScope(event,') &&
     gameInput.includes('requestAnimationFrame(focusGameMenuControl)') &&
     game.includes("document.getElementById('bgmSlider')?.focus()") &&
-    game.includes('returnFocusToOpenGameMenu();'),
+    game.includes('closeMenuAfterDialog();') &&
+    game.includes("document.querySelector('.game-menu > summary')?.focus();") &&
+    game.includes('requestAnimationFrame(focusGameMenuButton);'),
     'Menu keeps focus contained while native buttons and volume ranges retain keyboard behavior');
+expect(gameInput.includes('function handleArrowNavigation(event)') &&
+    gameInput.includes('function moveMenuFocus(event, controls)') &&
+    gameInput.includes('function handleStartScreenArrowNavigation(event)') &&
+    gameInput.includes("event.key === 'ArrowDown'") &&
+    gameInput.includes("document.getElementById('bgmSlider')") &&
+    gameInput.includes("document.getElementById('sfxSlider')"),
+    'arrow keys move focus through Menu, BGM controls, and Settings sliders');
+expect(gameInput.includes("const isDialogClick = event.target.closest('.dialog-overlay');") &&
+    gameInput.includes('!gameMenu.contains(event.target) && !isDialogClick'),
+    'dialog close clicks do not trigger the outside-click Menu close rule');
+expect(index.includes('aria-label="How to Play content"') &&
+    index.includes('aria-label="Legal notice content"') &&
+    componentStyles.includes('scrollbar-width: thin') &&
+    componentStyles.includes('::-webkit-scrollbar-thumb') &&
+    gameInput.includes('function scrollDialogContent(event)') &&
+    game.includes("dialog.querySelector('.dialog-content')?.focus()") &&
+    game.includes("dialog.querySelector('.legal-content')?.focus()"),
+    'scrollable dialogs use styled scrollbars and receive keyboard focus');
+expect(game.includes('function focusGameMenuButton()') &&
+    gameInput.includes('if (wasMenuOpen) focusGameMenuButton();') &&
+    !gameInput.includes('requestAnimationFrame(focusGameMenuButton)') &&
+    gameInput.includes('const wasMenuOpen = isGameMenuOpen();'),
+    'Escape returns focus to the Menu button after closing a Menu child or the Menu itself');
+expect(game.includes('function closeMenuAfterDialog()') &&
+    game.includes('if (menu) menu.open = false;') &&
+    game.includes('requestAnimationFrame(focusGameMenuButton);') &&
+    game.includes('document.activeElement?.blur();') &&
+    gameInput.includes('if (isStartScreenVisible) {'),
+    'dialog close separates start-screen Menu focus from gameplay focus clearing');
+expect(!gameInput.includes('function isStartMenuSummary') &&
+    gameInput.includes("event.code === 'Space' && !isMenuControlTarget(event.target)"),
+    'Space keeps the native start Menu behavior while gameplay controls remain protected');
+expect(gameInput.includes('function handleGameOverKey(event)') &&
+    gameInput.includes('event.repeat') &&
+    gameInput.includes('button.click();') &&
+    world.includes('focusGameOverButton(canRetry);'),
+    'loss screen focuses Retry or Play Again and prevents repeated keyboard activation');
 
 class KeyboardTestElement {
-    constructor(isControl) {
+    constructor(isControl, tagName = 'BUTTON') {
         this.isControl = isControl;
+        this.tagName = tagName;
     }
 
     closest() {
         return this.isControl ? this : null;
+    }
+
+    getClientRects() {
+        return [{}];
+    }
+
+    focus() {
+        keyboardTestContext.document.activeElement = this;
     }
 }
 
@@ -162,6 +212,7 @@ const keyboardTestContext = {
     Element: KeyboardTestElement,
     keyboard: {},
     isStoryVideoPlaying: () => false,
+    isMenuCreditsOpen: () => false,
     document: {
         addEventListener() { },
         querySelector(selector) {
@@ -189,6 +240,148 @@ keyboardTestContext.updateKeyboardState({
 }, true);
 expect(!keyboardTestContext.keyboard.RIGHT && gameDefaultPrevented,
     'game movement remains blocked while the Menu is open');
+
+const firstMenuButton = new KeyboardTestElement(true);
+const lastMenuButton = new KeyboardTestElement(true);
+const bgmMenuButton = new KeyboardTestElement(true, 'SUMMARY');
+const gameMenuButton = new KeyboardTestElement(true, 'SUMMARY');
+const startButton = new KeyboardTestElement(true);
+const menuCreditsBackButton = new KeyboardTestElement(true);
+const bgmSlider = new KeyboardTestElement(true, 'INPUT');
+const sfxSlider = new KeyboardTestElement(true, 'INPUT');
+let settingsOpen = false;
+const arrowMenu = {
+    open: true,
+    querySelectorAll() { return [firstMenuButton, lastMenuButton]; },
+    querySelector(selector) { return selector === 'summary' ? gameMenuButton : null; }
+};
+const arrowBgmMenu = {
+    open: false,
+    querySelector(selector) { return selector === 'summary' ? bgmMenuButton : null; },
+    querySelectorAll() { return [bgmMenuButton]; }
+};
+const arrowSettings = {
+    classList: { contains: () => !settingsOpen }
+};
+let infoDialogOpen = false;
+let dialogScrollDistance = 0;
+const arrowInfoDialog = {
+    classList: { contains: () => !infoDialogOpen },
+    querySelector() {
+        return {
+            clientHeight: 200,
+            scrollBy(x, y) { dialogScrollDistance += y; }
+        };
+    }
+};
+keyboardTestContext.document.querySelector = selector =>
+    selector === '.game-menu' ? arrowMenu : null;
+keyboardTestContext.document.getElementById = id => ({
+    settingsDialog: arrowSettings,
+    bgmMenu: arrowBgmMenu,
+    bgmSlider,
+    sfxSlider,
+    startBtn: startButton,
+    menuCreditsBackBtn: menuCreditsBackButton,
+    infoDialog: arrowInfoDialog,
+    legalDialog: { classList: { contains: () => true } }
+}[id] || null);
+keyboardTestContext.document.activeElement = lastMenuButton;
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === firstMenuButton,
+    'Menu ArrowDown wraps focus from its last button to its first button');
+
+settingsOpen = true;
+keyboardTestContext.document.activeElement = sfxSlider;
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === bgmSlider,
+    'Settings ArrowDown wraps focus between the existing volume sliders');
+
+settingsOpen = false;
+infoDialogOpen = true;
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { }
+});
+expect(dialogScrollDistance === 140,
+    'ArrowDown scrolls visible How to Play text without moving menu focus');
+infoDialogOpen = false;
+
+settingsOpen = false;
+arrowMenu.open = false;
+keyboardTestContext.document.activeElement = startButton;
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowLeft',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === bgmMenuButton,
+    'start screen ArrowLeft selects the BGM button without using Tab');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowRight',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === gameMenuButton,
+    'start screen ArrowRight selects the Menu button without using Tab');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === startButton,
+    'start screen ArrowDown selects Start Game without using Tab');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowUp',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === gameMenuButton,
+    'start screen ArrowUp selects the Menu button without using Tab');
+
+let menuCreditsOpen = true;
+keyboardTestContext.isMenuCreditsOpen = () => menuCreditsOpen;
+arrowMenu.open = false;
+keyboardTestContext.document.activeElement = menuCreditsBackButton;
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowLeft',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === bgmMenuButton,
+    'Menu Credits ArrowLeft selects BGM without leaving the game');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { }
+});
+expect(keyboardTestContext.document.activeElement === menuCreditsBackButton,
+    'Menu Credits ArrowDown selects Back to Menu');
+let creditsTabPrevented = false;
+keyboardTestContext.handleMenuFocus({
+    key: 'Tab',
+    shiftKey: false,
+    preventDefault() { creditsTabPrevented = true; }
+});
+expect(creditsTabPrevented && keyboardTestContext.document.activeElement === bgmMenuButton,
+    'Menu Credits Tab cycles between Back to Menu and BGM');
+
+keyboardTestContext.requestAnimationFrame = callback => callback();
+keyboardTestContext.focusGameMenuButton = () => gameMenuButton.focus();
+keyboardTestContext.closeSettingsDialog = () => {
+    settingsOpen = false;
+    keyboardTestContext.focusGameMenuButton();
+};
+keyboardTestContext.closeInfoDialog = () => { };
+keyboardTestContext.closeLegalNotice = () => { };
+menuCreditsOpen = false;
+keyboardTestContext.isPaused = true;
+settingsOpen = true;
+arrowMenu.open = true;
+keyboardTestContext.document.activeElement = sfxSlider;
+keyboardTestContext.closeMenuDialog();
+expect(keyboardTestContext.document.activeElement === gameMenuButton,
+    'Escape from Settings returns focus to the visible Menu button');
 expect(game.includes('playStoryVideo(1, () => startLevel(1))'),
     'start game opens story chapter 1 before level 1');
 expect(storyVideos.includes('videos/loco-0${videoNumber}.mp4'),
