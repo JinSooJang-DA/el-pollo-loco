@@ -44,7 +44,9 @@ World.prototype.checkCollisions = function () {
 World.prototype.checkCollectBottles = function () {
     if (!this.level.bottles) return;
 
-    this.level.bottles.forEach((bottle, idx) => {
+    for (let idx = this.level.bottles.length - 1; idx >= 0; idx--) {
+        let bottle = this.level.bottles[idx];
+
         if (this.character.isColliding(bottle) &&
             this.availableBottles < this.maxBottles) {
             this.availableBottles++;
@@ -53,7 +55,7 @@ World.prototype.checkCollectBottles = function () {
             this.updateBottleBar();
             this.respawnBottle(bottle);
         }
-    });
+    }
 };
 
 World.prototype.respawnBottle = function (bottle) {
@@ -70,9 +72,11 @@ World.prototype.respawnBottle = function (bottle) {
 World.prototype.checkCollectCoins = function () {
     if (!this.level.coins) return;
 
-    this.level.coins.forEach((coin, idx) => {
-        if (!this.character.isColliding(coin)) return;
-        if (this.character.isDead()) return;
+    for (let idx = this.level.coins.length - 1; idx >= 0; idx--) {
+        let coin = this.level.coins[idx];
+
+        if (!this.character.isColliding(coin)) continue;
+        if (this.character.isDead()) continue;
 
         if (this.character.energy < 100) {
             // A coin restores 10 HP and is consumed immediately.
@@ -89,11 +93,11 @@ World.prototype.checkCollectCoins = function () {
                 (this.collectedCoins / this.maxCoins) * 100
             );
         } else {
-            return;
+            continue;
         }
 
         rememberCollectedCoin(this.levelNumber, coin);
         this.level.coins.splice(idx, 1);
         playSound(AUDIO_HUB.coinCollect);
-    });
+    }
 };
