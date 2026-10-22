@@ -49,8 +49,10 @@
     }
 
     .game-container {
-        width: 100vw;
-        height: 100vh;
+        width: min(100vw, 150dvh);
+        height: auto;
+        aspect-ratio: 3 / 2;
+        margin: 0 auto;
         border-radius: 0;
     }
 

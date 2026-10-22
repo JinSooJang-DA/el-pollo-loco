@@ -15,6 +15,7 @@ const baseStyles = read('styles/base.css');
 const componentStyles = read('styles/components.css');
 const levelRulesStyles = read('styles/level-rules.css');
 const gameInput = read('js/game-input.js');
+const responsiveStyles = read('styles/responsive.css');
 
 function expect(condition, message) {
     if (!condition) throw new Error(message);
@@ -67,6 +68,10 @@ expect(worldRender.includes('drawBackgroundObjects()') &&
     worldRender.includes('Math.round(this.camera_x) - this.camera_x') &&
     worldRender.includes('this.ctx.translate(pixelCorrection, 0)'),
     'background tiles use pixel-aligned rendering without changing camera movement');
+
+expect(responsiveStyles.includes('width: min(100vw, 150dvh);') &&
+    responsiveStyles.includes('aspect-ratio: 3 / 2;'),
+    'mobile landscape keeps the 720 by 480 Canvas display at its 3:2 ratio');
 
 expect(/id="startVideo"[\s\S]*videos\/stat-video\.mp4/.test(index),
     'start screen uses stat-video.mp4');
