@@ -66,11 +66,5 @@ function playSpatialSound(sound, worldX) {
 }
 
 function playBottleSmashAt(worldX) {
-    console.log('Bottle ground impact:', {
-        x: worldX,
-        path: BOTTLE_SMASH_PATH,
-        pan: getSoundPan(worldX)
-    });
-
     playSpatialSound(BOTTLE_SMASH_PATH, worldX);
 }

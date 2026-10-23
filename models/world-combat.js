@@ -26,68 +26,76 @@ World.prototype.handleEnemyContact = function (enemy) {
     }
 
     if (enemy instanceof Endboss) {
-        let pepeFeet = this.character.y + this.character.height
-            - this.character.offset.bottom;
-        let bossHead = enemy.y + enemy.height * 0.13;
-        let bossHeadBottom = enemy.y + enemy.height * 0.43;
-        let pepeLeft = this.character.x + this.character.offset.left;
-        let pepeRight = this.character.x + this.character.width
-            - this.character.offset.right;
-        let headLeft = enemy.otherDirection
-            ? enemy.x + enemy.width * 0.52
-            : enemy.x + enemy.width * 0.08;
-        let headRight = headLeft + enemy.width * 0.38;
-
-        let isStomping = this.character.speedY < 0 &&
-            pepeFeet >= bossHead &&
-            pepeFeet <= bossHeadBottom &&
-            pepeRight > headLeft &&
-            pepeLeft < headRight;
-
-        if (isStomping) {
-            let now = Date.now();
-
-            // All levels: same 3-second stomp cooldown.
-            if (now - (enemy.lastStompBounce || 0) < 3000) {
-                return;
-            }
-
-            let attackMode = this.getBossAttackMode();
-
-            // Levels 1, 2 and 4:
-            // Respect the existing boss damage cooldown.
-            if (attackMode !== 'bottle' &&
-                now - enemy.lastHit < 3000) {
-                return;
-            }
-
-            // A successful stomp always gives the same bounce.
-            enemy.lastStompBounce = now;
-            this.character.speedY = 15;
-
-            // Levels 3 and 5: bounce without boss damage.
-            if (attackMode === 'bottle') {
-                return;
-            }
-
-            // Levels 1, 2 and 4: boss takes 20 damage.
-            enemy.energy = Math.max(0, enemy.energy - 20);
-            enemy.lastHit = now;
-
-            this.statusBarEndboss.setPercentage(
-                (enemy.energy / enemy.maxEnergy) * 100
-            );
-
-            // Stomping sounds remain centered.
-            playSound(AUDIO_HUB.bossHurt);
-            return;
-        }
-
-        if (Date.now() - enemy.lastHit < 2000) return;
-        this.hurtCharacter(40);
+        this.handleBossContact(enemy);
         return;
     }
 
+    this.handleChickenContact(enemy);
+};
+
+World.prototype.handleBossContact = function (enemy) {
+    let pepeFeet = this.character.y + this.character.height
+        - this.character.offset.bottom;
+    let bossHead = enemy.y + enemy.height * 0.13;
+    let bossHeadBottom = enemy.y + enemy.height * 0.43;
+    let pepeLeft = this.character.x + this.character.offset.left;
+    let pepeRight = this.character.x + this.character.width
+        - this.character.offset.right;
+    let headLeft = enemy.otherDirection
+        ? enemy.x + enemy.width * 0.52
+        : enemy.x + enemy.width * 0.08;
+    let headRight = headLeft + enemy.width * 0.38;
+
+    let isStomping = this.character.speedY < 0 &&
+        pepeFeet >= bossHead &&
+        pepeFeet <= bossHeadBottom &&
+        pepeRight > headLeft &&
+        pepeLeft < headRight;
+
+    if (isStomping) {
+        let now = Date.now();
+
+        // All levels: same 3-second stomp cooldown.
+        if (now - (enemy.lastStompBounce || 0) < 3000) {
+            return;
+        }
+
+        let attackMode = this.getBossAttackMode();
+
+        // Levels 1, 2 and 4:
+        // Respect the existing boss damage cooldown.
+        if (attackMode !== 'bottle' &&
+            now - enemy.lastHit < 3000) {
+            return;
+        }
+
+        // A successful stomp always gives the same bounce.
+        enemy.lastStompBounce = now;
+        this.character.speedY = 15;
+
+        // Levels 3 and 5: bounce without boss damage.
+        if (attackMode === 'bottle') {
+            return;
+        }
+
+        // Levels 1, 2 and 4: boss takes 20 damage.
+        enemy.energy = Math.max(0, enemy.energy - 20);
+        enemy.lastHit = now;
+
+        this.statusBarEndboss.setPercentage(
+            (enemy.energy / enemy.maxEnergy) * 100
+        );
+
+        // Stomping sounds remain centered.
+        playSound(AUDIO_HUB.bossHurt);
+        return;
+    }
+
+    if (Date.now() - enemy.lastHit < 2000) return;
+    this.hurtCharacter(40);
+};
+
+World.prototype.handleChickenContact = function (enemy) {
     // Normal chicken: only a downward landing counts as a stomp.
     let pepeFeet = this.character.y + this.character.height
         - this.character.offset.bottom;

@@ -29,6 +29,9 @@ const context = {
     AUDIO_HUB: {},
     playSound() { },
     playSpatialSound() { },
+    hasReviveProtection(character) {
+        return now < (character.reviveProtectionUntil || 0);
+    },
     setTimeout() { },
     world: null
 };
@@ -52,6 +55,28 @@ function createChicken() {
         die() { this.dead = true; }
     });
     return chicken;
+}
+
+function createBoss() {
+    const boss = new Endboss();
+    Object.assign(boss, {
+        x: 100,
+        y: 300,
+        width: 200,
+        height: 200,
+        otherDirection: false,
+        energy: 100,
+        maxEnergy: 100,
+        lastHit: now - 3000,
+        lastStompBounce: now - 3000,
+        hadFirstContact: false,
+        isHitOnHead: () => true,
+        hit() {
+            this.energy -= 10;
+            this.lastHit = now;
+        }
+    });
+    return boss;
 }
 
 function createWorld() {
@@ -111,3 +136,44 @@ sideContactWorld.character.speedY = 0;
 sideContactWorld.handleEnemyContact(createChicken());
 expect(sideContactWorld.character.energy === 60,
     'a side contact without a prior stomp remains damaging');
+
+expect(typeof testWorld.handleBossContact === 'function' &&
+    typeof testWorld.handleChickenContact === 'function',
+    'boss and normal chicken contact handlers are available separately');
+
+now += 3000;
+const bossStompWorld = createWorld();
+let bossHealthPercentage = null;
+bossStompWorld.statusBarEndboss = {
+    setPercentage(value) { bossHealthPercentage = value; }
+};
+bossStompWorld.getBossAttackMode = () => 'stomp';
+const stompBoss = createBoss();
+bossStompWorld.handleEnemyContact(stompBoss);
+expect(stompBoss.energy === 80 && bossStompWorld.character.speedY === 15 &&
+    bossHealthPercentage === 80,
+    'a boss head stomp keeps the 20-damage and bounce behavior');
+
+now += 3000;
+const bossSideWorld = createWorld();
+bossSideWorld.character.speedY = 0;
+bossSideWorld.statusBarEndboss = { setPercentage() { } };
+bossSideWorld.getBossAttackMode = () => 'stomp';
+bossSideWorld.handleEnemyContact(createBoss());
+expect(bossSideWorld.character.energy === 60,
+    'boss side contact keeps the existing 40-damage behavior');
+
+now += 3000;
+const bottleWorld = createWorld();
+bottleWorld.statusBarEndboss = { setPercentage() { } };
+bottleWorld.getBossAttackMode = () => 'bottle';
+const bottleBoss = createBoss();
+bottleWorld.handleBottleImpact({}, bottleBoss);
+expect(bottleBoss.hadFirstContact && bottleBoss.energy === 90,
+    'the bottle-mode boss still takes one valid bottle hit');
+
+const protectedWorld = createWorld();
+protectedWorld.character.reviveProtectionUntil = now + 5000;
+protectedWorld.handleEnemyContact(createChicken());
+expect(protectedWorld.character.energy === 100,
+    'revive protection still prevents chicken contact damage');

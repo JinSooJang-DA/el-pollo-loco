@@ -60,6 +60,7 @@ class ThrowableObject extends MovableObject {
         this.applyGravity();
 
         this.throwInterval = setInterval(() => {
+            if (isPaused) return;
             if (this.isSplashed) return;
 
             // Keep the current 20% shorter horizontal throw.
@@ -87,6 +88,7 @@ class ThrowableObject extends MovableObject {
     /** Plays rotating or splash animation. */
     animate() {
         this.animationInterval = setInterval(() => {
+            if (isPaused) return;
             if (!this.isSplashed) {
                 this.playAnimation(this.IMAGES_ROTATING);
             }

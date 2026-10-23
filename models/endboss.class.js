@@ -14,6 +14,10 @@ class Endboss extends MovableObject {
     lastSpecialAttack = Date.now();
     isPreparingAttack = false;
     isCharging = false;
+    specialAttackTimer = null;
+    specialAttackDeadline = 0;
+    specialAttackNextPhase = null;
+    specialAttackRemaining = 0;
 
     offset = {
         top: 60,
@@ -101,6 +105,8 @@ class Endboss extends MovableObject {
 
     animate() {
         let mainInterval = setInterval(() => {
+            if (isPaused) return;
+
             if (this.isDead()) {
                 clearInterval(mainInterval);
                 clearInterval(moveInterval);
@@ -111,6 +117,7 @@ class Endboss extends MovableObject {
         }, 150);
 
         let moveInterval = setInterval(() => {
+            if (isPaused) return;
             if (this.isDead()) return;
             if (!this.hadFirstContact || this.animationStep < 10) return;
             if (this.isHurt() || this.isPreparingAttack) return;
@@ -154,17 +161,58 @@ class Endboss extends MovableObject {
 
         this.isPreparingAttack = true;
         this.lastSpecialAttack = Date.now();
+        this.scheduleSpecialAttackPhase('charge', 1000);
+    }
 
-        setTimeout(() => {
-            if (this.isDead()) return;
+    /** Schedules one pause-aware Endboss attack phase. */
+    scheduleSpecialAttackPhase(nextPhase, delay) {
+        this.specialAttackNextPhase = nextPhase;
+        this.specialAttackDeadline = Date.now() + delay;
+        this.specialAttackTimer = setTimeout(() => {
+            this.completeSpecialAttackPhase();
+        }, delay);
+    }
 
+    /** Applies the current Endboss attack phase after its delay finishes. */
+    completeSpecialAttackPhase() {
+        this.specialAttackTimer = null;
+        if (this.isDead()) return;
+
+        if (this.specialAttackNextPhase === 'charge') {
             this.isPreparingAttack = false;
             this.isCharging = true;
+            this.scheduleSpecialAttackPhase('finish', 1000);
+            return;
+        }
 
-            setTimeout(() => {
-                this.isCharging = false;
-            }, 1000);
-        }, 1000);
+        this.isCharging = false;
+        this.specialAttackNextPhase = null;
+        this.specialAttackRemaining = 0;
+    }
+
+    /** Stores the remaining Endboss attack delay while gameplay is paused. */
+    pauseSpecialAttack() {
+        if (!this.specialAttackTimer) return;
+
+        clearTimeout(this.specialAttackTimer);
+        this.specialAttackTimer = null;
+        this.specialAttackRemaining = Math.max(
+            0,
+            this.specialAttackDeadline - Date.now()
+        );
+    }
+
+    /** Continues a paused Endboss attack delay after gameplay resumes. */
+    resumeSpecialAttack() {
+        if (!this.specialAttackNextPhase || this.specialAttackTimer || this.isDead()) {
+            return;
+        }
+
+        this.scheduleSpecialAttackPhase(
+            this.specialAttackNextPhase,
+            this.specialAttackRemaining
+        );
+        this.specialAttackRemaining = 0;
     }
 
 
@@ -187,6 +235,7 @@ class Endboss extends MovableObject {
     startDeathSequence() {
         let frame = 0;
         let deadInterval = setInterval(() => {
+            if (isPaused) return;
             if (frame < this.IMAGES_DEAD.length) {
                 this.img = this.imageCache[this.IMAGES_DEAD[frame]];
                 frame++;
@@ -202,6 +251,7 @@ class Endboss extends MovableObject {
      */
     startFallAnimation() {
         let fallInterval = setInterval(() => {
+            if (isPaused) return;
             this.y += 15;
             if (this.y > 600) {
                 clearInterval(fallInterval);

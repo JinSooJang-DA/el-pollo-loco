@@ -463,14 +463,6 @@ canvas {
     outline-offset: 3px;
 }
 
-.control-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px 0;
-    font-size: 15px;
-}
-
 .key-badge {
     background: #444;
     padding: 4px 8px;
@@ -478,13 +470,6 @@ canvas {
     border: 1px solid #777;
     font-weight: bold;
     color: #ff9800;
-}
-
-.story-desc {
-    margin-top: 14px;
-    font-size: 13px;
-    color: #ccc;
-    line-height: 1.4;
 }
 
 .mobile-controls-container {

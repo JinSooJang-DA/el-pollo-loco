@@ -22,6 +22,8 @@ class MovableObject extends DrawableObject {
      */
     applyGravity() {
         setInterval(() => {
+            if (isPaused) return;
+
             if (this.isAboveGround() || this.speedY > 0) {
                 // Remember Pepe's downward movement.
                 if (this instanceof Character && this.speedY < 0) {

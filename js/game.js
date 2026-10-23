@@ -9,6 +9,8 @@ let keyboard = new Keyboard();
 let isMuted = false;
 /** @type {boolean} */
 let isPaused = false;
+/** @type {number} */
+let pauseStartedAt = 0;
 /** @type {HTMLAudioElement|null} */
 let currentBgm = null;
 /** @type {number} */
@@ -244,9 +246,62 @@ function stopSoundEffects() {
 function togglePause() {
     if (!world || world.gameEnded || pendingLevelNumber !== null) return;
 
-    isPaused = !isPaused;
+    if (!isPaused) {
+        pauseStartedAt = Date.now();
+        pauseBossAttackTimers();
+        isPaused = true;
+    } else {
+        let pausedFor = Date.now() - pauseStartedAt;
+        isPaused = false;
+        shiftPausedGameplayTimes(pausedFor);
+        resumeBossAttackTimers();
+        pauseStartedAt = 0;
+    }
     updatePauseUI();
     handlePauseAudio();
+}
+
+/** Pauses pending Endboss attack phases without changing their remaining time. */
+function pauseBossAttackTimers() {
+    let boss = world?.level.enemies.find(enemy => enemy instanceof Endboss);
+    boss?.pauseSpecialAttack();
+}
+
+/** Restarts a paused Endboss attack phase with its remaining delay. */
+function resumeBossAttackTimers() {
+    let boss = world?.level.enemies.find(enemy => enemy instanceof Endboss);
+    boss?.resumeSpecialAttack();
+}
+
+/** Keeps gameplay cooldowns and temporary protection from expiring during Pause. */
+function shiftPausedGameplayTimes(pausedFor) {
+    if (!world || pausedFor <= 0) return;
+
+    let character = world.character;
+    shiftPauseTime(character, 'lastActionTime', pausedFor);
+    shiftPauseTime(character, 'lastHit', pausedFor);
+    shiftPauseTime(character, 'lastLandingTime', pausedFor);
+    shiftPauseTime(character, 'stompBounceUntil', pausedFor);
+    shiftPauseTime(character, 'reviveProtectionUntil', pausedFor);
+
+    (character.lastFallSteps || []).forEach(step => {
+        shiftPauseTime(step, 'time', pausedFor);
+    });
+    shiftPauseTime(character.lastFallStep, 'time', pausedFor);
+
+    world.level.enemies.forEach(enemy => {
+        shiftPauseTime(enemy, 'lastHit', pausedFor);
+        shiftPauseTime(enemy, 'lastStomp', pausedFor);
+        shiftPauseTime(enemy, 'lastStompBounce', pausedFor);
+        shiftPauseTime(enemy, 'lastSpecialAttack', pausedFor);
+    });
+}
+
+/** Moves one existing timestamp forward by the paused duration. */
+function shiftPauseTime(target, property, pausedFor) {
+    if (target && Number.isFinite(target[property]) && target[property] > 0) {
+        target[property] += pausedFor;
+    }
 }
 
 /** Updates pause screen and button text. */
@@ -275,6 +330,7 @@ function handlePauseAudio() {
 /** Resets the pause state. */
 function resetPauseState() {
     isPaused = false;
+    pauseStartedAt = 0;
     updatePauseUI();
 }
 
