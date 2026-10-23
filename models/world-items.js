@@ -2,6 +2,8 @@
 /** World item collection and throwing methods. */
 
 World.prototype.checkThrowObjects = function () {
+    if (typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(this.character)) return;
     if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
         let offset = this.character.otherDirection ? 0 : 60;
 
@@ -97,6 +99,7 @@ World.prototype.checkCollectCoins = function () {
         }
 
         rememberCollectedCoin(this.levelNumber, coin);
+        recordCollectedCoin();
         this.level.coins.splice(idx, 1);
         playSound(AUDIO_HUB.coinCollect);
     }

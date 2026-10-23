@@ -108,6 +108,7 @@ function applyMuteState() {
 
     if (isMuted) stopSoundEffects();
     if (typeof syncStoryVideoMute === 'function') syncStoryVideoMute();
+    if (typeof syncEndingRewardVideoAudio === 'function') syncEndingRewardVideoAudio();
 }
 
 /** Loads stored volume preferences. */
@@ -170,6 +171,7 @@ function changeSfxVolume(val) {
 
     sfxVolume = clampVolume(volume);
     localStorage.setItem('sfxVolume', sfxVolume);
+    if (typeof syncEndingRewardVideoAudio === 'function') syncEndingRewardVideoAudio();
 }
 
 /**
@@ -339,6 +341,7 @@ function restartGame() {
     resetPauseState();
 
     stopEndVideo();
+    cancelEndingSequence();
 
     document.getElementById('restartScreen').classList.add('d-none');
 
@@ -349,6 +352,7 @@ function restartGame() {
 /** Returns to the start screen. */
 function backToMainMenu() {
     closeGameOverlays();
+    cancelEndingSequence();
 
     // Stop rendering the active world.
     if (world) {
@@ -387,6 +391,7 @@ function closeGameOverlays() {
     cancelSombreroReward();
     cancelStoryVideo();
     stopEndVideo();
+    cancelEndingSequence();
     resetPauseState();
 
     ['restartScreen', 'settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {

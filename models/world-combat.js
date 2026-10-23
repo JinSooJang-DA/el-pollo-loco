@@ -18,6 +18,8 @@ World.prototype.checkCharacterCollisions = function () {
 };
 
 World.prototype.handleEnemyContact = function (enemy) {
+    if (typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(this.character)) return;
     if (enemy instanceof SmallChicken) {
         this.hurtCharacter();
         return;
@@ -131,6 +133,8 @@ World.prototype.handleEnemyContact = function (enemy) {
 };
 
 World.prototype.hurtCharacter = function (damage = 40) {
+    if (typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(this.character)) return;
     if (this.character.isHurt() || this.character.isDead()) return;
 
     let coinsUsed = Math.min(
@@ -154,6 +158,8 @@ World.prototype.hurtCharacter = function (damage = 40) {
 };
 
 World.prototype.stompEnemy = function (enemy) {
+    if (typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(this.character)) return false;
     if (!(enemy instanceof Chicken)) return false;
 
     let now = Date.now();
@@ -211,6 +217,8 @@ World.prototype.checkBottleCollisions = function () {
 };
 
 World.prototype.handleBottleImpact = function (bottle, enemy) {
+    if (typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(this.character)) return;
     if (enemy instanceof Endboss) {
         enemy.hadFirstContact = true;
 

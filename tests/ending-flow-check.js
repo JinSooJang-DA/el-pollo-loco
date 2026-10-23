@@ -120,10 +120,10 @@ expect(expectedDelays.every(delay => index.includes(delay)),
 expect(baseStyles.includes('animation: credit-cycle 81s') &&
     baseStyles.includes('@keyframes credit-cycle'),
     'credits repeat through one continuous 81-second CSS cycle');
-expect(componentStyles.includes('.game-container:has(#restartScreen:not(.d-none) #endCredits:not(.d-none)) .game-menu') &&
-    componentStyles.includes('.game-container:has(#startScreen.d-none) .bgm-menu') &&
+expect(componentStyles.includes('.game-container:has(#startScreen.d-none) .bgm-menu') &&
+    !componentStyles.includes('.game-container:has(#restartScreen:not(.d-none) #endCredits:not(.d-none)) .game-menu') &&
     componentStyles.includes('display: none;'),
-    'non-start screens hide top BGM and ending hides top Menu');
+    'non-start screens hide top BGM while ending keeps Menu available');
 expect(index.includes('id="creditsBtn"') && index.includes('onclick="openMenuCredits()"') &&
     index.includes('id="menuCreditsBackBtn"') && index.includes('onclick="closeMenuCredits()"'),
     'Menu exposes keyboard-accessible Credits and Back controls without duplicating credit markup');
@@ -188,11 +188,11 @@ expect(game.includes('function closeMenuAfterDialog()') &&
 expect(!gameInput.includes('function isStartMenuSummary') &&
     gameInput.includes("event.code === 'Space' && !isMenuControlTarget(event.target)"),
     'Space keeps the native start Menu behavior while gameplay controls remain protected');
-expect(gameInput.includes('function handleGameOverKey(event)') &&
-    gameInput.includes('event.repeat') &&
-    gameInput.includes('button.click();') &&
+expect(gameInput.includes('function getGameOverButtons()') &&
+    gameInput.includes('function handleGameOverArrowNavigation(event)') &&
+    gameInput.includes("return ['retryLevelBtn', 'restartBtn', 'homeBtn']") &&
     world.includes('focusGameOverButton(canRetry);'),
-    'loss screen focuses Retry or Play Again and prevents repeated keyboard activation');
+    'loss screen focuses the visible action and keeps arrow navigation on its native buttons');
 
 class KeyboardTestElement {
     constructor(isControl, tagName = 'BUTTON') {
@@ -392,11 +392,20 @@ expect(game.includes('playStoryVideo(1, () => startLevel(1))'),
 expect(storyVideos.includes('videos/loco-0${videoNumber}.mp4'),
     'story player constructs the requested chapter path');
 expect(sombrero.includes('playStoryVideo(6, () => {') &&
+    sombrero.includes('if (finishedWorld.character.energy === 100) {') &&
+    sombrero.includes('sombreros++;') &&
     !sombrero.includes('playStoryVideo(7'),
-    'level 5 uses only chapter 6 before the ending');
-expect(sombrero.includes("showEndScreen('img/You won, you lost/You win B.png', true)") &&
-    sombrero.includes('playBgm(AUDIO_HUB.bgmWin)'),
-    'victory keeps the existing win music and opens credits');
+    'level 5 silently awards its perfect-health sombrero before chapter 6');
+expect(sombrero.includes('startFinalEnding(finishedWorld)') &&
+    sombrero.includes('playBgm(AUDIO_HUB.bgmWin, true)') &&
+    sombrero.includes("showEndScreen('', true)"),
+    'victory starts final rewards with the existing win music before credits');
+expect(sombrero.includes("if (count >= 3) return { type: 'video', src: 'videos/golden-sombrero.mp4' };") &&
+    sombrero.includes("if (count >= 20) return { type: 'video', src: 'videos/golden-coins.mp4' };") &&
+    !sombrero.includes('2nd-hat-award.webp') && !sombrero.includes('3rd-hat-award.webp') &&
+    !sombrero.includes('2nd-coin-award.webp') && !sombrero.includes('3rd-coin-award.webp') &&
+    !sombrero.includes("{ type: 'image', src: 'img/You won, you lost/You win B.png'"),
+    'final ending selects only the two highest reward videos with no clear or lower-tier cards');
 expect(world.includes('showEndScreen(imagePath, isVictory = false)') &&
     world.includes('playEndVideo();') && world.includes('stopEndVideo();'),
     'result screen starts and stops the credits video by outcome');

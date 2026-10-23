@@ -54,7 +54,8 @@
 
     <div class="game-container" id="gameContainer">
 
-        <div id="sombreroCounter">SOMBRERO x 0</div>
+        <div id="sombreroCounter"></div>
+        <div id="coinCollectedCounter"><img src="img/coin-full.webp" alt="Coin"><span>× 0</span></div>
         <!-- Collapsible navigation menu -->
         <details class="game-menu">
             <summary>Menu</summary>
@@ -208,6 +209,15 @@
         </div>
 
         <!-- Game result screen -->
+        <div id="endingRewardScreen" class="overlay-screen ending-reward-screen d-none" aria-live="polite">
+            <div class="level-rules-card">
+                <video id="endingRewardVideo" class="ending-reward-media d-none" playsinline></video>
+                <button id="endingPauseBtn" class="western-action-button western-ending-button" type="button" onclick="toggleEndingPause()">
+                    PAUSE
+                </button>
+            </div>
+        </div>
+
         <div id="restartScreen" class="overlay-screen d-none">
             <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
 
@@ -302,18 +312,21 @@
                     onclick="closeMenuCredits()">
                     BACK TO MENU
                 </button>
-                <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
-                    <img src="img/golden-sombrero-big.webp" alt="">
-                    <span>RETRY LEVEL</span>
-                    <span>× 1</span>
-                </button>
-                <button id="restartBtn" class="western-action-button western-ending-button" onclick="restartGame()">
-                    PLAY AGAIN
-                </button>
-
-                <button id="homeBtn" class="western-action-button western-ending-button" onclick="backToMainMenu()">
-                    MAIN MENU
-                </button>
+                <div class="end-revive-row">
+                    <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
+                        <img src="img/golden-sombrero-big.webp" alt="">
+                        <span>REVIVE WITH SOMBRERO</span>
+                        <span>× 1</span>
+                    </button>
+                </div>
+                <div class="end-secondary-row">
+                    <button id="restartBtn" class="western-action-button western-ending-button" onclick="restartGame()">
+                        NEW START
+                    </button>
+                    <button id="homeBtn" class="western-action-button western-ending-button" onclick="backToMainMenu()">
+                        MAIN MENU
+                    </button>
+                </div>
             </div>
         </div>
 

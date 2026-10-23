@@ -509,31 +509,54 @@
 }
 
 
-/* Sombreros directly below the Menu button */
+/* Earned sombreros use the original one-icon-per-reward display. */
 #sombreroCounter {
     position: absolute;
     top: 64px;
     right: 20px;
-    left: auto;
-    transform: none;
     z-index: 10;
-
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
     max-width: 180px;
-
     pointer-events: none;
 }
 
-/* Sombrero reward icon */
+/* The run-wide coin statistic remains visible even before a sombrero is earned. */
+#coinCollectedCounter {
+    position: absolute;
+    top: 112px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+    color: #ffe3a3;
+    font-family: 'Rye', cursive;
+    font-size: 16px;
+    line-height: 26px;
+    text-shadow: 1px 1px 0 #351808;
+    pointer-events: none;
+}
+
+#coinCollectedCounter img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}
+
 .sombrero-icon {
     width: 40px;
     height: 40px;
     object-fit: contain;
     display: block;
+}
+
+#gameContainer:not(:has(#sombreroCounter .sombrero-icon)) #coinCollectedCounter {
+    top: 64px;
 }
 
 /* Sombrero retry button */
@@ -551,6 +574,7 @@
 
     font-family: 'Rye', cursive;
     font-size: 18px;
+    white-space: nowrap;
     cursor: pointer;
 }
 
@@ -580,4 +604,53 @@
 
 #sombreroRewardImage + p {
     margin-top: 4px;
+}
+
+.ending-reward-screen {
+    z-index: 35;
+    padding: 8px;
+    background: rgba(13, 9, 6, 0.9);
+}
+
+.ending-reward-screen .level-rules-card {
+    padding: 8px;
+    gap: 8px;
+}
+
+.ending-reward-media {
+    display: block;
+    width: min(700px, 100%);
+    max-height: 72%;
+    object-fit: contain;
+    margin: 0 auto 8px;
+    background: #000;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.credits-paused .credit-entry {
+    animation-play-state: paused;
+}
+
+.revive-message {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    z-index: 30;
+    padding: 10px 16px;
+    color: #ffe3a3;
+    background: rgba(53, 24, 8, 0.9);
+    border: 2px solid #f2cf83;
+    border-radius: 8px;
+    font-family: 'Rye', cursive;
+    font-size: clamp(16px, 3vw, 26px);
+    text-shadow: 2px 2px 0 #351808;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.revive-message.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
 }

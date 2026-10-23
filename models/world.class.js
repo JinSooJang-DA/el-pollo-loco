@@ -147,6 +147,7 @@ class World {
 
         if (this.character.isDead() && !this.gameEnded) {
             this.gameEnded = true;
+            this.character.resetIdleTimer();
             playSound(AUDIO_HUB.pepeDead);
             playBgm(AUDIO_HUB.bgmLost);
 
@@ -172,8 +173,11 @@ class World {
     showEndScreen(imagePath, isVictory = false) {
         if (this !== world) return;
 
-        this.stopDrawing = true;
-        stopAllIntervals();
+        let canRevive = this.character.isDead() && sombreros > 0;
+        if (!canRevive) {
+            this.stopDrawing = true;
+            stopAllIntervals();
+        }
 
         let endScreenImg = document.getElementById('endScreenImg');
         let restartScreen = document.getElementById('restartScreen');
@@ -190,7 +194,7 @@ class World {
         }
 
         let retryButton = document.getElementById('retryLevelBtn');
-        let canRetry = this.character.isDead() && sombreros > 0;
+        let canRetry = canRevive;
 
         if (retryButton) {
             retryButton.classList.toggle('d-none', !canRetry);

@@ -160,8 +160,26 @@ canvas {
 
 .end-buttons-group {
     display: flex;
-    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     z-index: 2;
+}
+
+.end-revive-row,
+.end-secondary-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.end-revive-row:has(#retryLevelBtn.d-none) {
+    display: none;
+}
+
+.end-secondary-row .western-ending-button {
+    min-width: 150px;
 }
 
 .end-credits {

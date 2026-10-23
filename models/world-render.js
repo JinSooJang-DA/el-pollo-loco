@@ -111,6 +111,16 @@ World.prototype.addObjectsToMap = function (objects) {
 };
 
 World.prototype.addToMap = function (mo) {
+    if (mo === this.character && typeof hasReviveProtection === 'function' &&
+        hasReviveProtection(mo)) {
+        this.ctx.save();
+        this.ctx.globalAlpha = Math.floor(Date.now() / 180) % 2 ? 0.42 : 1;
+        if (mo.otherDirection) this.flipImage(mo);
+        mo.draw(this.ctx);
+        if (mo.otherDirection) this.flipImageBack(mo);
+        this.ctx.restore();
+        return;
+    }
     if (mo.otherDirection) this.flipImage(mo);
     mo.draw(this.ctx);
     if (mo.otherDirection) this.flipImageBack(mo);

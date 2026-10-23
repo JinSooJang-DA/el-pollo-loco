@@ -138,6 +138,23 @@ screen and (orientation: portrait) and (max-width: 600px) {
         max-width: 90%;
     }
 
+    .end-revive-row,
+    .end-secondary-row {
+        gap: 10px;
+        max-width: 100%;
+    }
+
+    .end-secondary-row .western-ending-button {
+        min-width: 0;
+        width: min(42vw, 150px);
+    }
+
+    #retryLevelBtn {
+        max-width: 100%;
+        padding: 9px 14px;
+        font-size: clamp(12px, 3.4vh, 16px);
+    }
+
     .western-ending-button {
         min-height: 40px;
         padding: 7px 11px;
