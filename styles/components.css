@@ -473,7 +473,7 @@
 /* Keep compact top controls limited to the start screen and active game UI. */
 .game-container:has(#startScreen:not(.d-none)) .game-menu > summary,
 .game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary,
-.game-container:has(#startScreen.d-none):has(#endCredits.d-none) .game-menu > summary {
+.game-container:has(#startScreen.d-none) .game-menu > summary {
     width: 76px;
     min-width: 76px;
     min-height: 35px;
@@ -493,10 +493,6 @@
     display: none;
 }
 
-.game-container:has(#restartScreen:not(.d-none) #endCredits:not(.d-none)) .game-menu {
-    display: none;
-}
-
 /* The Menu credits view reuses the ending screen but exposes only its Back action. */
 #restartScreen.menu-credits-mode #retryLevelBtn,
 #restartScreen.menu-credits-mode #restartBtn,
@@ -506,7 +502,8 @@
 
 .game-container:has(#startScreen:not(.d-none)) .game-menu > summary:focus-visible,
 .game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary:focus-visible,
-.game-container:has(#startScreen.d-none):has(#endCredits.d-none) .game-menu > summary:focus-visible {
+.game-container:has(#startScreen.d-none) .game-menu > summary:focus-visible,
+#startBtn.is-keyboard-selected {
     outline: 3px solid #f2cf83;
     outline-offset: 3px;
 }

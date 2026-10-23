@@ -275,6 +275,32 @@ canvas {
     letter-spacing: 1.1px;
 }
 
+/* Make the initial keyboard target easy to recognize without affecting other actions. */
+#startBtn {
+    position: relative;
+    overflow: hidden;
+}
+
+#startBtn::after {
+    content: '';
+    position: absolute;
+    inset: -35% auto -35% -45%;
+    width: 28%;
+    background: linear-gradient(90deg, transparent, rgba(255, 236, 167, 0.75), transparent);
+    transform: skewX(-22deg);
+    animation: start-button-sweep 2.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes start-button-sweep {
+    0%, 38% { left: -45%; }
+    68%, 100% { left: 120%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #startBtn::after { animation: none; }
+}
+
 .western-ending-button {
     min-height: 40px;
     min-width: 0;

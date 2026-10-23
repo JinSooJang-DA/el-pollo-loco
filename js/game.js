@@ -54,6 +54,7 @@ function init() {
     playBgm(AUDIO_HUB.bgmMenu);
     unlockAudioOnFirstInteraction();
     showLocalEndingPreview();
+    requestAnimationFrame(focusStartGameButton);
 }
 
 /** Allows background music after user interaction. */
@@ -358,11 +359,26 @@ function backToMainMenu() {
     stopSoundEffects();
 
     document.getElementById('startScreen').classList.remove('d-none');
+    resetStartScreenMenuState();
 
     playStartVideo();
 
     world = null;
     resetPlaylist();
+}
+
+/** Closes menu panels and returns keyboard focus to Start Game. */
+function resetStartScreenMenuState() {
+    document.querySelector('.game-menu').open = false;
+    document.getElementById('bgmMenu').open = false;
+    requestAnimationFrame(focusStartGameButton);
+}
+
+/** Focuses Start Game when the initial screen becomes available. */
+function focusStartGameButton() {
+    const startButton = document.getElementById('startBtn');
+    startButton?.classList.add('is-keyboard-selected');
+    startButton?.focus();
 }
 
 /** Closes game overlays and cancels their pending continue actions. */

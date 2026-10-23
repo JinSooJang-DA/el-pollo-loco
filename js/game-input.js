@@ -159,6 +159,21 @@ function getStartScreenControls() {
     ].filter(control => control && control.getClientRects().length > 0);
 }
 
+/** Keeps the visible Start Game selection aligned with start-screen navigation. */
+function syncStartScreenSelection(target) {
+    const startScreen = document.getElementById('startScreen');
+    const startButton = document.getElementById('startBtn');
+    if (!startScreen || startScreen.classList.contains('d-none') || !startButton) return;
+
+    const [bgmButton, menuButton] = getStartScreenControls();
+    const selectedElsewhere = target === bgmButton || target === menuButton ||
+        document.getElementById('bgmMenu')?.contains(target) ||
+        document.querySelector('.game-menu')?.contains(target);
+
+    if (target === startButton) startButton.classList.add('is-keyboard-selected');
+    if (selectedElsewhere) startButton.classList.remove('is-keyboard-selected');
+}
+
 /** Moves focus between the BGM, Menu, and Start Game controls. */
 function handleStartScreenArrowNavigation(event) {
     const controls = getStartScreenControls();
@@ -313,16 +328,31 @@ function handleMenuFocus(event) {
     }
 
     const menu = document.querySelector('.game-menu');
-    if (menu?.open) keepFocusInScope(event, menu);
+    if (menu?.open) {
+        keepFocusInScope(event, menu);
+        return;
+    }
+
+    const startScreen = document.getElementById('startScreen');
+    const bgmMenu = document.getElementById('bgmMenu');
+    if (startScreen && !startScreen.classList.contains('d-none') && !bgmMenu?.open) {
+        keepFocusInControls(event, getStartScreenControls());
+    }
 }
 
 /** Returns whether a game-flow overlay must keep Escape unavailable. */
 function isGameplayFlowOverlayVisible() {
-    return ['storyVideoScreen', 'levelRulesScreen', 'sombreroRewardScreen', 'restartScreen']
+    return ['storyVideoScreen', 'levelRulesScreen', 'sombreroRewardScreen']
         .some(id => {
             const screen = document.getElementById(id);
             return screen && !screen.classList.contains('d-none');
         });
+}
+
+/** Returns whether the existing lost or victory result screen is visible. */
+function isGameResultVisible() {
+    const resultScreen = document.getElementById('restartScreen');
+    return Boolean(resultScreen && !resultScreen.classList.contains('d-none'));
 }
 
 /** Clears held gameplay controls before a Menu pause can resume. */
@@ -420,7 +450,8 @@ function handleGameMenuEscape(event) {
 
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
-    const canControlGameplayMenu = world && !world.gameEnded && pendingLevelNumber === null;
+    const canControlGameplayMenu = pendingLevelNumber === null &&
+        ((world && !world.gameEnded) || isGameResultVisible());
     if (!isStartScreenVisible && !canControlGameplayMenu) return;
 
     event.preventDefault();
@@ -439,6 +470,7 @@ function initGameMenuControls() {
     document.addEventListener('keydown', handleGameMenuEscape, true);
     document.addEventListener('keydown', handleMenuFocus, true);
     document.addEventListener('keydown', handleArrowNavigation, true);
+    document.addEventListener('focusin', event => syncStartScreenSelection(event.target), true);
 }
 
 // Keep Space for jumping outside native controls.
@@ -462,8 +494,10 @@ document.addEventListener('keyup', event => {
 function handleStartKey(event) {
     const startScreen = document.getElementById('startScreen');
     if (startScreen.classList.contains('d-none')) return false;
-    if (event.code !== 'Enter') return false;
+    if (event.code !== 'Enter' && event.code !== 'Space') return false;
     if (isMenuControlTarget(event.target)) return false;
+    if (!document.getElementById('startBtn').classList.contains('is-keyboard-selected')) return false;
+    if (isGameMenuOpen() || document.getElementById('bgmMenu').open) return false;
     event.preventDefault();
     const infoClosed = document.getElementById('infoDialog').classList.contains('d-none');
     const settingsClosed = document.getElementById('settingsDialog').classList.contains('d-none');
