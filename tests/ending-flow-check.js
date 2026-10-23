@@ -139,6 +139,12 @@ expect(baseStyles.includes("end/end-background.webp") &&
     baseStyles.includes('transition: opacity 1.5s ease') &&
     baseStyles.includes('body:has(#restartScreen:not(.d-none) #endCredits:not(.d-none))::after'),
     'ending crossfades to its dedicated outer background');
+expect(index.includes('<main class="game-presentation">') &&
+    baseStyles.includes('.game-presentation {') &&
+    baseStyles.includes('gap: 20px;') &&
+    baseStyles.includes('font-size: clamp(52px, 5vw, 56px);') &&
+    game.includes("document.getElementById('endCredits').classList.add('d-none');"),
+    'desktop title shares the game presentation layout and NEW START clears Credits state');
 expect(/#levelRulesStartBtn,\s*#sombreroRewardScreen \.level-action-button/.test(levelRulesStyles) &&
     !componentStyles.includes('#sombreroRewardScreen button'),
     'sombrero continue button reuses the level action western style');

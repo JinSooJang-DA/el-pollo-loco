@@ -10,17 +10,10 @@
         background-color: transparent;
     }
 
-    /* Title stays at the top */
-    body>h1 {
-        position: absolute;
-        top: 12px;
-        left: 0;
-        width: 100%;
-        margin: 0;
-        text-align: center;
+    .game-presentation {
+        flex-shrink: 0;
     }
 
-    /* The game itself stays at the center */
     .game-container {
         flex-shrink: 0;
         margin: 0 auto;

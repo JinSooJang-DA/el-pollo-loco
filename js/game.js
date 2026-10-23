@@ -344,6 +344,7 @@ function restartGame() {
     cancelEndingSequence();
 
     document.getElementById('restartScreen').classList.add('d-none');
+    document.getElementById('endCredits').classList.add('d-none');
 
     resetSombreroGame();
     startLevel(1);
