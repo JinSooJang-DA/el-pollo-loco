@@ -261,7 +261,7 @@ World.prototype.handleBottleImpact = function (bottle, enemy) {
 
         if (enemy.energy === 0) {
             if (!bottle.hasPlayedChickenHitSound) {
-                playSpatialSound(AUDIO_HUB.chickenDead, enemy.x + enemy.width / 2);
+                playSpatialSound(AUDIO_HUB.chickenDead1, enemy.x + enemy.width / 2);
                 bottle.hasPlayedChickenHitSound = true;
             }
             enemy.die();
