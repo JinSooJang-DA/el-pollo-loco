@@ -31,7 +31,7 @@
     }
 }
 
-@media screen and (orientation: landscape) and (max-height: 600px) {
+@media screen and (orientation: landscape) and (max-height: 600px) and (hover: none) {
     body {
         margin: 0;
         overflow: hidden;
