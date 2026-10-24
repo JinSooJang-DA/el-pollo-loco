@@ -6,6 +6,8 @@
 class ThrowableObject extends MovableObject {
     otherDirection = false;
     isSplashed = false;
+    hasPlayedSmallChickenHitSound = false;
+    hasPlayedChickenHitSound = false;
     throwInterval;
     animationInterval;
 

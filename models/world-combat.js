@@ -248,7 +248,10 @@ World.prototype.handleBottleImpact = function (bottle, enemy) {
             );
         }
     } else if (enemy instanceof SmallChicken) {
-        playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
+        if (!bottle.hasPlayedSmallChickenHitSound) {
+            playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
+            bottle.hasPlayedSmallChickenHitSound = true;
+        }
 
         if (typeof enemy.die === 'function') enemy.die();
         this.removeEnemyAfterDelay(enemy, 500);
@@ -257,11 +260,17 @@ World.prototype.handleBottleImpact = function (bottle, enemy) {
         enemy.energy = Math.max(0, enemy.energy - 2);
 
         if (enemy.energy === 0) {
-            playSpatialSound(AUDIO_HUB.chickenDead, enemy.x + enemy.width / 2);
+            if (!bottle.hasPlayedChickenHitSound) {
+                playSpatialSound(AUDIO_HUB.chickenDead, enemy.x + enemy.width / 2);
+                bottle.hasPlayedChickenHitSound = true;
+            }
             enemy.die();
             this.removeEnemyAfterDelay(enemy, 500);
         } else {
-            playSpatialSound(AUDIO_HUB.chickenStomp, enemy.x + enemy.width / 2);
+            if (!bottle.hasPlayedChickenHitSound) {
+                playSpatialSound(AUDIO_HUB.chickenStomp, enemy.x + enemy.width / 2);
+                bottle.hasPlayedChickenHitSound = true;
+            }
             enemy.showStompReaction();
         }
     }
