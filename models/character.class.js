@@ -79,9 +79,21 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-53.png',
         'img/2_character_pepe/5_dead/D-54.png',
         'img/2_character_pepe/5_dead/D-55.png',
-        'img/2_character_pepe/5_dead/D-56.png',
-        'img/2_character_pepe/5_dead/D-57.png'
+        'img/2_character_pepe/5_dead/D-56.png'
     ];
+
+    // Measured non-transparent bounds in the 610 × 1200 DEAD source PNGs.
+    DEAD_FRAME_ALPHA_BOUNDS = [
+        { left: 69, top: 495, right: 546, bottom: 1200 },
+        { left: 48, top: 466, right: 561, bottom: 1200 },
+        { left: 55, top: 491, right: 567, bottom: 1141 },
+        { left: 55, top: 421, right: 567, bottom: 1141 },
+        { left: 55, top: 337, right: 567, bottom: 1141 },
+        { left: 55, top: 301, right: 567, bottom: 1141 }
+    ];
+
+    // Render-only lift values that complete the source PNGs' short hop.
+    DEAD_FRAME_RENDER_Y = [0, 0, -8, -24, -36, 0];
 
     /** Initializes Pepe's images and animation loops. */
     constructor() {
@@ -94,6 +106,105 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_DEAD);
         this.applyGravity();
         this.animate();
+    }
+
+    /** Draws DEAD frames with an isolated hop, fall, and landing transform. */
+    draw(ctx) {
+        if (!this.isDead()) {
+            super.draw(ctx);
+            return;
+        }
+
+        let frameIndex = this.IMAGES_DEAD.findIndex(path =>
+            this.imageCache[path] === this.img
+        );
+        let rotation = this.getDeathRotation(frameIndex);
+        let floorOffset = this.getDeathFloorOffset(frameIndex, rotation);
+        let visualOffset = this.getDeathVisualOffset(frameIndex);
+        let edgeOffset = this.getDeathEdgeOffset(frameIndex);
+
+        ctx.save();
+        ctx.translate(
+            this.x + this.width / 2 + edgeOffset,
+            this.y + this.height + floorOffset + visualOffset
+        );
+        ctx.rotate(rotation);
+        ctx.drawImage(this.img, -this.width / 2, -this.height, this.width, this.height);
+        ctx.restore();
+    }
+
+    /** Keeps Pepe face-up after World applies its outer horizontal mirror. */
+    getDeathRotation(frameIndex) {
+        let rotations = [0, 0, 0, 0, -Math.PI / 6, -Math.PI / 2];
+        return rotations[frameIndex] || 0;
+    }
+
+    /** Returns the DEAD-only visual lift without changing physics coordinates. */
+    getDeathVisualOffset(frameIndex) {
+        return this.DEAD_FRAME_RENDER_Y[frameIndex] || 0;
+    }
+
+    /** Smoothly shifts a DEAD-only render back inside the visible canvas. */
+    getDeathEdgeOffset(frameIndex) {
+        if (!this.world?.canvas || frameIndex < 0) return 0;
+
+        let allBounds = this.IMAGES_DEAD.map((_, index) =>
+            this.getDeathScreenBounds(index, this.getDeathRotation(index))
+        );
+        let animationLeft = Math.min(...allBounds.map(bounds => bounds.left));
+        let animationRight = Math.max(...allBounds.map(bounds => bounds.right));
+        let margin = 8;
+        let targetScreenOffset = 0;
+
+        if (animationLeft < margin) {
+            targetScreenOffset = margin - animationLeft;
+        } else if (animationRight > this.world.canvas.width - margin) {
+            targetScreenOffset = this.world.canvas.width - margin - animationRight;
+        }
+
+        let progress = [0, 0, 0.2, 0.45, 0.75, 1][frameIndex] || 0;
+        let localOffset = targetScreenOffset * progress;
+        return this.otherDirection ? -localOffset : localOffset;
+    }
+
+    /** Returns the rotated alpha bounds in visible screen coordinates. */
+    getDeathScreenBounds(frameIndex, rotation) {
+        let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
+        if (!bounds) return { left: 0, right: 0 };
+
+        let scaleX = this.width / 610;
+        let scaleY = this.height / 1200;
+        let xValues = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
+        let yValues = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
+        let cos = Math.cos(rotation);
+        let sin = Math.sin(rotation);
+        let mirror = this.otherDirection ? -1 : 1;
+        // World temporarily negates x while drawing a left-facing character.
+        // Reconstruct the world coordinate before calculating screen bounds;
+        // the mirror below already represents Canvas scale(-1, 1).
+        let worldX = this.otherDirection ? -this.x : this.x;
+        let pivotX = worldX + this.width / 2 + (this.world?.camera_x || 0);
+        let screenX = xValues.flatMap(x => yValues.map(y =>
+            pivotX + mirror * (cos * x - sin * y)
+        ));
+
+        return { left: Math.min(...screenX), right: Math.max(...screenX) };
+    }
+
+    /** Keeps the rotated PNG's lowest opaque pixel on Pepe's existing floor. */
+    getDeathFloorOffset(frameIndex, rotation) {
+        let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
+        if (!bounds) return 0;
+
+        let scaleX = this.width / 610;
+        let scaleY = this.height / 1200;
+        let sin = Math.sin(rotation);
+        let cos = Math.cos(rotation);
+        let xValues = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
+        let yValues = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
+        let lowestPixel = Math.max(...xValues.flatMap(x => yValues.map(y => sin * x + cos * y)));
+
+        return Math.min(0, -lowestPixel);
     }
 
     /** Remembers when Pepe lands after falling. */

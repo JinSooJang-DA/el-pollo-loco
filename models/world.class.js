@@ -146,16 +146,7 @@ class World {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
         if (this.character.isDead() && !this.gameEnded) {
-            this.gameEnded = true;
-            this.character.resetIdleTimer();
-            playSound(AUDIO_HUB.pepeDead);
-            playBgm(AUDIO_HUB.bgmLost);
-
-            setTimeout(() => {
-                if (this === world) {
-                    this.showEndScreen('img/You won, you lost/You lost.png');
-                }
-            }, 1500);
+            this.startPepeDeathSequence();
             return;
         }
 
@@ -168,6 +159,26 @@ class World {
 
             finishCompletedLevel(this);
         }
+    }
+
+    /** Starts Pepe's one-time death voice and waits for it before Game Over. */
+    startPepeDeathSequence() {
+        if (this.gameEnded) return;
+
+        this.gameEnded = true;
+        this.character.resetIdleTimer();
+        if (currentBgm) currentBgm.pause();
+
+        let deathVoice = playRandomPepeDeadVoice();
+        let finishDeath = () => {
+            if (this !== world || !this.gameEnded) return;
+
+            playBgm(AUDIO_HUB.bgmLost);
+            this.showEndScreen('img/You won, you lost/You lost.png');
+        };
+
+        deathVoice.addEventListener('ended', finishDeath, { once: true });
+        deathVoice.addEventListener('error', finishDeath, { once: true });
     }
 
     showEndScreen(imagePath, isVictory = false) {

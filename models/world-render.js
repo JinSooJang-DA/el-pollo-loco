@@ -23,7 +23,6 @@ World.prototype.draw = function () {
 
 World.prototype.drawWorldObjects = function () {
     this.drawBackgroundObjects();
-    this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
 
     if (this.level.bottles) {

@@ -14,7 +14,7 @@ let pauseStartedAt = 0;
 /** @type {HTMLAudioElement|null} */
 let currentBgm = null;
 /** @type {number} */
-let bgmVolume = 0.5;
+let bgmVolume = 0.25;
 /** @type {number} */
 let sfxVolume = 0.5;
 /** @type {'start'|'game'|null} */
@@ -38,8 +38,12 @@ const AUDIO_HUB = {
     chickenDead1: new Audio('audio/chicken-dead1.mp3'),
     chickenDead: new Audio('audio/chicken-dead.mp3'),
     bossHurt: new Audio('audio/boss-hurt.mp3'),
-    pepeHurt: new Audio('audio/hurt.mp3'),
-    pepeDead: new Audio('audio/dead.mp3')
+    pepeHurt01: new Audio('audio/hurt01.mp3'),
+    pepeHurt02: new Audio('audio/hurt02.mp3'),
+    pepeHurt03: new Audio('audio/hurt03.mp3'),
+    pepeDead01: new Audio('audio/dead01.mp3'),
+    pepeDead02: new Audio('audio/dead02.mp3'),
+    pepeDead03: new Audio('audio/dead03.mp3')
 };
 
 AUDIO_HUB.run.loop = true;
@@ -232,6 +236,38 @@ function playSound(sound) {
     sound.play().catch(() => { });
 }
 
+/** Returns one of Pepe's bundled voice lines at random. */
+function getRandomPepeVoice(type) {
+    let voices = type === 'hurt'
+        ? [AUDIO_HUB.pepeHurt01, AUDIO_HUB.pepeHurt02, AUDIO_HUB.pepeHurt03]
+        : [AUDIO_HUB.pepeDead01, AUDIO_HUB.pepeDead02, AUDIO_HUB.pepeDead03];
+
+    return voices[Math.floor(Math.random() * voices.length)];
+}
+
+/** Stops any active Hurt line before Pepe changes state or takes another hit. */
+function stopPepeHurtVoices() {
+    [AUDIO_HUB.pepeHurt01, AUDIO_HUB.pepeHurt02, AUDIO_HUB.pepeHurt03]
+        .forEach(sound => {
+            sound.pause();
+            sound.currentTime = 0;
+        });
+}
+
+/** Plays exactly one non-overlapping Hurt line. */
+function playRandomPepeHurtVoice() {
+    stopPepeHurtVoices();
+    playSound(getRandomPepeVoice('hurt'));
+}
+
+/** Stops Hurt and starts one Death line, returning it for end-of-line handling. */
+function playRandomPepeDeadVoice() {
+    stopPepeHurtVoices();
+    let voice = getRandomPepeVoice('dead');
+    playSound(voice);
+    return voice;
+}
+
 /** Stops all sound effects except the current BGM. */
 function stopSoundEffects() {
     Object.values(AUDIO_HUB).forEach(audio => {
@@ -244,8 +280,17 @@ function stopSoundEffects() {
 
 /** Toggles the game's pause state. */
 function togglePause() {
-    if (!world || world.gameEnded || pendingLevelNumber !== null) return;
+    if (typeof isGameResultVisible === 'function' && isGameResultVisible()) {
+        setGameMenuOpen(false);
+        return;
+    }
+    if (!world || pendingLevelNumber !== null) return;
+    if (world.gameEnded) {
+        setGameMenuOpen(false);
+        return;
+    }
 
+    const wasPaused = isPaused;
     if (!isPaused) {
         pauseStartedAt = Date.now();
         pauseBossAttackTimers();
@@ -259,6 +304,10 @@ function togglePause() {
     }
     updatePauseUI();
     handlePauseAudio();
+
+    if (wasPaused && typeof isGameMenuOpen === 'function' && isGameMenuOpen()) {
+        setGameMenuOpen(false);
+    }
 }
 
 /** Pauses pending Endboss attack phases without changing their remaining time. */
@@ -374,6 +423,7 @@ function beginLevel(levelNumber) {
 function startGame() {
     stopSoundEffects();
     resetPauseState();
+    keyboard = new Keyboard();
 
     stopStartVideo();
 
@@ -395,6 +445,7 @@ function stopAllIntervals() {
 function restartGame() {
     stopSoundEffects();
     resetPauseState();
+    keyboard = new Keyboard();
 
     stopEndVideo();
     cancelEndingSequence();

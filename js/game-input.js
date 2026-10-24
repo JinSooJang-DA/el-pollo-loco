@@ -364,6 +364,14 @@ function clearGameMenuInput() {
 
 /** Keeps the native Menu dropdown and existing pause state in sync. */
 function syncGameMenuPause(menu) {
+    if (isGameResultVisible()) {
+        if (menu.open) {
+            clearGameMenuInput();
+            document.getElementById('pauseBtn').classList.add('d-none');
+            requestAnimationFrame(focusGameMenuControl);
+        }
+        return;
+    }
     if (isMenuCreditsOpen()) return;
 
     const startScreen = document.getElementById('startScreen');
@@ -372,6 +380,7 @@ function syncGameMenuPause(menu) {
     if (menu.open) {
         clearGameMenuInput();
         requestAnimationFrame(focusGameMenuControl);
+        document.getElementById('pauseBtn').classList.remove('d-none');
         if (isStartScreenVisible || isGameplayFlowOverlayVisible()) return;
         if (!isPaused) togglePause();
         return;
@@ -387,7 +396,7 @@ function syncGameMenuPause(menu) {
         document.activeElement.blur();
     }
 
-    if (isGameplayFlowOverlayVisible()) return;
+    if (isGameplayFlowOverlayVisible() || isGameResultVisible()) return;
 
     if (isPaused) togglePause();
 }
@@ -471,6 +480,20 @@ function initGameMenuControls() {
     document.addEventListener('keydown', handleMenuFocus, true);
     document.addEventListener('keydown', handleArrowNavigation, true);
     document.addEventListener('focusin', event => syncStartScreenSelection(event.target), true);
+    document.addEventListener('pointerdown', closeGameMenuOnOutsidePointer, true);
+}
+
+/** Closes an open Menu from a blank outer area before gameplay input can run. */
+function closeGameMenuOnOutsidePointer(event) {
+    const menu = document.querySelector('.game-menu');
+    const isDialogClick = event.target.closest('.dialog-overlay');
+    const isControlClick = isMenuControlTarget(event.target);
+
+    if (!menu?.open || menu.contains(event.target) || isDialogClick || isControlClick) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setGameMenuOpen(false);
 }
 
 // Keep Space for jumping outside native controls.
@@ -517,13 +540,14 @@ window.addEventListener('keyup', event => {
     updateKeyboardState(event, false);
 });
 
-/** Closes dropdown menus when clicking outside. */
+/** Closes dropdown menus when another control is clicked. */
 document.addEventListener('click', event => {
     const gameMenu = document.querySelector('.game-menu');
     const bgmMenu = document.querySelector('.bgm-menu');
     const isDialogClick = event.target.closest('.dialog-overlay');
 
-    if (gameMenu && !gameMenu.contains(event.target) && !isDialogClick) {
+    if (gameMenu && !gameMenu.contains(event.target) && !isDialogClick &&
+        isMenuControlTarget(event.target)) {
         gameMenu.open = false;
     }
 

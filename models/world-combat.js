@@ -162,7 +162,13 @@ World.prototype.hurtCharacter = function (damage = 40) {
 
     this.statusBar.setPercentage(this.character.energy);
     this.character.lastHit = Date.now();
-    playSound(AUDIO_HUB.pepeHurt);
+
+    if (this.character.isDead()) {
+        this.startPepeDeathSequence();
+        return;
+    }
+
+    playRandomPepeHurtVoice();
 };
 
 World.prototype.stompEnemy = function (enemy) {
