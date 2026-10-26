@@ -53,356 +53,374 @@
     <main class="game-presentation">
         <h1>El Pollo Loco</h1>
 
+        <!-- SNS Link Preview -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://jinsoojang-da.github.io/el-pollo-loco/">
+        <meta property="og:title" content="El Pollo Loco">
+        <meta property="og:description" content="Run, jump, throw bottles and defeat the chickens!">
+        <meta property="og:image" content="https://jinsoojang-da.github.io/el-pollo-loco/img/sns-link.webp">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="El Pollo Loco">
+        <meta name="twitter:description" content="Run, jump, throw bottles and defeat the chickens!">
+        <meta name="twitter:image" content="https://jinsoojang-da.github.io/el-pollo-loco/img/sns-link.webp">
+
         <div class="game-container" id="gameContainer">
 
-        <div id="sombreroCounter"></div>
-        <div id="coinCollectedCounter"><img src="img/coin-full.webp" alt="Coin"><span>× 0</span></div>
-        <!-- Collapsible navigation menu -->
-        <details class="game-menu">
-            <summary>Menu</summary>
-            <div class="top-nav-bar">
-                <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause()">Pause</button>
-                <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu()">Main Menu</button>
-                <button class="nav-icon-btn" onclick="openSettingsDialog()">Settings</button>
-                <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()">Sound: On</button>
-                <button class="nav-icon-btn" onclick="openImpressum()">Legal Notice</button>
-                <button class="nav-icon-btn" onclick="openInfoDialog()">How to Play</button>
-                <button id="creditsBtn" class="nav-icon-btn" onclick="openMenuCredits()">Credits</button>
-                <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
-            </div>
-        </details>
-
-        <!-- Start screen BGM playlist -->
-        <details id="bgmMenu" class="bgm-menu">
-            <summary>♫ BGM</summary>
-
-            <div class="bgm-panel">
-                <h3>Soundtrack</h3>
-
-                <button class="playlist-track is-playing" onclick="selectPlaylistTrack(0)">01 · Main Theme</button>
-                <button class="playlist-track" onclick="selectPlaylistTrack(1)">02 · Desert Adventure</button>
-                <button class="playlist-track" onclick="selectPlaylistTrack(2)">03 · Boss Battle</button>
-                <button class="playlist-track" onclick="selectPlaylistTrack(3)">04 · Game Over</button>
-                <button class="playlist-track" onclick="selectPlaylistTrack(4)">05 · Victory</button>
-
-                <div class="bgm-player-controls">
-                    <button onclick="playPreviousTrack()" title="Previous">⏮</button>
-                    <button id="bgmPlayBtn" onclick="togglePlaylistPlayback()" title="Play or pause">⏸</button>
-                    <button onclick="playNextTrack()" title="Next">⏭</button>
+            <div id="sombreroCounter"></div>
+            <div id="coinCollectedCounter"><img src="img/coin-full.webp" alt="Coin"><span>× 0</span></div>
+            <!-- Collapsible navigation menu -->
+            <details class="game-menu">
+                <summary>Menu</summary>
+                <div class="top-nav-bar">
+                    <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause()">Pause</button>
+                    <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu()">Main Menu</button>
+                    <button class="nav-icon-btn" onclick="openSettingsDialog()">Settings</button>
+                    <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()">Sound: On</button>
+                    <button class="nav-icon-btn" onclick="openImpressum()">Legal Notice</button>
+                    <button class="nav-icon-btn" onclick="openInfoDialog()">How to Play</button>
+                    <button id="creditsBtn" class="nav-icon-btn" onclick="openMenuCredits()">Credits</button>
+                    <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
                 </div>
+            </details>
 
-                <div class="bgm-player-options">
-                    <button id="bgmShuffleBtn" onclick="togglePlaylistShuffle()">Shuffle: Off</button>
-                    <button id="bgmRepeatBtn" onclick="togglePlaylistRepeat()">Repeat: List</button>
+            <!-- Start screen BGM playlist -->
+            <details id="bgmMenu" class="bgm-menu">
+                <summary>♫ BGM</summary>
+
+                <div class="bgm-panel">
+                    <h3>Soundtrack</h3>
+
+                    <button class="playlist-track is-playing" onclick="selectPlaylistTrack(0)">01 · Main Theme</button>
+                    <button class="playlist-track" onclick="selectPlaylistTrack(1)">02 · Desert Adventure</button>
+                    <button class="playlist-track" onclick="selectPlaylistTrack(2)">03 · Boss Battle</button>
+                    <button class="playlist-track" onclick="selectPlaylistTrack(3)">04 · Game Over</button>
+                    <button class="playlist-track" onclick="selectPlaylistTrack(4)">05 · Victory</button>
+
+                    <div class="bgm-player-controls">
+                        <button onclick="playPreviousTrack()" title="Previous">⏮</button>
+                        <button id="bgmPlayBtn" onclick="togglePlaylistPlayback()" title="Play or pause">⏸</button>
+                        <button onclick="playNextTrack()" title="Next">⏭</button>
+                    </div>
+
+                    <div class="bgm-player-options">
+                        <button id="bgmShuffleBtn" onclick="togglePlaylistShuffle()">Shuffle: Off</button>
+                        <button id="bgmRepeatBtn" onclick="togglePlaylistRepeat()">Repeat: List</button>
+                    </div>
                 </div>
-            </div>
-        </details>
+            </details>
 
-        <!-- Game canvas -->
-        <canvas id="canvas" width="720" height="480"></canvas>
+            <!-- Game canvas -->
+            <canvas id="canvas" width="720" height="480"></canvas>
 
-        <!-- Pause screen -->
-        <div id="pauseScreen" class="overlay-screen d-none">
-            <h2 class="pause-title">GAME PAUSED</h2>
-            <button id="resumeBtn" class="western-action-button western-start-button" onclick="togglePause()">
-                RESUME GAME
-            </button>
-        </div>
-
-        <!-- Start screen -->
-        <div id="startScreen" class="overlay-screen start-screen-layout">
-            <video id="startVideo" class="start-bg" autoplay muted loop playsinline
-                poster="img/9_intro_outro_screens/start/startscreen_1.webp">
-                <source src="videos/stat-video.mp4" type="video/mp4">
-            </video>
-
-            <button id="startBtn" class="western-action-button western-start-button" onclick="startGame()">
-                START GAME
-            </button>
-        </div>
-
-        <!-- Level rules displayed before each level starts -->
-        <div id="levelRulesScreen" class="overlay-screen level-rules-screen d-none" role="dialog" aria-modal="true"
-            aria-labelledby="levelRulesTitle">
-            <div class="level-rules-card">
-                <h2 id="levelRulesTitle">LEVEL 1</h2>
-                <img id="levelRulesImage" class="level-rules-image" src="img/tip-lv1.webp" alt="Level 1 tip">
-                <p id="levelRulesText">Loading level rules...</p>
-                <button id="levelRulesStartBtn" class="level-action-button" onclick="continueLevel()" disabled>
-                    START LEVEL · SPACE ↵
+            <!-- Pause screen -->
+            <div id="pauseScreen" class="overlay-screen d-none">
+                <h2 class="pause-title">GAME PAUSED</h2>
+                <button id="resumeBtn" class="western-action-button western-start-button" onclick="togglePause()">
+                    RESUME GAME
                 </button>
             </div>
-        </div>
 
-        <!-- Story videos between the menu, levels and finale -->
-        <div id="storyVideoScreen" class="story-video-screen d-none" role="dialog" aria-label="Story video">
-            <video id="storyVideo" class="story-video" playsinline></video>
-            <button id="storyVideoSkipBtn" class="story-video-skip" type="button" onclick="skipStoryVideo()">
-                SKIP · SPACE
-            </button>
-        </div>
-
-
-        <!-- Game instructions -->
-        <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
-            <div class="dialog-card">
-                <button class="dialog-close-btn" aria-label="Close How to Play" onclick="closeInfoDialog()">✕</button>
-
-                <h2>How to Play</h2>
-
-                <div class="dialog-content" tabindex="0" role="region" aria-label="How to Play content">
-                    <h3>Controls</h3>
-                    <p><strong>← →</strong> Move</p>
-                    <p><strong>SPACE</strong> Jump / Stomp / Start Level</p>
-                    <p><strong>D</strong> Throw Bottle</p>
-
-                    <h3>Menu &amp; Accessibility</h3>
-                    <p><strong>ESC</strong> Open / Close Menu / Go Back</p>
-                    <p><strong>TAB / SHIFT + TAB</strong> Navigate Buttons and Controls</p>
-                    <p><strong>ARROW KEYS</strong> Navigate Menus and Screen Buttons</p>
-                    <p><strong>↑ / ↓</strong> Scroll How to Play and Legal Notice</p>
-                    <p><strong>ENTER / SPACE</strong> Select</p>
-                    <p><strong>LEFT / RIGHT</strong> Adjust Volume (in Settings)</p>
-
-                    <h3 class="guide-section-heading">
-                        <img class="guide-icon" src="img/3_enemies_chicken/chicken_normal/1_walk/1_w.png"
-                            alt="Chicken enemy">
-                        Chicken Combat
-                    </h3>
-                    <p>Stomp chickens or throw bottles.</p>
-                    <p class="guide-copy-with-icon">
-                        <img class="guide-icon" src="img/3_enemies_chicken/chicken_small/1_walk/1_w.png"
-                            alt="Baby chick enemy">
-                        <span>Baby chicks are too cute to stomp! Use bottles instead.</span>
-                    </p>
-
-                    <h3 class="guide-section-heading">
-                        <span class="guide-icon-pair">
-                            <img class="guide-icon" src="img/7_statusbars/3_icons/icon_health.png" alt="Health icon">
-                            <img class="guide-icon" src="img/7_statusbars/3_icons/icon_coin.png" alt="Coin icon">
-                        </span>
-                        Health &amp; Coins
-                    </h3>
-                    <p>Coins restore health or protect you from damage.</p>
-
-                    <h3 class="guide-section-heading">
-                        <img class="guide-icon" src="img/4_enemie_boss_chicken/1_walk/G1.png" alt="Boss chicken">
-                        Boss Battles
-                    </h3>
-                    <p>Wait 3 seconds between successful attacks.</p>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Sombrero reward screen -->
-        <div id="sombreroRewardScreen" class="overlay-screen d-none">
-            <div class="level-rules-card">
-                <h2>ONE MORE ROUND!</h2>
-                <img id="sombreroRewardImage" class="level-rules-image" src="img/sombrero-reward.webp"
-                    alt="Sombrero reward">
-                <p>SOMBRERO +1</p>
-                <p>You earned an extra chance!</p>
-                <button class="level-action-button" onclick="continueAfterSombrero()">
-                    CONTINUE
-                </button>
-            </div>
-        </div>
-
-        <!-- Game result screen -->
-        <div id="endingRewardScreen" class="overlay-screen ending-reward-screen d-none" aria-live="polite">
-            <div class="level-rules-card">
-                <video id="endingRewardVideo" class="ending-reward-media d-none" playsinline></video>
-                <button id="endingPauseBtn" class="western-action-button western-ending-button" type="button" onclick="toggleEndingPause()">
-                    PAUSE
-                </button>
-            </div>
-        </div>
-
-        <div id="restartScreen" class="overlay-screen d-none">
-            <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
-
-            <div id="endCredits" class="end-credits d-none" aria-label="End credits">
-                <video id="endVideo" class="end-bg" autoplay muted loop playsinline
-                    poster="img/You won, you lost/You win B.png">
-                    <source src="videos/end-video.mp4" type="video/mp4">
+            <!-- Start screen -->
+            <div id="startScreen" class="overlay-screen start-screen-layout">
+                <video id="startVideo" class="start-bg" autoplay muted loop playsinline
+                    poster="img/9_intro_outro_screens/start/startscreen_1.webp">
+                    <source src="videos/stat-video.mp4" type="video/mp4">
                 </video>
-                <div class="credits-copy" aria-live="polite">
-                    <p class="credit-entry" style="--credit-delay: 0s">
-                        <span class="credit-role">BASED ON THE ORIGINAL GAME TUTORIAL BY</span>
-                        <strong class="credit-name">JUNUS ERGIN</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -4.5s">
-                        <span class="credit-role">CREATED DURING THE FRONTEND COURSE AT</span>
-                        <strong class="credit-name">DEVELOPER AKADEMIE</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -9s">
-                        <span class="credit-role">FOUNDER OF DEVELOPER AKADEMIE</span>
-                        <strong class="credit-name">JUNUS ERGIN</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -13.5s">
-                        <span class="credit-role">COURSE INSTRUCTOR</span>
-                        <strong class="credit-name">GIULIANO GIOIA</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -18s">
-                        <span class="credit-role">GAME DESIGN &amp; EXTENDED DEVELOPMENT</span>
-                        <strong class="credit-name">JIN SOO JANG</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -22.5s">
-                        <span class="credit-role">PROGRAMMING &amp; AI ASSISTANCE</span>
-                        <strong class="credit-name">JIN SOO JANG &amp; CHATGPT</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -27s">
-                        <span class="credit-role">ORIGINAL GAME ARTWORK</span>
-                        <strong class="credit-name">DEVELOPER AKADEMIE</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -31.5s">
-                        <span class="credit-role">ADDITIONAL GRAPHICS &amp; VISUAL DESIGN</span>
-                        <strong class="credit-name">JIN SOO JANG</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -36s">
-                        <span class="credit-role">MUSIC</span>
-                        <strong class="credit-name">JIN SOO JANG &amp; GOOGLE GEMINI (LYRIA)</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -40.5s">
-                        <span class="credit-role">SOUND EFFECTS</span>
-                        <strong class="credit-name">PIXABAY &amp; OTHER SOUND RESOURCES</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -45s">
-                        <span class="credit-role">AI CINEMATICS</span>
-                        <strong class="credit-name">GOOGLE GEMINI</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -49.5s">
-                        <span class="credit-role">VIDEO EDITING</span>
-                        <strong class="credit-name">JIN SOO JANG</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -54s">
-                        <span class="credit-role">STORY &amp; SCREENPLAY</span>
-                        <strong class="credit-name">JIN SOO JANG</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -58.5s">
-                        <span class="credit-role">CREATIVE DIRECTION &amp; PRODUCTION</span>
-                        <strong class="credit-name">JIN SOO JANG</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -63s">
-                        <span class="credit-role">SPECIAL THANKS</span>
-                        <strong class="credit-name">JUNUS ERGIN</strong>
-                        <strong class="credit-name">GIULIANO GIOIA</strong>
-                        <strong class="credit-name">DEVELOPER AKADEMIE</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -67.5s">
-                        <span class="credit-role">A VERY SPECIAL THANK YOU</span>
-                        <strong class="credit-name">TO ALL THE CHICKENS!</strong>
-                        <em class="credit-note">For their patience, courage, and countless sacrifices.</em>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -72s">
-                        <span class="credit-role">FINAL COMEDY CARD</span>
-                        <strong class="credit-name">NO CHICKENS WERE INTENTIONALLY HARMED IN THE MAKING OF THIS
-                            GAME.</strong>
-                    </p>
-                    <p class="credit-entry" style="--credit-delay: -76.5s">
-                        <span class="credit-role">THE END</span>
-                        <strong class="credit-name">¡HASTA LA PRÓXIMA, AMIGOS!</strong>
-                        <em class="credit-note">THE CHICKENS WILL RETURN…</em>
-                    </p>
-                </div>
-            </div>
 
-            <div class="end-buttons-group">
-                <button id="menuCreditsBackBtn" class="western-action-button western-ending-button d-none" type="button"
-                    onclick="closeMenuCredits()">
-                    BACK TO MENU
+                <button id="startBtn" class="western-action-button western-start-button" onclick="startGame()">
+                    START GAME
                 </button>
-                <div class="end-revive-row">
-                    <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
-                        <img src="img/golden-sombrero-big.webp" alt="">
-                        <span>REVIVE WITH SOMBRERO</span>
-                        <span>× 1</span>
-                    </button>
-                </div>
-                <div class="end-secondary-row">
-                    <button id="restartBtn" class="western-action-button western-ending-button" onclick="restartGame()">
-                        NEW START
-                    </button>
-                    <button id="homeBtn" class="western-action-button western-ending-button" onclick="backToMainMenu()">
-                        MAIN MENU
+            </div>
+
+            <!-- Level rules displayed before each level starts -->
+            <div id="levelRulesScreen" class="overlay-screen level-rules-screen d-none" role="dialog" aria-modal="true"
+                aria-labelledby="levelRulesTitle">
+                <div class="level-rules-card">
+                    <h2 id="levelRulesTitle">LEVEL 1</h2>
+                    <img id="levelRulesImage" class="level-rules-image" src="img/tip-lv1.webp" alt="Level 1 tip">
+                    <p id="levelRulesText">Loading level rules...</p>
+                    <button id="levelRulesStartBtn" class="level-action-button" onclick="continueLevel()" disabled>
+                        START LEVEL · SPACE ↵
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Volume settings -->
-        <div id="settingsDialog" class="dialog-overlay d-none" role="dialog" aria-modal="true"
-            aria-labelledby="settingsDialogTitle" onclick="closeSettingsOnBackdrop(event)">
-            <div class="dialog-card">
-                <button class="dialog-close-btn" aria-label="Close volume settings"
-                    onclick="closeSettingsDialog()">✕</button>
-                <h2 id="settingsDialogTitle">Volume Settings</h2>
+            <!-- Story videos between the menu, levels and finale -->
+            <div id="storyVideoScreen" class="story-video-screen d-none" role="dialog" aria-label="Story video">
+                <video id="storyVideo" class="story-video" playsinline></video>
+                <button id="storyVideoSkipBtn" class="story-video-skip" type="button" onclick="skipStoryVideo()">
+                    SKIP · SPACE
+                </button>
+            </div>
 
-                <div class="dialog-content">
-                    <div class="volume-control-row">
-                        <label for="bgmSlider">BGM Volume</label>
-                        <input type="range" id="bgmSlider" min="0" max="1" step="0.05" value="0.25"
-                            oninput="changeBgmVolume(this.value)">
+
+            <!-- Game instructions -->
+            <div id="infoDialog" class="dialog-overlay d-none" onclick="closeOnBackdrop(event)">
+                <div class="dialog-card">
+                    <button class="dialog-close-btn" aria-label="Close How to Play"
+                        onclick="closeInfoDialog()">✕</button>
+
+                    <h2>How to Play</h2>
+
+                    <div class="dialog-content" tabindex="0" role="region" aria-label="How to Play content">
+                        <h3>Controls</h3>
+                        <p><strong>← →</strong> Move</p>
+                        <p><strong>SPACE</strong> Jump / Stomp / Start Level</p>
+                        <p><strong>D</strong> Throw Bottle</p>
+
+                        <h3>Menu &amp; Accessibility</h3>
+                        <p><strong>ESC</strong> Open / Close Menu / Go Back</p>
+                        <p><strong>TAB / SHIFT + TAB</strong> Navigate Buttons and Controls</p>
+                        <p><strong>ARROW KEYS</strong> Navigate Menus and Screen Buttons</p>
+                        <p><strong>↑ / ↓</strong> Scroll How to Play and Legal Notice</p>
+                        <p><strong>ENTER / SPACE</strong> Select</p>
+                        <p><strong>LEFT / RIGHT</strong> Adjust Volume (in Settings)</p>
+
+                        <h3 class="guide-section-heading">
+                            <img class="guide-icon" src="img/3_enemies_chicken/chicken_normal/1_walk/1_w.png"
+                                alt="Chicken enemy">
+                            Chicken Combat
+                        </h3>
+                        <p>Stomp chickens or throw bottles.</p>
+                        <p class="guide-copy-with-icon">
+                            <img class="guide-icon" src="img/3_enemies_chicken/chicken_small/1_walk/1_w.png"
+                                alt="Baby chick enemy">
+                            <span>Baby chicks are too cute to stomp! Use bottles instead.</span>
+                        </p>
+
+                        <h3 class="guide-section-heading">
+                            <span class="guide-icon-pair">
+                                <img class="guide-icon" src="img/7_statusbars/3_icons/icon_health.png"
+                                    alt="Health icon">
+                                <img class="guide-icon" src="img/7_statusbars/3_icons/icon_coin.png" alt="Coin icon">
+                            </span>
+                            Health &amp; Coins
+                        </h3>
+                        <p>Coins restore health or protect you from damage.</p>
+
+                        <h3 class="guide-section-heading">
+                            <img class="guide-icon" src="img/4_enemie_boss_chicken/1_walk/G1.png" alt="Boss chicken">
+                            Boss Battles
+                        </h3>
+                        <p>Wait 3 seconds between successful attacks.</p>
                     </div>
+                </div>
+            </div>
 
-                    <div class="volume-control-row">
-                        <label for="sfxSlider">SFX Volume</label>
-                        <input type="range" id="sfxSlider" min="0" max="1" step="0.05" value="0.5"
-                            oninput="changeSfxVolume(this.value)">
+
+            <!-- Sombrero reward screen -->
+            <div id="sombreroRewardScreen" class="overlay-screen d-none">
+                <div class="level-rules-card">
+                    <h2>ONE MORE ROUND!</h2>
+                    <img id="sombreroRewardImage" class="level-rules-image" src="img/sombrero-reward.webp"
+                        alt="Sombrero reward">
+                    <p>SOMBRERO +1</p>
+                    <p>You earned an extra chance!</p>
+                    <button class="level-action-button" onclick="continueAfterSombrero()">
+                        CONTINUE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game result screen -->
+            <div id="endingRewardScreen" class="overlay-screen ending-reward-screen d-none" aria-live="polite">
+                <div class="level-rules-card">
+                    <video id="endingRewardVideo" class="ending-reward-media d-none" playsinline></video>
+                    <button id="endingPauseBtn" class="western-action-button western-ending-button" type="button"
+                        onclick="toggleEndingPause()">
+                        PAUSE
+                    </button>
+                </div>
+            </div>
+
+            <div id="restartScreen" class="overlay-screen d-none">
+                <img id="endScreenImg" src="" alt="Game Result" class="end-result-img d-none">
+
+                <div id="endCredits" class="end-credits d-none" aria-label="End credits">
+                    <video id="endVideo" class="end-bg" autoplay muted loop playsinline
+                        poster="img/You won, you lost/You win B.png">
+                        <source src="videos/end-video.mp4" type="video/mp4">
+                    </video>
+                    <div class="credits-copy" aria-live="polite">
+                        <p class="credit-entry" style="--credit-delay: 0s">
+                            <span class="credit-role">BASED ON THE ORIGINAL GAME TUTORIAL BY</span>
+                            <strong class="credit-name">JUNUS ERGIN</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -4.5s">
+                            <span class="credit-role">CREATED DURING THE FRONTEND COURSE AT</span>
+                            <strong class="credit-name">DEVELOPER AKADEMIE</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -9s">
+                            <span class="credit-role">FOUNDER OF DEVELOPER AKADEMIE</span>
+                            <strong class="credit-name">JUNUS ERGIN</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -13.5s">
+                            <span class="credit-role">COURSE INSTRUCTOR</span>
+                            <strong class="credit-name">GIULIANO GIOIA</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -18s">
+                            <span class="credit-role">GAME DESIGN &amp; EXTENDED DEVELOPMENT</span>
+                            <strong class="credit-name">JIN SOO JANG</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -22.5s">
+                            <span class="credit-role">PROGRAMMING &amp; AI ASSISTANCE</span>
+                            <strong class="credit-name">JIN SOO JANG &amp; CHATGPT</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -27s">
+                            <span class="credit-role">ORIGINAL GAME ARTWORK</span>
+                            <strong class="credit-name">DEVELOPER AKADEMIE</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -31.5s">
+                            <span class="credit-role">ADDITIONAL GRAPHICS &amp; VISUAL DESIGN</span>
+                            <strong class="credit-name">JIN SOO JANG</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -36s">
+                            <span class="credit-role">MUSIC</span>
+                            <strong class="credit-name">JIN SOO JANG &amp; GOOGLE GEMINI (LYRIA)</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -40.5s">
+                            <span class="credit-role">SOUND EFFECTS</span>
+                            <strong class="credit-name">PIXABAY &amp; OTHER SOUND RESOURCES</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -45s">
+                            <span class="credit-role">AI CINEMATICS</span>
+                            <strong class="credit-name">GOOGLE GEMINI</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -49.5s">
+                            <span class="credit-role">VIDEO EDITING</span>
+                            <strong class="credit-name">JIN SOO JANG</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -54s">
+                            <span class="credit-role">STORY &amp; SCREENPLAY</span>
+                            <strong class="credit-name">JIN SOO JANG</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -58.5s">
+                            <span class="credit-role">CREATIVE DIRECTION &amp; PRODUCTION</span>
+                            <strong class="credit-name">JIN SOO JANG</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -63s">
+                            <span class="credit-role">SPECIAL THANKS</span>
+                            <strong class="credit-name">JUNUS ERGIN</strong>
+                            <strong class="credit-name">GIULIANO GIOIA</strong>
+                            <strong class="credit-name">DEVELOPER AKADEMIE</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -67.5s">
+                            <span class="credit-role">A VERY SPECIAL THANK YOU</span>
+                            <strong class="credit-name">TO ALL THE CHICKENS!</strong>
+                            <em class="credit-note">For their patience, courage, and countless sacrifices.</em>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -72s">
+                            <span class="credit-role">FINAL COMEDY CARD</span>
+                            <strong class="credit-name">NO CHICKENS WERE INTENTIONALLY HARMED IN THE MAKING OF THIS
+                                GAME.</strong>
+                        </p>
+                        <p class="credit-entry" style="--credit-delay: -76.5s">
+                            <span class="credit-role">THE END</span>
+                            <strong class="credit-name">¡HASTA LA PRÓXIMA, AMIGOS!</strong>
+                            <em class="credit-note">THE CHICKENS WILL RETURN…</em>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="end-buttons-group">
+                    <button id="menuCreditsBackBtn" class="western-action-button western-ending-button d-none"
+                        type="button" onclick="closeMenuCredits()">
+                        BACK TO MENU
+                    </button>
+                    <div class="end-revive-row">
+                        <button id="retryLevelBtn" class="d-none" onclick="retryCurrentLevel()">
+                            <img src="img/golden-sombrero-big.webp" alt="">
+                            <span>REVIVE WITH SOMBRERO</span>
+                            <span>× 1</span>
+                        </button>
+                    </div>
+                    <div class="end-secondary-row">
+                        <button id="restartBtn" class="western-action-button western-ending-button"
+                            onclick="restartGame()">
+                            NEW START
+                        </button>
+                        <button id="homeBtn" class="western-action-button western-ending-button"
+                            onclick="backToMainMenu()">
+                            MAIN MENU
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Legal Notice dialog -->
-        <div id="legalDialog" class="dialog-overlay d-none" onclick="closeLegalOnBackdrop(event)">
-            <div class="dialog-card legal-card">
-                <button class="dialog-close-btn" aria-label="Close legal notice" onclick="closeLegalNotice()">✕</button>
-                <h2>Legal Notice</h2>
+            <!-- Volume settings -->
+            <div id="settingsDialog" class="dialog-overlay d-none" role="dialog" aria-modal="true"
+                aria-labelledby="settingsDialogTitle" onclick="closeSettingsOnBackdrop(event)">
+                <div class="dialog-card">
+                    <button class="dialog-close-btn" aria-label="Close volume settings"
+                        onclick="closeSettingsDialog()">✕</button>
+                    <h2 id="settingsDialogTitle">Volume Settings</h2>
 
-                <div class="legal-content" tabindex="0" role="region" aria-label="Legal notice content">
-                    <h3>Project Information</h3>
-                    <p>
-                        <strong>Project:</strong> El Pollo Loco - Jump & Run Game
-                        <br>
-                        <strong>Developer:</strong> Student at Developer Akademie
-                        <br>
-                        <strong>Purpose:</strong> Educational frontend development project
-                    </p>
+                    <div class="dialog-content">
+                        <div class="volume-control-row">
+                            <label for="bgmSlider">BGM Volume</label>
+                            <input type="range" id="bgmSlider" min="0" max="1" step="0.05" value="0.25"
+                                oninput="changeBgmVolume(this.value)">
+                        </div>
 
-                    <p>
-                        This game was created for learning and practice
-                        purposes only. It is a non-commercial student project.
-                    </p>
-
-                    <h3>Music and Sound Effects</h3>
-                    <p>
-                        All background music was created by the developer
-                        using artificial intelligence (AI).
-                    </p>
-
-                    <p>
-                        Sound effects were obtained from
-                        <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer">Pixabay</a>
-                        or created using free sound generation tools.
-                    </p>
-
-                    <h3>Copyright</h3>
-                    <p>
-                        Original project content is subject to applicable
-                        copyright laws. Third-party assets remain subject
-                        to their respective licenses and usage conditions.
-                    </p>
-
-                    <h3>Disclaimer</h3>
-                    <p>
-                        This game is provided as an educational and
-                        demonstration project.
-                    </p>
+                        <div class="volume-control-row">
+                            <label for="sfxSlider">SFX Volume</label>
+                            <input type="range" id="sfxSlider" min="0" max="1" step="0.05" value="0.5"
+                                oninput="changeSfxVolume(this.value)">
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Legal Notice dialog -->
+            <div id="legalDialog" class="dialog-overlay d-none" onclick="closeLegalOnBackdrop(event)">
+                <div class="dialog-card legal-card">
+                    <button class="dialog-close-btn" aria-label="Close legal notice"
+                        onclick="closeLegalNotice()">✕</button>
+                    <h2>Legal Notice</h2>
+
+                    <div class="legal-content" tabindex="0" role="region" aria-label="Legal notice content">
+                        <h3>Project Information</h3>
+                        <p>
+                            <strong>Project:</strong> El Pollo Loco - Jump & Run Game
+                            <br>
+                            <strong>Developer:</strong> Student at Developer Akademie
+                            <br>
+                            <strong>Purpose:</strong> Educational frontend development project
+                        </p>
+
+                        <p>
+                            This game was created for learning and practice
+                            purposes only. It is a non-commercial student project.
+                        </p>
+
+                        <h3>Music and Sound Effects</h3>
+                        <p>
+                            All background music was created by the developer
+                            using artificial intelligence (AI).
+                        </p>
+
+                        <p>
+                            Sound effects were obtained from
+                            <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer">Pixabay</a>
+                            or created using free sound generation tools.
+                        </p>
+
+                        <h3>Copyright</h3>
+                        <p>
+                            Original project content is subject to applicable
+                            copyright laws. Third-party assets remain subject
+                            to their respective licenses and usage conditions.
+                        </p>
+
+                        <h3>Disclaimer</h3>
+                        <p>
+                            This game is provided as an educational and
+                            demonstration project.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
