@@ -320,6 +320,10 @@ screen and (orientation: portrait) and (max-width: 600px) {
         gap: var(--touch-button-gap);
     }
 
+    .touch-group-left {
+        flex-direction: row;
+    }
+
     .touch-btn {
         width: var(--touch-button-size);
         height: var(--touch-button-size);
