@@ -731,11 +731,17 @@ function toggleFullscreen() {
         document.activeElement.blur();
     }
 
-    const container = document.getElementById('gameContainer');
+    const presentation = document.querySelector('.game-presentation');
 
     if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(() => { });
+        if (!presentation?.requestFullscreen) return Promise.resolve(false);
+
+        return presentation.requestFullscreen()
+            .then(() => document.fullscreenElement === presentation)
+            .catch(() => false);
     } else {
-        document.exitFullscreen().catch(() => { });
+        return document.exitFullscreen()
+            .then(() => false)
+            .catch(() => Boolean(document.fullscreenElement));
     }
 }

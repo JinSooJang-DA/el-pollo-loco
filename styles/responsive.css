@@ -245,6 +245,19 @@ screen and (orientation: portrait) and (max-width: 600px) {
 }
 
 /* Shared phone/tablet touch layout. This overrides pointer:fine on hybrid tablets. */
+.game-presentation:fullscreen {
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-width: none;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-image: url('../img/9_intro_outro_screens/start/intro-backdrop.webp');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 @media screen and (orientation: portrait) and (any-pointer: coarse) {
     .turn-device-overlay {
         display: flex !important;
