@@ -24,6 +24,16 @@ function handleTouchStart(event, keyProperty) {
     if (isStoryVideoPlaying()) return;
     keyboard[keyProperty] = true;
 
+    if (keyProperty === 'SPACE') {
+        keyboard.SPACE = false;
+        if (world && !isPaused && !world.gameEnded &&
+            !world.character.isDead() && !world.character.isAboveGround()) {
+            world.character.resetIdleTimer();
+            world.character.jump();
+        }
+        return;
+    }
+
     if (keyProperty === 'D' && world && !isPaused) {
         world.character.resetIdleTimer();
         world.checkThrowObjects();
@@ -45,6 +55,7 @@ function bindTouchEvents() {
     bindTouchButton('btnThrow', 'D');
     window.addEventListener('orientationchange', clearTouchControlState);
     window.addEventListener('resize', clearTouchControlState);
+    window.addEventListener('blur', clearTouchControlState);
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) clearTouchControlState();
     });
