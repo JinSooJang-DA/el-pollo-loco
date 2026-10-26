@@ -375,3 +375,31 @@ screen and (orientation: portrait) and (max-width: 600px) {
         );
     }
 }
+
+/* Desktop fullscreen: maximize game canvas only */
+@media screen and (pointer: fine) and (min-width: 1025px) {
+
+    .game-presentation:fullscreen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .game-presentation:fullscreen > h1 {
+        display: none;
+    }
+
+    .game-presentation:fullscreen .game-container {
+        width: min(100vw, 150dvh);
+        height: auto;
+        aspect-ratio: 3 / 2;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .game-presentation:fullscreen .mobile-controls-container {
+        display: none !important;
+    }
+}
