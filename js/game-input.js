@@ -43,6 +43,19 @@ function bindTouchEvents() {
     bindTouchButton('btnRight', 'RIGHT');
     bindTouchButton('btnJump', 'SPACE');
     bindTouchButton('btnThrow', 'D');
+    window.addEventListener('orientationchange', clearTouchControlState);
+    window.addEventListener('resize', clearTouchControlState);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearTouchControlState();
+    });
+}
+
+/** Releases active touch input when rotation, resizing, or app switching cancels it. */
+function clearTouchControlState() {
+    keyboard.LEFT = false;
+    keyboard.RIGHT = false;
+    keyboard.SPACE = false;
+    keyboard.D = false;
 }
 
 /**

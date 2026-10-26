@@ -474,20 +474,21 @@ canvas {
 
 .mobile-controls-container {
     display: none;
-    position: absolute;
-    bottom: 8px;
-    left: 0;
+    position: fixed;
+    inset: 0;
     width: 100%;
     box-sizing: border-box;
-    padding: 0 47px;
     justify-content: space-between;
+    align-items: flex-end;
     pointer-events: none;
     z-index: 20;
 }
 
 .touch-group-left, .touch-group-right {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 12px;
     pointer-events: auto;
 }
 

@@ -243,3 +243,106 @@ screen and (orientation: portrait) and (max-width: 600px) {
         border-radius: 10px;
     }
 }
+
+/* Shared phone/tablet touch layout. This overrides pointer:fine on hybrid tablets. */
+@media screen and (orientation: portrait) and (any-pointer: coarse) {
+    .turn-device-overlay {
+        display: flex !important;
+    }
+
+    h1,
+    .game-container,
+    .mobile-controls-container {
+        display: none !important;
+    }
+}
+
+@media screen and (orientation: landscape) and (any-pointer: coarse) {
+    :root {
+        --touch-button-size: clamp(56px, 10vw, 68px);
+        --touch-button-gap: clamp(10px, 2.5dvh, 16px);
+        --touch-edge-space: max(12px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --touch-bottom-space: max(16px, env(safe-area-inset-bottom));
+        --touch-canvas-clearance: 8px;
+        --touch-control-zone: calc(
+            var(--touch-button-size) + var(--touch-edge-space) + var(--touch-canvas-clearance)
+        );
+    }
+
+    body {
+        min-height: 100dvh;
+        overflow: hidden;
+        justify-content: center;
+    }
+
+    .game-presentation {
+        width: 100%;
+        min-height: 100dvh;
+        box-sizing: border-box;
+        justify-content: center;
+    }
+
+    .game-presentation h1 {
+        display: none;
+    }
+
+    .game-container {
+        width: min(
+            calc(100vw - (var(--touch-control-zone) * 2)),
+            150dvh
+        );
+        height: auto;
+        aspect-ratio: 3 / 2;
+        margin: 0 auto;
+        border-radius: 0;
+    }
+
+    .mobile-controls-container {
+        display: flex !important;
+        padding: 0 var(--touch-edge-space) var(--touch-bottom-space);
+    }
+
+    .touch-group-left,
+    .touch-group-right {
+        gap: var(--touch-button-gap);
+    }
+
+    .touch-btn {
+        width: var(--touch-button-size);
+        height: var(--touch-button-size);
+        font-size: clamp(10px, 2.5dvh, 14px);
+        flex-shrink: 0;
+    }
+
+    body:has(#startScreen:not(.d-none)) .mobile-controls-container,
+    body:has(#restartScreen:not(.d-none)) .mobile-controls-container {
+        display: none !important;
+    }
+}
+
+/* Larger touch screens enlarge this same layout and keep both groups at the bottom. */
+@media screen and (orientation: landscape) and (any-pointer: coarse) and (min-width: 721px) and (min-height: 600px) {
+    :root {
+        --touch-button-size: clamp(76px, 8vw, 96px);
+        --touch-button-gap: clamp(14px, 2.5dvh, 22px);
+        --touch-edge-space: max(18px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --touch-bottom-space: max(22px, env(safe-area-inset-bottom));
+        --touch-control-zone: calc(var(--touch-button-size) + (var(--touch-edge-space) * 2));
+    }
+
+    .game-presentation {
+        gap: 20px;
+        padding: 16px 0;
+    }
+
+    .game-presentation h1 {
+        display: block;
+    }
+
+    .game-container {
+        width: min(
+            calc(100vw - (var(--touch-control-zone) * 2)),
+            calc(150dvh - 180px)
+        );
+    }
+}
