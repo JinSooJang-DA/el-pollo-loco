@@ -320,6 +320,11 @@ screen and (orientation: portrait) and (max-width: 600px) {
         gap: var(--touch-button-gap);
     }
 
+    .touch-group-right {
+        align-items: flex-end;
+        gap: clamp(12px, 2.5dvh, 18px);
+    }
+
     .touch-group-left {
         flex-direction: row;
     }
@@ -334,18 +339,8 @@ screen and (orientation: portrait) and (max-width: 600px) {
     /* Keep the right edge anchored while the action targets extend left. */
     #btnThrow,
     #btnJump {
-        border-radius: 999px;
-    }
-
-    #btnThrow {
         width: calc(var(--touch-button-size) + var(--touch-button-size));
-    }
-
-    #btnJump {
-        width: calc(
-            var(--touch-button-size) + var(--touch-button-size) +
-            var(--touch-button-size)
-        );
+        border-radius: 999px;
     }
 
     body:has(#startScreen:not(.d-none)) .mobile-controls-container,
