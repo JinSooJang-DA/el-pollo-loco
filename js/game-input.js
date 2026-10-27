@@ -303,12 +303,12 @@ function getScrollableDialogContent() {
     return document.getElementById(visibleDialog[0])?.querySelector(visibleDialog[1]);
 }
 
-/** Scrolls open information text with the Up and Down arrow keys. */
+/** Scrolls focused information text with the Up and Down arrow keys. */
 function scrollDialogContent(event) {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
 
     const content = getScrollableDialogContent();
-    if (!content) return false;
+    if (!content || document.activeElement !== content) return false;
 
     const distance = Math.max(80, content.clientHeight * 0.7);
     content.scrollBy(0, event.key === 'ArrowDown' ? distance : -distance);
@@ -322,11 +322,11 @@ function handleArrowNavigation(event) {
     const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
     if (!isArrowKey) return;
 
+    if (scrollDialogContent(event)) return;
+
     if (handleUiArrowNavigation(event)) return;
 
     if (handleGameOverArrowNavigation(event)) return;
-
-    if (scrollDialogContent(event)) return;
 
     const settings = document.getElementById('settingsDialog');
     if (settings && !settings.classList.contains('d-none') && isVerticalArrow) {

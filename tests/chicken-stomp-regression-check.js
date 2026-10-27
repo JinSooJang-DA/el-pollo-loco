@@ -29,6 +29,7 @@ const context = {
     AUDIO_HUB: {},
     playSound() { },
     playSpatialSound() { },
+    playRandomPepeHurtVoice() { },
     hasReviveProtection(character) {
         return now < (character.reviveProtectionUntil || 0);
     },

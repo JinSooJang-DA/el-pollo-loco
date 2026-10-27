@@ -210,6 +210,10 @@ class KeyboardTestElement {
         return this.isControl ? this : null;
     }
 
+    matches() {
+        return false;
+    }
+
     getClientRects() {
         return [{}];
     }
@@ -226,9 +230,11 @@ const keyboardTestContext = {
     isMenuCreditsOpen: () => false,
     document: {
         addEventListener() { },
+        getElementById() { return null; },
         querySelector(selector) {
             return selector === '.game-menu' ? { open: true } : null;
-        }
+        },
+        querySelectorAll() { return []; }
     },
     window: { addEventListener() { } }
 };
@@ -272,17 +278,19 @@ const arrowBgmMenu = {
     querySelectorAll() { return [bgmMenuButton]; }
 };
 const arrowSettings = {
-    classList: { contains: () => !settingsOpen }
+    classList: { contains: () => !settingsOpen },
+    querySelectorAll() { return [bgmSlider, sfxSlider]; }
 };
 let infoDialogOpen = false;
 let dialogScrollDistance = 0;
+const infoDialogContent = new KeyboardTestElement(true, 'DIV');
+infoDialogContent.clientHeight = 200;
+infoDialogContent.scrollBy = (x, y) => { dialogScrollDistance += y; };
 const arrowInfoDialog = {
     classList: { contains: () => !infoDialogOpen },
+    querySelectorAll() { return [infoDialogContent]; },
     querySelector() {
-        return {
-            clientHeight: 200,
-            scrollBy(x, y) { dialogScrollDistance += y; }
-        };
+        return infoDialogContent;
     }
 };
 keyboardTestContext.document.querySelector = selector =>
@@ -300,25 +308,29 @@ keyboardTestContext.document.getElementById = id => ({
 keyboardTestContext.document.activeElement = lastMenuButton;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
-expect(keyboardTestContext.document.activeElement === firstMenuButton,
-    'Menu ArrowDown wraps focus from its last button to its first button');
+expect(keyboardTestContext.document.activeElement === bgmMenuButton,
+    'Menu ArrowDown wraps focus through the visible BGM control');
 
 settingsOpen = true;
 keyboardTestContext.document.activeElement = sfxSlider;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
-expect(keyboardTestContext.document.activeElement === bgmSlider,
-    'Settings ArrowDown wraps focus between the existing volume sliders');
+expect(keyboardTestContext.document.activeElement === bgmMenuButton,
+    'Settings ArrowDown wraps focus through the visible BGM control');
 
 settingsOpen = false;
 infoDialogOpen = true;
+keyboardTestContext.document.activeElement = infoDialogContent;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(dialogScrollDistance === 140,
     'ArrowDown scrolls visible How to Play text without moving menu focus');
@@ -329,25 +341,29 @@ arrowMenu.open = false;
 keyboardTestContext.document.activeElement = startButton;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowLeft',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === bgmMenuButton,
     'start screen ArrowLeft selects the BGM button without using Tab');
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowRight',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === gameMenuButton,
     'start screen ArrowRight selects the Menu button without using Tab');
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === startButton,
     'start screen ArrowDown selects Start Game without using Tab');
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowUp',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === gameMenuButton,
     'start screen ArrowUp selects the Menu button without using Tab');
@@ -358,13 +374,15 @@ arrowMenu.open = false;
 keyboardTestContext.document.activeElement = menuCreditsBackButton;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowLeft',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === bgmMenuButton,
     'Menu Credits ArrowLeft selects BGM without leaving the game');
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
-    preventDefault() { }
+    preventDefault() { },
+    stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === menuCreditsBackButton,
     'Menu Credits ArrowDown selects Back to Menu');
@@ -553,6 +571,7 @@ globalThis.menuCreditApi = {
         document.getElementById('startScreen').classList.add('d-none');
         world = { gameEnded: false };
         isPaused = true;
+        currentBgm = AUDIO_HUB.bgmGame;
     },
     isPaused: () => isPaused
 };`, menuCreditContext);
