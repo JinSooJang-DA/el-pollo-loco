@@ -100,9 +100,21 @@ function toggleMute() {
 /** Updates the sound button text. */
 function updateMuteUI() {
     const soundBtn = document.getElementById('soundBtn');
+    const soundIcon = document.getElementById('soundIcon');
+
+    if (soundIcon) {
+        soundIcon.src = isMuted
+            ? 'img/sound-off.webp'
+            : 'img/sound-on.webp';
+
+        soundIcon.alt = isMuted ? 'Sound Off' : 'Sound On';
+    }
 
     if (soundBtn) {
-        soundBtn.innerText = isMuted ? 'Sound: Off' : 'Sound: On';
+        soundBtn.setAttribute(
+            'aria-label',
+            isMuted ? 'Turn sound on' : 'Mute sound'
+        );
     }
 }
 
@@ -415,8 +427,8 @@ function beginLevel(levelNumber) {
     world.draw();
 
     if (currentBgm !== AUDIO_HUB.bgmGame) {
-    playBgm(AUDIO_HUB.bgmGame);
-}
+        playBgm(AUDIO_HUB.bgmGame);
+    }
 }
 
 /** Starts a new game at Level 1. */
@@ -426,7 +438,7 @@ function startGame() {
     keyboard = new Keyboard();
 
     stopStartVideo();
-
+    document.getElementById('startControls')?.classList.add('d-none');
     document.getElementById('startScreen').classList.add('d-none');
 
     deactivatePlaylist();
@@ -470,6 +482,7 @@ function backToMainMenu() {
     stopAllIntervals();
     stopSoundEffects();
 
+    document.getElementById('startControls')?.classList.remove('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
     resetStartScreenMenuState();
 

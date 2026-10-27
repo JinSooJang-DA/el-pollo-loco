@@ -76,13 +76,17 @@
                     <button id="pauseBtn" class="nav-icon-btn" onclick="togglePause()">Pause</button>
                     <button id="menuBtn" class="nav-icon-btn" onclick="backToMainMenu()">Main Menu</button>
                     <button class="nav-icon-btn" onclick="openSettingsDialog()">Settings</button>
-                    <button id="soundBtn" class="nav-icon-btn" onclick="toggleMute()">Sound: On</button>
                     <button class="nav-icon-btn" onclick="openImpressum()">Legal Notice</button>
                     <button class="nav-icon-btn" onclick="openInfoDialog()">How to Play</button>
                     <button id="creditsBtn" class="nav-icon-btn" onclick="openMenuCredits()">Credits</button>
                     <button class="nav-icon-btn" onclick="toggleFullscreen()">Fullscreen</button>
                 </div>
             </details>
+
+            <button id="soundBtn" class="sound-toggle-btn" type="button" onclick="toggleMute()"
+                aria-label="Mute sound">
+                <img id="soundIcon" src="img/sound-on.webp" alt="Sound On">
+            </button>
 
             <!-- Start screen BGM playlist -->
             <details id="bgmMenu" class="bgm-menu">
@@ -131,6 +135,12 @@
                 <button id="startBtn" class="western-action-button western-start-button" onclick="startGame()">
                     START GAME
                 </button>
+            </div>
+
+            <!-- Start screen keyboard guide -->
+            <div id="startControls" class="start-controls">
+                <img class="start-controls-guide" src="img/start-controls.webp"
+                    alt="Arrow keys: Move, Space: Jump, D: Throw">
             </div>
 
             <!-- Level rules displayed before each level starts -->

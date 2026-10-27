@@ -232,6 +232,17 @@ screen and (orientation: portrait) and (max-width: 600px) {
         left: 12px;
     }
 
+    .sound-toggle-btn {
+        top: 8px;
+        left: 12px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .game-container:has(#startScreen:not(.d-none)) .sound-toggle-btn {
+        left: 102px;
+    }
+
     .game-menu summary,
     .bgm-menu summary {
         width: 82px;

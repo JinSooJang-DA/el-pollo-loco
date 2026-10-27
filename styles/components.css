@@ -587,3 +587,48 @@ body:has(#restartScreen:not(.d-none)) .mobile-controls-container {
     opacity: 1;
     transform: translate(-50%, 0);
 }
+
+/* Global sound toggle and start screen keyboard guide */
+
+.sound-toggle-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 60;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+body:has(#loadingScreen) .sound-toggle-btn {
+    display: none;
+}
+
+.game-container:has(#startScreen:not(.d-none)) .sound-toggle-btn {
+    left: 96px;
+}
+
+.sound-toggle-btn img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.start-controls {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    z-index: 10;
+}
+
+.start-controls-guide {
+    display: block;
+    height: 48px; /* 기존 34px → 48px */
+    width: auto;
+    max-width: calc(100% - 24px);
+    object-fit: contain;
+}
