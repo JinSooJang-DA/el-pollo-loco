@@ -25,6 +25,12 @@ class World {
     gameEnded = false;
     stopDrawing = false;
 
+    /**
+     * Creates one playable level world.
+     * @param {HTMLCanvasElement} canvas The game drawing surface.
+     * @param {Keyboard} keyboard The shared keyboard state.
+     * @param {number} [levelNumber=1] The level to load.
+     */
     constructor(canvas, keyboard, levelNumber = 1) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -66,10 +72,12 @@ class World {
         this.run();
     }
 
+    /** Connects Pepe to this world instance. */
     setWorld() {
         this.character.world = this;
     }
 
+    /** Starts the existing 50 ms game-state check loop. */
     run() {
         setInterval(() => {
             if (this !== world || this.gameEnded || isPaused) return;
@@ -84,6 +92,7 @@ class World {
         }, 50);
     }
 
+    /** Switches to boss music after the boss first engages Pepe. */
     checkBossMusicTrigger() {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
@@ -93,6 +102,10 @@ class World {
         }
     }
 
+    /**
+     * Returns the boss damage rule for this level.
+     * @returns {string} The allowed attack mode.
+     */
     getBossAttackMode() {
         if (this.levelNumber === 1) return 'both';
         if (this.levelNumber === 2) return 'stomp';
@@ -102,6 +115,7 @@ class World {
         return 'both';
     }
 
+    /** Spawns and configures the boss after all regular enemies are defeated. */
     checkBossSpawn() {
         if (this.bossSpawned || this.gameEnded) return;
 
@@ -142,6 +156,7 @@ class World {
         }
     }
 
+    /** Starts Pepe's loss flow or completes a level after the boss dies. */
     checkGameOver() {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
@@ -191,6 +206,11 @@ class World {
         });
     }
 
+    /**
+     * Shows the loss or victory result UI.
+     * @param {string} imagePath The result image to display for a loss.
+     * @param {boolean} [isVictory=false] Whether to show the victory flow.
+     */
     showEndScreen(imagePath, isVictory = false) {
         if (this !== world) return;
 
@@ -228,6 +248,11 @@ class World {
         }
     }
 
+    /**
+     * Loads a result image and falls back to the standard game-over asset.
+     * @param {HTMLImageElement} imgElement The result image element.
+     * @param {string} imagePath The preferred image path.
+     */
     setEndScreenImage(imgElement, imagePath) {
         if (!imgElement) return;
 

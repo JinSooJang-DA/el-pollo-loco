@@ -1,6 +1,7 @@
 
 /** World rendering methods. */
 
+/** Draws one animation frame while this World instance is active. */
 World.prototype.draw = function () {
     if (this !== world || this.stopDrawing) return;
 
@@ -21,6 +22,7 @@ World.prototype.draw = function () {
     requestAnimationFrame(() => this.draw());
 };
 
+/** Draws map objects in their intended background-to-foreground order. */
 World.prototype.drawWorldObjects = function () {
     this.drawBackgroundObjects();
     this.addObjectsToMap(this.level.clouds);
@@ -48,6 +50,7 @@ World.prototype.drawBackgroundObjects = function () {
     this.ctx.restore();
 };
 
+/** Draws health bars above living normal chickens. */
 World.prototype.drawChickenHealthBars = function () {
     this.level.enemies.forEach(enemy => {
         if (!(enemy instanceof Chicken) || enemy.isDead()) return;
@@ -73,6 +76,7 @@ World.prototype.drawChickenHealthBars = function () {
     });
 };
 
+/** Draws Pepe's status bars and the active boss health bar. */
 World.prototype.drawStatusBars = function () {
     this.addToMap(this.statusBar);
     this.drawBottleCounter();
@@ -85,6 +89,7 @@ World.prototype.drawStatusBars = function () {
     }
 };
 
+/** Draws the available bottle icon and count. */
 World.prototype.drawBottleCounter = function () {
     if (this.bottleIcon.complete && this.bottleIcon.naturalWidth > 0) {
         this.ctx.drawImage(this.bottleIcon, 18, 100, 28, 40);
@@ -95,6 +100,7 @@ World.prototype.drawBottleCounter = function () {
     this.ctx.fillText('× ' + this.availableBottles, 60, 122);
 };
 
+/** Draws the stored coin icon and count. */
 World.prototype.drawCoinCounter = function () {
     if (this.coinIcon.complete && this.coinIcon.naturalWidth > 0) {
         this.ctx.drawImage(this.coinIcon, 18, 65, 30, 30);
@@ -105,10 +111,12 @@ World.prototype.drawCoinCounter = function () {
     this.ctx.fillText('× ' + this.collectedCoins, 60, 87);
 };
 
+/** Draws every object in an array when the array exists. */
 World.prototype.addObjectsToMap = function (objects) {
     if (objects) objects.forEach(o => this.addToMap(o));
 };
 
+/** Draws one movable object, including its directional flip when required. */
 World.prototype.addToMap = function (mo) {
     if (mo === this.character && typeof hasReviveProtection === 'function' &&
         hasReviveProtection(mo)) {
@@ -125,6 +133,7 @@ World.prototype.addToMap = function (mo) {
     if (mo.otherDirection) this.flipImageBack(mo);
 };
 
+/** Mirrors the canvas for one left-facing object. */
 World.prototype.flipImage = function (mo) {
     this.ctx.save();
     this.ctx.translate(mo.width, 0);
@@ -132,6 +141,7 @@ World.prototype.flipImage = function (mo) {
     mo.x = mo.x * -1;
 };
 
+/** Restores the canvas after drawing one left-facing object. */
 World.prototype.flipImageBack = function (mo) {
     mo.x = mo.x * -1;
     this.ctx.restore();

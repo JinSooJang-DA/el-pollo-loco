@@ -24,7 +24,11 @@ function clearGameplayInput() {
     });
 }
 
-/** Plays one story chapter and completes its callback exactly once. */
+/**
+ * Plays one story chapter and completes its callback exactly once.
+ * @param {number} videoNumber The chapter video number.
+ * @param {Function} onComplete The transition to run after the video closes.
+ */
 function playStoryVideo(videoNumber, onComplete) {
     if (storyVideoActive || storyVideoFinishing) return;
 

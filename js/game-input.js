@@ -1,11 +1,15 @@
 
 /**
  * Connects a mobile touch button to the keyboard.
- * @param {string} btnId
- * @param {string} keyProperty
+ * @param {string} btnId The touch button element ID.
+ * @param {string} keyProperty The matching Keyboard state property.
  */
 
-/** Connects a button to touch input. */
+/**
+ * Connects a button to touch input.
+ * @param {string} btnId The touch button element ID.
+ * @param {string} keyProperty The matching Keyboard state property.
+ */
 function bindTouchButton(btnId, keyProperty) {
     const button = document.getElementById(btnId);
     if (!button) return;
@@ -18,7 +22,11 @@ function bindTouchButton(btnId, keyProperty) {
     button.addEventListener('contextmenu', event => event.preventDefault());
 }
 
-/** Activates a touch control. */
+/**
+ * Activates a touch control.
+ * @param {TouchEvent} event The touch start event.
+ * @param {string} keyProperty The Keyboard state property to activate.
+ */
 function handleTouchStart(event, keyProperty) {
     event.preventDefault();
     if (isStoryVideoPlaying()) return;
@@ -41,7 +49,11 @@ function handleTouchStart(event, keyProperty) {
     }
 }
 
-/** Releases a touch control. */
+/**
+ * Releases a touch control.
+ * @param {TouchEvent} event The touch end or cancel event.
+ * @param {string} keyProperty The Keyboard state property to clear.
+ */
 function handleTouchEnd(event, keyProperty) {
     event.preventDefault();
     keyboard[keyProperty] = false;
@@ -71,8 +83,8 @@ function clearTouchControlState() {
 
 /**
  * Updates the keyboard state.
- * @param {KeyboardEvent} event
- * @param {boolean} pressed
+ * @param {KeyboardEvent} event The keyboard event to process.
+ * @param {boolean} pressed Whether the key was pressed or released.
  */
 function updateKeyboardState(event, pressed) {
     if (isStoryVideoPlaying()) return;
@@ -99,14 +111,22 @@ function isGameMenuOpen() {
     return Boolean(menu && menu.open);
 }
 
-/** Returns whether a native control should keep its own keyboard behavior. */
+/**
+ * Returns whether a native control should keep its own keyboard behavior.
+ * @param {EventTarget|null} target The event target to inspect.
+ * @returns {boolean} Whether the target is an interactive control.
+ */
 function isMenuControlTarget(target) {
     return target instanceof Element && Boolean(target.closest(
         'button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])'
     ));
 }
 
-/** Returns visible, enabled controls inside a keyboard scope. */
+/**
+ * Returns visible, enabled controls inside a keyboard scope.
+ * @param {Element|null} scope The element that contains the controls.
+ * @returns {Element[]} Visible controls in DOM order.
+ */
 function getFocusableControls(scope) {
     if (!scope) return [];
 
@@ -153,7 +173,11 @@ function isUiNavigationActive() {
     )).some(overlay => overlay.getClientRects().length > 0);
 }
 
-/** Moves focus through all controls visible in the current UI state. */
+/**
+ * Moves focus through all controls visible in the current UI state.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @returns {boolean} Whether UI navigation handled the key.
+ */
 function handleUiArrowNavigation(event) {
     if (!isUiNavigationActive()) return false;
 
@@ -170,7 +194,11 @@ function handleUiArrowNavigation(event) {
     return true;
 }
 
-/** Moves through the opened BGM menu before global UI navigation can leave it. */
+/**
+ * Moves through the opened BGM menu before global UI navigation can leave it.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @returns {boolean} Whether BGM navigation handled the key.
+ */
 function handleBgmMenuArrowNavigation(event) {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
 
@@ -195,7 +223,11 @@ function getMenuCreditsControls() {
         .filter(control => control && control.getClientRects().length > 0);
 }
 
-/** Moves focus through a list of controls and wraps at both ends. */
+/**
+ * Moves focus through a list of controls and wraps at both ends.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @param {Element[]} controls The visible controls to navigate.
+ */
 function moveMenuFocus(event, controls) {
     if (!controls.length) return;
 
@@ -218,7 +250,10 @@ function moveMenuFocus(event, controls) {
     nextControl.focus();
 }
 
-/** Closes an open submenu only after keyboard focus leaves its controls. */
+/**
+ * Closes an open submenu only after keyboard focus leaves its controls.
+ * @param {Element} nextControl The control receiving focus.
+ */
 function closeInactiveSubmenus(nextControl) {
     const bgmMenu = document.getElementById('bgmMenu');
     if (bgmMenu?.open && !bgmMenu.contains(nextControl)) bgmMenu.open = false;
@@ -237,7 +272,11 @@ function closeInactiveSubmenus(nextControl) {
     });
 }
 
-/** Returns whether a key represents one of the four UI navigation arrows. */
+/**
+ * Returns whether a key represents one of the four UI navigation arrows.
+ * @param {string} key The key value to test.
+ * @returns {boolean} Whether the key is a UI navigation arrow.
+ */
 function isUiArrowKey(key) {
     return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
         'Up', 'Down', 'Left', 'Right'].includes(key);
@@ -253,7 +292,11 @@ function getGameOverButtons() {
         .filter(button => button && button.getClientRects().length > 0);
 }
 
-/** Moves between result actions without changing their click behavior. */
+/**
+ * Moves between result actions without changing their click behavior.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @returns {boolean} Whether result navigation handled the key.
+ */
 function handleGameOverArrowNavigation(event) {
     const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
     if (!isArrowKey) return false;
@@ -280,7 +323,10 @@ function getStartScreenControls() {
     ].filter(control => control && control.getClientRects().length > 0);
 }
 
-/** Keeps the visible Start Game selection aligned with start-screen navigation. */
+/**
+ * Keeps the visible Start Game selection aligned with start-screen navigation.
+ * @param {Element} target The newly focused control.
+ */
 function syncStartScreenSelection(target) {
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startBtn');
@@ -289,7 +335,10 @@ function syncStartScreenSelection(target) {
     startButton.classList.toggle('is-keyboard-selected', target === startButton);
 }
 
-/** Moves focus between the BGM, Menu, and Start Game controls. */
+/**
+ * Moves focus between the BGM, Menu, and Start Game controls.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ */
 function handleStartScreenArrowNavigation(event) {
     const controls = getStartScreenControls();
     if (!controls.includes(document.activeElement)) return;
@@ -309,7 +358,10 @@ function handleStartScreenArrowNavigation(event) {
     nextButton.focus();
 }
 
-/** Moves focus between BGM and Back to Menu in Menu Credits. */
+/**
+ * Moves focus between BGM and Back to Menu in Menu Credits.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ */
 function handleMenuCreditsArrowNavigation(event) {
     const controls = getMenuCreditsControls();
     if (!controls.includes(document.activeElement)) return;
@@ -339,7 +391,11 @@ function getScrollableDialogContent() {
     return document.getElementById(visibleDialog[0])?.querySelector(visibleDialog[1]);
 }
 
-/** Scrolls focused information text with the Up and Down arrow keys. */
+/**
+ * Scrolls focused information text with the Up and Down arrow keys.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @returns {boolean} Whether dialog scrolling handled the key.
+ */
 function scrollDialogContent(event) {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
 
@@ -352,7 +408,10 @@ function scrollDialogContent(event) {
     return true;
 }
 
-/** Handles arrow-key navigation for start screen, Menu, BGM, and volume controls. */
+/**
+ * Handles arrow-key navigation for start screen, Menu, BGM, and volume controls.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ */
 function handleArrowNavigation(event) {
     const isArrowKey = isUiArrowKey(event.key);
     const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
@@ -406,12 +465,20 @@ function focusGameMenuControl() {
     (firstAction || controls[0])?.focus();
 }
 
-/** Keeps Tab navigation within an open Menu or dialog. */
+/**
+ * Keeps Tab navigation within an open Menu or dialog.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ * @param {Element} scope The open Menu or dialog scope.
+ */
 function keepFocusInScope(event, scope) {
     keepFocusInControls(event, getFocusableControls(scope));
 }
 
-/** Keeps Tab navigation inside a supplied list of controls. */
+/**
+ * Keeps Tab navigation inside a supplied list of controls.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ * @param {Element[]} controls The controls allowed to receive focus.
+ */
 function keepFocusInControls(event, controls) {
     if (event.key !== 'Tab') return;
     if (!controls.length) return;
@@ -429,7 +496,10 @@ function keepFocusInControls(event, controls) {
     }
 }
 
-/** Keeps keyboard focus out of background controls while a dialog is visible. */
+/**
+ * Keeps keyboard focus out of background controls while a dialog is visible.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ */
 function handleMenuFocus(event) {
     if (isMenuCreditsOpen()) {
         keepFocusInControls(event, getMenuCreditsControls());
@@ -479,7 +549,10 @@ function clearGameMenuInput() {
     });
 }
 
-/** Keeps the native Menu dropdown and existing pause state in sync. */
+/**
+ * Keeps the native Menu dropdown and existing pause state in sync.
+ * @param {HTMLDetailsElement} menu The native Menu dropdown.
+ */
 function syncGameMenuPause(menu) {
     if (!menu.open && menuCloseKeepsPause) {
         menuCloseKeepsPause = false;
@@ -524,7 +597,10 @@ function syncGameMenuPause(menu) {
     if (isPaused) togglePause();
 }
 
-/** Opens or closes the existing Menu dropdown. */
+/**
+ * Opens or closes the existing Menu dropdown.
+ * @param {boolean} isOpen Whether the Menu should be open.
+ */
 function setGameMenuOpen(isOpen) {
     const menu = document.querySelector('.game-menu');
     if (!menu) return;
@@ -562,7 +638,10 @@ function closeMenuDialog() {
     return true;
 }
 
-/** Handles Escape without changing story, level, reward, or ending flow. */
+/**
+ * Handles Escape without changing story, level, reward, or ending flow.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ */
 function handleGameMenuEscape(event) {
     if (event.key !== 'Escape' || event.repeat) return;
     if (isMenuCreditsOpen()) {
@@ -611,7 +690,10 @@ function initGameMenuControls() {
 
 let menuCloseKeepsPause = false;
 
-/** Closes the dropdown for a selected action without resuming gameplay. */
+/**
+ * Closes the dropdown for a selected action without resuming gameplay.
+ * @param {MouseEvent} event The captured menu click.
+ */
 function closeGameMenuForSelectedAction(event) {
     const menu = document.querySelector('.game-menu');
     if (!menu?.open || !event.target.closest('button')) return;
@@ -620,7 +702,10 @@ function closeGameMenuForSelectedAction(event) {
     menu.open = false;
 }
 
-/** Activates the focused UI button without letting gameplay input handle the key. */
+/**
+ * Activates the focused UI button without letting gameplay input handle the key.
+ * @param {KeyboardEvent} event The Enter or Space event.
+ */
 function handleUiActivation(event) {
     if (event.repeat || !['Enter', 'Space'].includes(event.code) ||
         !isUiNavigationActive()) return;
@@ -635,7 +720,10 @@ function handleUiActivation(event) {
     control.click();
 }
 
-/** Prevents held Enter or Space from repeatedly activating a focused UI button. */
+/**
+ * Prevents held Enter or Space from repeatedly activating a focused UI button.
+ * @param {KeyboardEvent} event The repeated keyboard event.
+ */
 function preventRepeatedUiActivation(event) {
     if (!event.repeat || !isUiNavigationActive()) return;
     if ((event.code === 'Enter' || event.code === 'Space') &&
@@ -645,7 +733,10 @@ function preventRepeatedUiActivation(event) {
     }
 }
 
-/** Closes an open Menu from a blank outer area before gameplay input can run. */
+/**
+ * Closes an open Menu from a blank outer area before gameplay input can run.
+ * @param {PointerEvent} event The pointer event outside the Menu.
+ */
 function closeGameMenuOnOutsidePointer(event) {
     const menu = document.querySelector('.game-menu');
     const isDialogClick = event.target.closest('.dialog-overlay');
@@ -673,7 +764,7 @@ document.addEventListener('keyup', event => {
 
 /**
  * Starts the game using Enter or Space.
- * @param {KeyboardEvent} event
+ * @param {KeyboardEvent} event The keyboard event to process.
  * @returns {boolean}
  */
 function handleStartKey(event) {

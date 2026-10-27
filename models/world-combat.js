@@ -1,6 +1,7 @@
 
 /** World collision and combat methods. */
 
+/** Checks Pepe's collision with every living enemy in the current level. */
 World.prototype.checkCharacterCollisions = function () {
     this.level.enemies.forEach(enemy => {
         let isAlive = typeof enemy.isDead === 'function'
@@ -17,6 +18,7 @@ World.prototype.checkCharacterCollisions = function () {
     });
 };
 
+/** Routes an enemy collision to the matching damage or stomp handler. */
 World.prototype.handleEnemyContact = function (enemy) {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
@@ -33,6 +35,7 @@ World.prototype.handleEnemyContact = function (enemy) {
     this.handleChickenContact(enemy);
 };
 
+/** Applies boss stomp rules or damages Pepe after boss contact. */
 World.prototype.handleBossContact = function (enemy) {
     let pepeFeet = this.character.y + this.character.height
         - this.character.offset.bottom;
@@ -95,6 +98,7 @@ World.prototype.handleBossContact = function (enemy) {
     this.hurtCharacter(40);
 };
 
+/** Applies a normal-chicken stomp only when Pepe crossed its top edge. */
 World.prototype.handleChickenContact = function (enemy) {
     // Normal chicken: only a downward landing counts as a stomp.
     let pepeFeet = this.character.y + this.character.height
@@ -140,6 +144,7 @@ World.prototype.handleChickenContact = function (enemy) {
     }
 };
 
+/** Reduces Pepe's health after coin protection and starts death when needed. */
 World.prototype.hurtCharacter = function (damage = 40) {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
@@ -171,6 +176,11 @@ World.prototype.hurtCharacter = function (damage = 40) {
     playRandomPepeHurtVoice();
 };
 
+/**
+ * Damages a normal chicken after a valid stomp.
+ * @param {Chicken} enemy The chicken Pepe landed on.
+ * @returns {boolean} Whether the stomp was accepted.
+ */
 World.prototype.stompEnemy = function (enemy) {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return false;
@@ -196,6 +206,7 @@ World.prototype.stompEnemy = function (enemy) {
     return true;
 };
 
+/** Removes a defeated enemy after its death animation delay. */
 World.prototype.removeEnemyAfterDelay = function (enemy, delay) {
     let currentLevel = this.level;
 
@@ -206,6 +217,7 @@ World.prototype.removeEnemyAfterDelay = function (enemy, delay) {
     }, delay);
 };
 
+/** Checks every active bottle before playing its splash animation once. */
 World.prototype.checkBottleCollisions = function () {
     this.throwableObjects.forEach(bottle => {
         if (bottle.isSplashed) return;
@@ -230,6 +242,7 @@ World.prototype.checkBottleCollisions = function () {
     });
 };
 
+/** Applies one bottle's damage and type-specific sound to an enemy. */
 World.prototype.handleBottleImpact = function (bottle, enemy) {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
@@ -276,6 +289,7 @@ World.prototype.handleBottleImpact = function (bottle, enemy) {
     }
 };
 
+/** Removes a splashed bottle after its short visual delay. */
 World.prototype.removeBottleAfterDelay = function (bottle, delay) {
     setTimeout(() => {
         if (this !== world) return;

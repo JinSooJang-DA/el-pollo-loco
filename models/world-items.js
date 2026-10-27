@@ -1,6 +1,7 @@
 
 /** World item collection and throwing methods. */
 
+/** Creates a bottle when the throw key, stock, and cooldown permit it. */
 World.prototype.checkThrowObjects = function () {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
@@ -21,11 +22,13 @@ World.prototype.checkThrowObjects = function () {
     }
 };
 
+/** Updates the bottle status bar from the current bottle stock. */
 World.prototype.updateBottleBar = function () {
     let percentage = (this.availableBottles / this.maxBottles) * 100;
     this.statusBarBottle.setPercentage(percentage);
 };
 
+/** Starts the existing one-second bottle throwing cooldown. */
 World.prototype.cooldownThrow = function () {
     this.canThrow = false;
 
@@ -36,6 +39,7 @@ World.prototype.cooldownThrow = function () {
     }, 1000);
 };
 
+/** Runs collision checks for enemies, bottles, and collectible items. */
 World.prototype.checkCollisions = function () {
     this.checkCharacterCollisions();
     this.checkBottleCollisions();
@@ -43,6 +47,7 @@ World.prototype.checkCollisions = function () {
     this.checkCollectCoins();
 };
 
+/** Collects overlapping bottles until Pepe reaches the bottle limit. */
 World.prototype.checkCollectBottles = function () {
     if (!this.level.bottles) return;
 
@@ -60,6 +65,7 @@ World.prototype.checkCollectBottles = function () {
     }
 };
 
+/** Returns one collected bottle to the same level after its respawn delay. */
 World.prototype.respawnBottle = function (bottle) {
     let currentLevel = this.level;
 
@@ -71,6 +77,7 @@ World.prototype.respawnBottle = function (bottle) {
     }, this.bottleRespawnTime);
 };
 
+/** Collects coins as health recovery or stored revive protection. */
 World.prototype.checkCollectCoins = function () {
     if (!this.level.coins) return;
 

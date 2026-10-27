@@ -13,7 +13,10 @@ const PLAYLIST_TRACKS = [
     AUDIO_HUB.bgmWin
 ];
 
-/** Selects and plays a soundtrack. */
+/**
+ * Selects and plays a soundtrack from the playlist.
+ * @param {number} index The selected track index.
+ */
 function selectPlaylistTrack(index) {
     if (!playlistActive) return;
     playlistTrack = index;
@@ -38,7 +41,10 @@ function playPreviousTrack() {
     selectPlaylistTrack(playlistTrack);
 }
 
-/** Returns a random track other than the current one. */
+/**
+ * Returns a random track other than the current one.
+ * @returns {number} A valid playlist index different from the current track.
+ */
 function getRandomTrack() {
     let next = Math.floor(Math.random() * (PLAYLIST_TRACKS.length - 1));
     if (next >= playlistTrack) next++;
@@ -99,7 +105,10 @@ function updatePlaylistPlayButton() {
     }
 }
 
-/** Continues the playlist after a song ends. */
+/**
+ * Continues the playlist after a song ends.
+ * @param {Event} event The ended event from a soundtrack element.
+ */
 function handlePlaylistEnded(event) {
     if (!playlistActive || event.target !== currentBgm) return;
     if (playlistRepeat === 'list') playNextTrack();
