@@ -78,79 +78,115 @@ function isMenuCreditsOpen() {
 /** Opens the existing credits screen without marking the game as completed. */
 function openMenuCredits() {
     if (isMenuCreditsOpen()) return;
-
     const openedFromStart = isMainMenuVisible();
-    const openedFromGame = world && !world.gameEnded;
+    const openedFromGame = Boolean(world && !world.gameEnded);
     if (!openedFromStart && !openedFromGame) return;
-
     menuCreditsOrigin = openedFromStart ? 'start' : 'game';
-    menuCreditsBgmState = openedFromGame && currentBgm ? {
-        track: currentBgm,
-        currentTime: currentBgm.currentTime
-    } : null;
+    menuCreditsBgmState = getMenuCreditsBgmState(openedFromGame);
+    showMenuCreditsScreen();
+    playMenuCreditsMedia();
+}
 
+/**
+ * Captures the gameplay BGM so it can resume after credits.
+ * @param {boolean} openedFromGame Whether credits opened during gameplay.
+ * @returns {{track: HTMLAudioElement, currentTime: number}|null}
+ */
+function getMenuCreditsBgmState(openedFromGame) {
+    if (!openedFromGame || !currentBgm) return null;
+    return { track: currentBgm, currentTime: currentBgm.currentTime };
+}
+
+/** Switches the existing result screen into credits mode. */
+function showMenuCreditsScreen() {
     const menu = document.querySelector('.game-menu');
     const restartScreen = document.getElementById('restartScreen');
-    const endCredits = document.getElementById('endCredits');
-    const endScreenImage = document.getElementById('endScreenImg');
     const backButton = document.getElementById('menuCreditsBackBtn');
-
     if (menu) menu.open = false;
-    if (endScreenImage) endScreenImage.classList.add('d-none');
-    if (restartScreen) {
-        restartScreen.classList.add('menu-credits-mode');
-        restartScreen.classList.remove('d-none');
-    }
-    if (endCredits) endCredits.classList.remove('d-none');
+    document.getElementById('endScreenImg')?.classList.add('d-none');
+    setMenuCreditsMode(restartScreen);
+    document.getElementById('endCredits')?.classList.remove('d-none');
     if (backButton) backButton.classList.remove('d-none');
-
     document.getElementById('pauseScreen')?.classList.add('d-none');
+    requestAnimationFrame(() => backButton?.focus());
+}
+
+/** Shows the result screen in credits mode. */
+function setMenuCreditsMode(restartScreen) {
+    if (!restartScreen) return;
+    restartScreen.classList.add('menu-credits-mode');
+    restartScreen.classList.remove('d-none');
+}
+
+/** Plays the credits video and its BGM track. */
+function playMenuCreditsMedia() {
     stopStartVideo();
     stopSoundEffects();
     playEndVideo();
     AUDIO_HUB.bgmLost.pause();
     AUDIO_HUB.bgmLost.currentTime = 0;
     playBgm(AUDIO_HUB.bgmLost, true);
-    requestAnimationFrame(() => backButton?.focus());
 }
 
 /** Closes Menu credits and restores the original Menu and BGM state. */
 function closeMenuCredits() {
     const origin = menuCreditsOrigin;
     if (!origin) return;
+    const savedBgmState = resetMenuCreditsState();
+    hideMenuCreditsScreen();
+    restoreMenuCreditsAudio(origin, savedBgmState);
+    focusAfterMenuCredits(origin);
+}
 
-    menuCreditsOrigin = null;
+/**
+ * Clears the saved credits state and returns the stored BGM.
+ * @returns {{track: HTMLAudioElement, currentTime: number}|null} The saved BGM.
+ */
+function resetMenuCreditsState() {
     const savedBgmState = menuCreditsBgmState;
+    menuCreditsOrigin = null;
     menuCreditsBgmState = null;
+    return savedBgmState;
+}
 
+/** Hides the credits overlay and stops its background video. */
+function hideMenuCreditsScreen() {
     const restartScreen = document.getElementById('restartScreen');
-    const endCredits = document.getElementById('endCredits');
-    const backButton = document.getElementById('menuCreditsBackBtn');
-
     stopEndVideo();
-    if (endCredits) endCredits.classList.add('d-none');
-    if (backButton) backButton.classList.add('d-none');
-    if (restartScreen) {
-        restartScreen.classList.remove('menu-credits-mode');
-        restartScreen.classList.add('d-none');
-    }
+    document.getElementById('endCredits')?.classList.add('d-none');
+    document.getElementById('menuCreditsBackBtn')?.classList.add('d-none');
+    if (!restartScreen) return;
+    restartScreen.classList.remove('menu-credits-mode');
+    restartScreen.classList.add('d-none');
+}
 
+/**
+ * Restores the start-screen or gameplay audio after closing credits.
+ * @param {'start'|'game'} origin Where the credits were opened from.
+ * @param {{track: HTMLAudioElement, currentTime: number}|null} savedBgmState
+ */
+function restoreMenuCreditsAudio(origin, savedBgmState) {
     if (origin === 'start') {
         playStartVideo();
         playBgm(AUDIO_HUB.bgmMenu);
-    } else {
-        document.getElementById('pauseScreen')?.classList.remove('d-none');
-        updatePauseUI();
-        playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);
-        if (savedBgmState) currentBgm.currentTime = savedBgmState.currentTime;
+        return;
     }
+    document.getElementById('pauseScreen')?.classList.remove('d-none');
+    updatePauseUI();
+    playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);
+    if (savedBgmState) currentBgm.currentTime = savedBgmState.currentTime;
+}
 
+/**
+ * Returns focus to Resume or the reopened Menu after closing credits.
+ * @param {'start'|'game'} origin Where the credits were opened from.
+ */
+function focusAfterMenuCredits(origin) {
     requestAnimationFrame(() => {
         if (origin === 'game') {
             focusPauseResumeButton();
             return;
         }
-
         setGameMenuOpen(true);
         document.getElementById('creditsBtn')?.focus();
     });
@@ -158,13 +194,7 @@ function closeMenuCredits() {
 
 /** Shows the ending locally without exposing a test control to players. */
 function showLocalEndingPreview() {
-    let isLocalHost = location.hostname === '127.0.0.1' ||
-        location.hostname === 'localhost';
-    let isEndingPreview = new URLSearchParams(location.search)
-        .get('preview') === 'ending';
-
-    if (!isLocalHost || !isEndingPreview) return;
-
+    if (!isLocalEndingPreview()) return;
     document.getElementById('startScreen').classList.add('d-none');
     document.getElementById('restartScreen').classList.remove('d-none');
     document.getElementById('endScreenImg').classList.add('d-none');
@@ -172,6 +202,15 @@ function showLocalEndingPreview() {
     stopStartVideo();
     playEndVideo();
     playBgm(AUDIO_HUB.bgmWin);
+}
+
+/** Returns whether the local ending preview was requested. */
+function isLocalEndingPreview() {
+    const isLocalHost = location.hostname === '127.0.0.1' ||
+        location.hostname === 'localhost';
+    const isEndingPreview = new URLSearchParams(location.search)
+        .get('preview') === 'ending';
+    return isLocalHost && isEndingPreview;
 }
 
 /** Opens the settings dialog. */
@@ -284,21 +323,37 @@ function closeLegalOnBackdrop(event) {
 
 /** Toggles fullscreen mode. */
 function toggleFullscreen() {
+    blurActiveElement();
+    const presentation = document.querySelector('.game-presentation');
+    if (!document.fullscreenElement) return enterFullscreen(presentation);
+    return exitFullscreen();
+}
+
+/** Removes focus from the control that triggered fullscreen. */
+function blurActiveElement() {
     if (document.activeElement) {
         document.activeElement.blur();
     }
+}
 
-    const presentation = document.querySelector('.game-presentation');
+/**
+ * Requests fullscreen for the game presentation.
+ * @param {Element|null} presentation The game presentation element.
+ * @returns {Promise<boolean>}
+ */
+function enterFullscreen(presentation) {
+    if (!presentation?.requestFullscreen) return Promise.resolve(false);
+    return presentation.requestFullscreen()
+        .then(() => document.fullscreenElement === presentation)
+        .catch(() => false);
+}
 
-    if (!document.fullscreenElement) {
-        if (!presentation?.requestFullscreen) return Promise.resolve(false);
-
-        return presentation.requestFullscreen()
-            .then(() => document.fullscreenElement === presentation)
-            .catch(() => false);
-    } else {
-        return document.exitFullscreen()
-            .then(() => false)
-            .catch(() => Boolean(document.fullscreenElement));
-    }
+/**
+ * Leaves fullscreen mode.
+ * @returns {Promise<boolean>}
+ */
+function exitFullscreen() {
+    return document.exitFullscreen()
+        .then(() => false)
+        .catch(() => Boolean(document.fullscreenElement));
 }
