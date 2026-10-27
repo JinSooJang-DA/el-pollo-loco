@@ -31,13 +31,18 @@ function updateSombreroCounter() {
     counter.innerHTML = '';
 
     for (let i = 0; i < sombreros; i++) {
-        let hat = document.createElement('img');
-        hat.src = 'img/golden-sombrero-big.webp';
-        hat.className = 'sombrero-icon';
-        hat.alt = 'Sombrero';
-        hat.title = 'Extra life';
-        counter.appendChild(hat);
+        counter.appendChild(createSombreroIcon());
     }
+}
+
+/** Creates one existing in-game sombrero icon. */
+function createSombreroIcon() {
+    let hat = document.createElement('img');
+    hat.src = 'img/golden-sombrero-big.webp';
+    hat.className = 'sombrero-icon';
+    hat.alt = 'Sombrero';
+    hat.title = 'Extra life';
+    return hat;
 }
 
 /** Updates the run-wide coin statistic without changing defense coins. */
@@ -83,20 +88,25 @@ function finishCompletedLevel(finishedWorld) {
     let nextLevel = finishedWorld.levelNumber + 1;
 
     if (finishedWorld.levelNumber === 5) {
-        if (finishedWorld.character.energy === 100) {
-            sombreros++;
-            updateSombreroCounter();
-        }
-        playStoryVideo(6, () => {
-            if (finishedWorld === world) {
-                startFinalEnding(finishedWorld);
-            }
-        });
-        return;
+        return finishFinalLevel(finishedWorld);
     }
 
     playStoryVideo(nextLevel, () => {
         showCompletedLevelResult(finishedWorld, nextLevel);
+    });
+}
+
+/** Awards the perfect-health sombrero and starts the final chapter. */
+function finishFinalLevel(finishedWorld) {
+    if (finishedWorld.character.energy === 100) {
+        sombreros++;
+        updateSombreroCounter();
+    }
+
+    playStoryVideo(6, () => {
+        if (finishedWorld === world) {
+            startFinalEnding(finishedWorld);
+        }
     });
 }
 
@@ -106,18 +116,22 @@ function showCompletedLevelResult(finishedWorld, nextLevel) {
 
     if (finishedWorld.levelNumber !== 1 &&
         finishedWorld.character.energy === 100) {
-        sombreros++;
-        updateSombreroCounter();
-
-        rewardNextLevel = nextLevel;
-
-        document.getElementById('sombreroRewardScreen')
-            .classList.remove('d-none');
-        playBgm(AUDIO_HUB.bgmGame);
-        return;
+        return showSombreroReward(nextLevel);
     }
 
     startLevel(nextLevel);
+}
+
+/** Awards a sombrero and shows the existing reward screen. */
+function showSombreroReward(nextLevel) {
+    sombreros++;
+    updateSombreroCounter();
+
+    rewardNextLevel = nextLevel;
+
+    document.getElementById('sombreroRewardScreen')
+        .classList.remove('d-none');
+    playBgm(AUDIO_HUB.bgmGame);
 }
 
 /** Continues after the reward screen. */
@@ -147,19 +161,29 @@ function retryCurrentLevel() {
     updateSombreroCounter();
     document.getElementById('restartScreen').classList.add('d-none');
 
-    world.character.energy = 100;
-    world.character.lastHit = 0;
-    world.character.deadFrameIndex = 0;
-    world.character.speedY = 0;
-    world.character.resetIdleTimer();
-    world.character.reviveProtectionUntil = Date.now() + 5000;
-    world.canThrow = true;
-    world.statusBar.setPercentage(100);
-    world.gameEnded = false;
-    world.stopDrawing = false;
+    reviveCharacter(world.character);
+    reviveWorld(world);
     let boss = world.level.enemies.find(enemy => enemy instanceof Endboss);
     playBgm(boss?.hadFirstContact ? AUDIO_HUB.bgmBoss : AUDIO_HUB.bgmGame);
     showReviveMessage();
+}
+
+/** Restores Pepe's health and movement after a sombrero revival. */
+function reviveCharacter(character) {
+    character.energy = 100;
+    character.lastHit = 0;
+    character.deadFrameIndex = 0;
+    character.speedY = 0;
+    character.resetIdleTimer();
+    character.reviveProtectionUntil = Date.now() + 5000;
+}
+
+/** Restarts the active world after a sombrero revival. */
+function reviveWorld(activeWorld) {
+    activeWorld.canThrow = true;
+    activeWorld.statusBar.setPercentage(100);
+    activeWorld.gameEnded = false;
+    activeWorld.stopDrawing = false;
 }
 
 /** Returns whether Pepe is still protected after a sombrero revival. */
@@ -232,24 +256,33 @@ function startFinalEnding(finishedWorld) {
 function showNextEndingStep(finishedWorld) {
     let result = finalRunResult;
     if (!result || finishedWorld !== world) return;
+    const cards = getEndingRewardCards(result);
+    endingStep++;
+    if (endingStep >= cards.length) {
+        return finishEndingRewards(finishedWorld);
+    }
+    showEndingRewardCard(finishedWorld, cards[endingStep]);
+}
 
-    const cards = [
+/** Returns the earned reward cards in their display order. */
+function getEndingRewardCards(result) {
+    return [
         getSombreroEndingReward(result.sombreros),
         getCoinEndingReward(result.totalCollectedCoins)
     ].filter(Boolean);
+}
 
-    endingStep++;
-    if (endingStep >= cards.length) {
-        document.getElementById('endingRewardScreen').classList.add('d-none');
-        finishedWorld.showEndScreen('', true);
-        return;
-    }
+/** Shows the existing victory screen once all rewards are done. */
+function finishEndingRewards(finishedWorld) {
+    document.getElementById('endingRewardScreen').classList.add('d-none');
+    finishedWorld.showEndScreen('', true);
+}
 
-    let card = cards[endingStep];
+/** Plays one reward card and schedules its automatic advance. */
+function showEndingRewardCard(finishedWorld, card) {
     let video = document.getElementById('endingRewardVideo');
     video.classList.remove('d-none');
     document.getElementById('endingRewardScreen').classList.remove('d-none');
-
     video.onended = () => advanceEndingStep(finishedWorld);
     video.onerror = () => advanceEndingStep(finishedWorld);
     video.src = card.src;
@@ -282,28 +315,38 @@ function toggleEndingPause() {
     let rewardOpen = !document.getElementById('endingRewardScreen').classList.contains('d-none');
     let creditsOpen = !document.getElementById('endCredits').classList.contains('d-none');
     if (!rewardOpen && !creditsOpen) return false;
-
     endingPaused = !endingPaused;
+    updateEndingPauseUi();
+    if (endingPaused) pauseEndingPlayback();
+    else resumeEndingPlayback(rewardOpen);
+    return true;
+}
+
+/** Updates the ending pause button and credits styling. */
+function updateEndingPauseUi() {
     document.getElementById('endingPauseBtn').textContent = endingPaused ? 'RESUME' : 'PAUSE';
     document.getElementById('endCredits').classList.toggle('credits-paused', endingPaused);
+}
 
-    if (endingPaused) {
-        if (endingTimer) window.clearTimeout(endingTimer);
-        endingTimer = null;
-        endingDeadline = Math.max(0, endingDeadline - Date.now());
-        if (currentBgm) currentBgm.pause();
-        document.getElementById('endingRewardVideo')?.pause();
-    } else {
-        if (currentBgm) resumeCurrentBgm(true);
-        if (rewardOpen) {
-            let video = document.getElementById('endingRewardVideo');
-            if (!video.classList.contains('d-none')) {
-                playEndingRewardVideo(video);
-            }
-            scheduleEndingStep(world, endingDeadline);
-        }
+/** Freezes ending timers, music, and video playback. */
+function pauseEndingPlayback() {
+    if (endingTimer) window.clearTimeout(endingTimer);
+    endingTimer = null;
+    endingDeadline = Math.max(0, endingDeadline - Date.now());
+    if (currentBgm) currentBgm.pause();
+    document.getElementById('endingRewardVideo')?.pause();
+}
+
+/** Resumes ending timers, music, and the visible reward video. */
+function resumeEndingPlayback(rewardOpen) {
+    if (currentBgm) resumeCurrentBgm(true);
+    if (!rewardOpen) return;
+
+    let video = document.getElementById('endingRewardVideo');
+    if (!video.classList.contains('d-none')) {
+        playEndingRewardVideo(video);
     }
-    return true;
+    scheduleEndingStep(world, endingDeadline);
 }
 
 /** Cancels pending reward timers when a run is abandoned. */
@@ -312,27 +355,38 @@ function cancelEndingSequence() {
     endingTimer = null;
     endingStep = -1;
     endingPaused = false;
+
     let screen = document.getElementById('endingRewardScreen');
     if (screen) screen.classList.add('d-none');
+    resetEndingRewardVideo();
+}
+
+/** Stops and unloads the ending reward video. */
+function resetEndingRewardVideo() {
     let video = document.getElementById('endingRewardVideo');
-    if (video) {
-        video.onended = null;
-        video.onerror = null;
-        video.pause();
-        video.removeAttribute('src');
-        video.load();
-    }
+    if (!video) return;
+
+    video.onended = null;
+    video.onerror = null;
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+}
+
+/** Toggles the ending pause with Space when the credits are not open. */
+function handleEndingPauseKey(event) {
+    if (event.code !== 'Space' || event.repeat) return false;
+    let backButton = document.getElementById('menuCreditsBackBtn');
+    if (!backButton?.classList.contains('d-none')) return false;
+    if (!toggleEndingPause()) return false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return true;
 }
 
 /** Continue the sombrero reward screen with Space. */
 document.addEventListener('keydown', function (event) {
-    if (event.code === 'Space' && !event.repeat &&
-        document.getElementById('menuCreditsBackBtn')?.classList.contains('d-none') &&
-        toggleEndingPause()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-    }
+    if (handleEndingPauseKey(event)) return;
     if (event.code !== 'Space' || event.repeat) return;
 
     let rewardScreen = document.getElementById('sombreroRewardScreen');
