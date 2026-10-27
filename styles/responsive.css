@@ -356,6 +356,59 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 }
 
+/* Phone landscape: keep top controls in the side space beside the 3:2 game. */
+@media screen and (orientation: landscape) and (any-pointer: coarse) and
+    (max-height: 599px) {
+    :root {
+        --phone-top-edge: max(6px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --phone-top-button-width: 66px;
+        --phone-top-button-height: 36px;
+        --phone-top-button-gap: 8px;
+    }
+
+    .game-container .bgm-menu,
+    .game-container .game-menu,
+    .game-container .sound-toggle-btn {
+        position: fixed;
+    }
+
+    .game-container .bgm-menu {
+        top: var(--phone-top-edge);
+        left: var(--phone-top-edge);
+        z-index: 70;
+        transform: none;
+    }
+
+    .game-container .game-menu {
+        top: var(--phone-top-edge);
+        right: var(--phone-top-edge);
+        z-index: 80;
+    }
+
+    .game-container .sound-toggle-btn {
+        top: calc(var(--phone-top-edge) + var(--phone-top-button-height) + var(--phone-top-button-gap));
+        right: var(--phone-top-edge);
+        z-index: 70;
+        width: 36px;
+        height: 36px;
+    }
+
+    .game-container .game-menu > summary,
+    .game-container .bgm-menu > summary {
+        width: var(--phone-top-button-width);
+        min-width: var(--phone-top-button-width);
+        height: var(--phone-top-button-height);
+        min-height: var(--phone-top-button-height);
+        padding: 0 4px;
+        font-size: 12px;
+    }
+
+    .game-container .game-menu .top-nav-bar {
+        z-index: 81;
+        max-height: calc(100dvh - var(--phone-top-edge) - var(--phone-top-button-height) - 12px);
+    }
+}
+
 @media (hover: none) and (pointer: coarse) {
     .start-controls-guide {
         display: none;
@@ -370,6 +423,21 @@ screen and (orientation: portrait) and (max-width: 600px) {
         --touch-edge-space: max(18px, env(safe-area-inset-left), env(safe-area-inset-right));
         --touch-bottom-space: max(22px, env(safe-area-inset-bottom));
         --touch-control-zone: calc(var(--touch-button-size) + (var(--touch-edge-space) * 2));
+        --tablet-canvas-width: min(
+            calc(100vw - (var(--touch-control-zone) * 2)),
+            calc(150dvh - 180px)
+        );
+        --tablet-canvas-height: calc(var(--tablet-canvas-width) * 0.666667);
+        --tablet-canvas-edge: max(12px, calc((100vw - var(--tablet-canvas-width)) * 0.5));
+        --tablet-canvas-top: calc((100dvh - var(--tablet-canvas-height)) * 0.5);
+        --tablet-top-clearance: 8px;
+        --tablet-menu-width: 140px;
+        --tablet-menu-height: 58px;
+        --tablet-top-edge: min(
+            32px,
+            max(0px, calc(var(--tablet-canvas-top) - var(--tablet-top-clearance) - var(--tablet-menu-height)))
+        );
+        --tablet-top-gap: 12px;
     }
 
     .game-presentation {
@@ -382,10 +450,69 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 
     .game-container {
-        width: min(
-            calc(100vw - (var(--touch-control-zone) * 2)),
-            calc(150dvh - 180px)
-        );
+        width: var(--tablet-canvas-width);
+    }
+
+    .game-container .bgm-menu,
+    .game-container .game-menu,
+    .game-container .sound-toggle-btn {
+        position: fixed;
+    }
+
+    .game-container .bgm-menu {
+        top: var(--tablet-top-edge);
+        left: var(--tablet-canvas-edge);
+        z-index: 70;
+        transform: none;
+    }
+
+    .game-container .game-menu {
+        top: var(--tablet-top-edge);
+        right: var(--tablet-canvas-edge);
+        z-index: 80;
+    }
+
+    .game-container .sound-toggle-btn {
+        top: var(--tablet-top-edge);
+        right: calc(var(--tablet-canvas-edge) + var(--tablet-menu-width) + var(--tablet-top-gap));
+        z-index: 70;
+        width: var(--tablet-menu-height);
+        height: var(--tablet-menu-height);
+    }
+
+    .game-container .game-menu > summary,
+    .game-container .bgm-menu > summary {
+        width: var(--tablet-menu-width);
+        min-width: var(--tablet-menu-width);
+        height: var(--tablet-menu-height);
+        min-height: var(--tablet-menu-height);
+        font-size: 18px;
+    }
+
+    .game-container:has(#startScreen:not(.d-none)) .game-menu > summary,
+    .game-container:has(#startScreen:not(.d-none)) .bgm-menu > summary,
+    .game-container:has(#startScreen.d-none) .game-menu > summary {
+        width: var(--tablet-menu-width);
+        min-width: var(--tablet-menu-width);
+        height: var(--tablet-menu-height);
+        min-height: var(--tablet-menu-height);
+        font-size: 18px;
+    }
+
+    .game-container .game-menu .top-nav-bar {
+        width: min(200px, calc(100vw - 24px));
+        z-index: 81;
+        max-height: calc(100dvh - var(--tablet-top-edge) - var(--tablet-menu-height) - 12px);
+    }
+
+    .game-container .bgm-panel {
+        width: min(224px, calc(100vw - 24px));
+    }
+
+    .game-container .game-menu .nav-icon-btn,
+    .game-container .playlist-track {
+        min-height: 44px;
+        font-size: 16px;
     }
 }
 
