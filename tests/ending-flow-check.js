@@ -7,6 +7,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const index = read('index.html');
 const game = read('js/game.js');
+const gameAudio = read('js/game-audio.js');
+const gameFlow = read('js/game-flow.js');
 const storyVideos = read('js/story-videos.js');
 const sombrero = read('js/sombrero-system.js');
 const world = read('models/world.class.js');
@@ -128,10 +130,10 @@ expect(index.includes('id="creditsBtn"') && index.includes('onclick="openMenuCre
     index.includes('id="menuCreditsBackBtn"') && index.includes('onclick="closeMenuCredits()"'),
     'Menu exposes keyboard-accessible Credits and Back controls without duplicating credit markup');
 expect(game.includes('function openMenuCredits()') && game.includes('function closeMenuCredits()') &&
-    game.includes("playBgm(AUDIO_HUB.bgmLost, true)") &&
+    gameAudio.includes('function playBgm(bgmTrack, allowWhilePaused = false)') &&
     game.includes('AUDIO_HUB.bgmLost.currentTime = 0;') &&
     game.includes('playBgm(AUDIO_HUB.bgmMenu);') &&
-    game.includes('playBgm(AUDIO_HUB.bgmGame);') &&
+    game.includes('playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);') &&
     gameInput.includes('if (isMenuCreditsOpen())') &&
     componentStyles.includes('#restartScreen.menu-credits-mode'),
     'Menu credits uses BGM04, restores the source BGM, and keeps Escape focus-aware');
@@ -143,7 +145,7 @@ expect(index.includes('<main class="game-presentation">') &&
     baseStyles.includes('.game-presentation {') &&
     baseStyles.includes('gap: 20px;') &&
     baseStyles.includes('font-size: clamp(52px, 5vw, 56px);') &&
-    game.includes("document.getElementById('endCredits').classList.add('d-none');"),
+    gameFlow.includes("document.getElementById('endCredits').classList.add('d-none');"),
     'desktop title shares the game presentation layout and NEW START clears Credits state');
 expect(/#levelRulesStartBtn,\s*#sombreroRewardScreen \.level-action-button/.test(levelRulesStyles) &&
     !componentStyles.includes('#sombreroRewardScreen button'),
@@ -490,7 +492,7 @@ keyboardTestContext.document.activeElement = sfxSlider;
 keyboardTestContext.closeMenuDialog();
 expect(keyboardTestContext.document.activeElement === gameMenuButton,
     'Escape from Settings returns focus to the visible Menu button');
-expect(game.includes('playStoryVideo(1, () => startLevel(1))'),
+expect(gameFlow.includes('playStoryVideo(1, () => startLevel(1))'),
     'start game opens story chapter 1 before level 1');
 expect(storyVideos.includes('videos/loco-0${videoNumber}.mp4'),
     'story player constructs the requested chapter path');
@@ -512,8 +514,8 @@ expect(sombrero.includes("if (count >= 3) return { type: 'video', src: 'videos/g
 expect(world.includes('showEndScreen(imagePath, isVictory = false)') &&
     world.includes('playEndVideo();') && world.includes('stopEndVideo();'),
     'result screen starts and stops the credits video by outcome');
-expect(game.includes('stopStartVideo();') && game.includes('playStartVideo();') &&
-    game.includes('stopEndVideo();'),
+expect(gameFlow.includes('stopStartVideo();') && gameFlow.includes('playStartVideo();') &&
+    gameFlow.includes('stopEndVideo();'),
     'screen changes stop the previous video before the next state');
 expect(game.includes("location.hostname === '127.0.0.1'") &&
     game.includes(".get('preview') === 'ending'"),
@@ -641,6 +643,8 @@ const menuCreditContext = {
 };
 vm.createContext(menuCreditContext);
 vm.runInContext(`${game}
+${gameAudio}
+${gameFlow}
 globalThis.menuCreditApi = {
     open: openMenuCredits,
     close: closeMenuCredits,
