@@ -278,19 +278,29 @@ let settingsOpen = false;
 const arrowMenu = {
     open: true,
     querySelectorAll() { return [firstMenuButton, lastMenuButton]; },
-    querySelector(selector) { return selector === 'summary' ? gameMenuButton : null; }
+    querySelector(selector) { return selector === 'summary' ? gameMenuButton : null; },
+    contains(control) {
+        return [gameMenuButton, firstMenuButton, lastMenuButton].includes(control);
+    }
 };
 const arrowBgmMenu = {
     open: false,
     querySelector(selector) { return selector === 'summary' ? bgmMenuButton : null; },
-    querySelectorAll() { return [bgmMenuButton, bgmTrackOne, bgmTrackTwo]; }
+    querySelectorAll() { return [bgmMenuButton, bgmTrackOne, bgmTrackTwo]; },
+    contains(control) {
+        return [bgmMenuButton, bgmTrackOne, bgmTrackTwo].includes(control);
+    }
 };
 bgmMenuButton.onClick = () => { arrowBgmMenu.open = true; };
 bgmTrackOne.onClick = () => { selectedBgmTrack = 0; };
 bgmTrackTwo.onClick = () => { selectedBgmTrack = 1; };
 const arrowSettings = {
-    classList: { contains: () => !settingsOpen },
-    querySelectorAll() { return [bgmSlider, sfxSlider]; }
+    classList: {
+        contains: () => !settingsOpen,
+        add() { settingsOpen = false; }
+    },
+    querySelectorAll() { return [bgmSlider, sfxSlider]; },
+    contains(control) { return [bgmSlider, sfxSlider].includes(control); }
 };
 let infoDialogOpen = false;
 let dialogScrollDistance = 0;
@@ -326,6 +336,7 @@ expect(keyboardTestContext.document.activeElement === bgmMenuButton,
     'Menu ArrowDown wraps focus through the visible BGM control');
 
 settingsOpen = true;
+keyboardTestContext.isUiNavigationActive = () => true;
 keyboardTestContext.document.activeElement = sfxSlider;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
@@ -333,7 +344,10 @@ keyboardTestContext.handleArrowNavigation({
     stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === bgmMenuButton,
-    'Settings ArrowDown wraps focus through the visible BGM control');
+    'Settings ArrowDown closes Settings and wraps focus through the visible BGM control');
+expect(!settingsOpen,
+    'keyboard focus never remains inside the hidden Settings dialog');
+keyboardTestContext.isUiNavigationActive = () => false;
 
 settingsOpen = false;
 infoDialogOpen = true;
@@ -372,7 +386,9 @@ keyboardTestContext.handleArrowNavigation({
     stopImmediatePropagation() { }
 });
 expect(keyboardTestContext.document.activeElement === bgmTrackOne,
-    'BGM ArrowDown enters the first soundtrack button');
+    'BGM ArrowDown enters the first soundtrack button while keeping BGM open');
+expect(arrowBgmMenu.open,
+    'BGM stays open while keyboard focus moves through its tracks');
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowDown',
     preventDefault() { },
@@ -388,6 +404,22 @@ keyboardTestContext.handleUiActivation({
 });
 expect(selectedBgmTrack === 1 && keyboardTestContext.document.activeElement === bgmTrackTwo,
     'Enter selects the focused soundtrack button without losing focus');
+keyboardTestContext.moveMenuFocus({
+    key: 'ArrowRight',
+    preventDefault() { }
+}, [bgmTrackTwo, gameMenuButton]);
+expect(!arrowBgmMenu.open && keyboardTestContext.document.activeElement === gameMenuButton,
+    'moving from a BGM track to Menu closes BGM before focus leaves it');
+arrowMenu.open = true;
+keyboardTestContext.document.activeElement = firstMenuButton;
+keyboardTestContext.moveMenuFocus({
+    key: 'ArrowLeft',
+    preventDefault() { }
+}, [firstMenuButton, bgmMenuButton]);
+expect(!arrowMenu.open && keyboardTestContext.document.activeElement === bgmMenuButton,
+    'moving from a Menu action to BGM closes Menu before focus leaves it');
+arrowBgmMenu.open = true;
+keyboardTestContext.document.activeElement = bgmTrackTwo;
 keyboardTestContext.requestAnimationFrame = callback => callback();
 keyboardTestContext.closeMenuDialog();
 expect(!arrowBgmMenu.open && keyboardTestContext.document.activeElement === bgmMenuButton,

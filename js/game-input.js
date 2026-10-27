@@ -213,7 +213,28 @@ function moveMenuFocus(event, controls) {
     }
 
     event.preventDefault();
-    controls[nextIndex].focus();
+    const nextControl = controls[nextIndex];
+    closeInactiveSubmenus(nextControl);
+    nextControl.focus();
+}
+
+/** Closes an open submenu only after keyboard focus leaves its controls. */
+function closeInactiveSubmenus(nextControl) {
+    const bgmMenu = document.getElementById('bgmMenu');
+    if (bgmMenu?.open && !bgmMenu.contains(nextControl)) bgmMenu.open = false;
+
+    const gameMenu = document.querySelector('.game-menu');
+    if (gameMenu?.open && !gameMenu.contains(nextControl)) {
+        menuCloseKeepsPause = true;
+        gameMenu.open = false;
+    }
+
+    ['settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {
+        const dialog = document.getElementById(id);
+        if (dialog && !dialog.classList.contains('d-none') && !dialog.contains(nextControl)) {
+            dialog.classList.add('d-none');
+        }
+    });
 }
 
 /** Returns whether a key represents one of the four UI navigation arrows. */
@@ -284,6 +305,7 @@ function handleStartScreenArrowNavigation(event) {
 
     if (!nextButton) return;
     event.preventDefault();
+    closeInactiveSubmenus(nextButton);
     nextButton.focus();
 }
 
@@ -298,6 +320,7 @@ function handleMenuCreditsArrowNavigation(event) {
     const nextButton = isBgmDirection ? bgmButton : backButton;
 
     event.preventDefault();
+    closeInactiveSubmenus(nextButton);
     nextButton.focus();
 }
 
@@ -608,6 +631,7 @@ function handleUiActivation(event) {
 
     event.preventDefault();
     event.stopImmediatePropagation();
+    closeInactiveSubmenus(control);
     control.click();
 }
 

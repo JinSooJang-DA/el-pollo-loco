@@ -514,6 +514,36 @@ screen and (orientation: portrait) and (max-width: 600px) {
         min-height: 44px;
         font-size: 16px;
     }
+
+    /* Match the larger tablet controls with the run-wide DOM HUD. */
+    .game-container #sombreroCounter {
+        top: 64px;
+        right: 24px;
+        gap: 8px;
+        max-width: 240px;
+    }
+
+    .game-container .sombrero-icon {
+        width: 56px;
+        height: 56px;
+    }
+
+    .game-container #coinCollectedCounter {
+        top: 128px;
+        right: 24px;
+        gap: 8px;
+        font-size: 24px;
+        line-height: 42px;
+    }
+
+    .game-container #coinCollectedCounter img {
+        width: 42px;
+        height: 42px;
+    }
+
+    #gameContainer:not(:has(#sombreroCounter .sombrero-icon)) #coinCollectedCounter {
+        top: 64px;
+    }
 }
 
 /* Desktop fullscreen: maximize game canvas only */
