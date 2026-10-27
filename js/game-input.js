@@ -137,8 +137,9 @@ function getUiNavigationControls() {
             ? [document.getElementById('startBtn')]
             : []);
     const menuControls = gameMenu?.open ? getFocusableControls(gameMenu) : [];
+    const bgmControls = bgmMenu?.open ? getFocusableControls(bgmMenu) : [];
 
-    return [...new Set([...topControls, ...menuControls, ...scopedControls])]
+    return [...new Set([...topControls, ...menuControls, ...bgmControls, ...scopedControls])]
         .filter(control => !control.disabled && control.getClientRects().length > 0);
 }
 
@@ -166,6 +167,18 @@ function handleUiArrowNavigation(event) {
 
     moveMenuFocus(event, controls);
     event.stopImmediatePropagation();
+    return true;
+}
+
+/** Moves through the opened BGM menu before global UI navigation can leave it. */
+function handleBgmMenuArrowNavigation(event) {
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
+
+    const bgmMenu = document.getElementById('bgmMenu');
+    const controls = bgmMenu?.open ? getFocusableControls(bgmMenu) : [];
+    if (!controls.includes(document.activeElement)) return false;
+
+    moveMenuFocus(event, controls);
     return true;
 }
 
@@ -324,6 +337,8 @@ function handleArrowNavigation(event) {
 
     if (scrollDialogContent(event)) return;
 
+    if (handleBgmMenuArrowNavigation(event)) return;
+
     if (handleUiArrowNavigation(event)) return;
 
     if (handleGameOverArrowNavigation(event)) return;
@@ -338,10 +353,6 @@ function handleArrowNavigation(event) {
     }
 
     const bgmMenu = document.getElementById('bgmMenu');
-    if (bgmMenu?.open && isVerticalArrow) {
-        moveMenuFocus(event, getMenuButtons(bgmMenu));
-        return;
-    }
 
     if (isMenuCreditsOpen()) {
         handleMenuCreditsArrowNavigation(event);

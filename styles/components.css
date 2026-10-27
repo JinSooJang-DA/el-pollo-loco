@@ -83,7 +83,6 @@
 
 #infoDialog .dialog-card h2 {
     margin: 0 0 12px;
-    padding-right: 28px;
     font-size: 24px;
 }
 
@@ -164,7 +163,6 @@ body:has(#restartScreen:not(.d-none)) .mobile-controls-container {
 
 .legal-card h2 {
     flex-shrink: 0;
-    margin-right: 25px;
 }
 
 .legal-content {

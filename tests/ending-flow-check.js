@@ -211,7 +211,8 @@ class KeyboardTestElement {
     }
 
     matches() {
-        return false;
+        return arguments[0] === 'button, summary' &&
+            (this.tagName === 'BUTTON' || this.tagName === 'SUMMARY');
     }
 
     getClientRects() {
@@ -220,6 +221,10 @@ class KeyboardTestElement {
 
     focus() {
         keyboardTestContext.document.activeElement = this;
+    }
+
+    click() {
+        this.onClick?.();
     }
 }
 
@@ -266,6 +271,9 @@ const startButton = new KeyboardTestElement(true);
 const menuCreditsBackButton = new KeyboardTestElement(true);
 const bgmSlider = new KeyboardTestElement(true, 'INPUT');
 const sfxSlider = new KeyboardTestElement(true, 'INPUT');
+const bgmTrackOne = new KeyboardTestElement(true);
+const bgmTrackTwo = new KeyboardTestElement(true);
+let selectedBgmTrack = null;
 let settingsOpen = false;
 const arrowMenu = {
     open: true,
@@ -275,8 +283,11 @@ const arrowMenu = {
 const arrowBgmMenu = {
     open: false,
     querySelector(selector) { return selector === 'summary' ? bgmMenuButton : null; },
-    querySelectorAll() { return [bgmMenuButton]; }
+    querySelectorAll() { return [bgmMenuButton, bgmTrackOne, bgmTrackTwo]; }
 };
+bgmMenuButton.onClick = () => { arrowBgmMenu.open = true; };
+bgmTrackOne.onClick = () => { selectedBgmTrack = 0; };
+bgmTrackTwo.onClick = () => { selectedBgmTrack = 1; };
 const arrowSettings = {
     classList: { contains: () => !settingsOpen },
     querySelectorAll() { return [bgmSlider, sfxSlider]; }
@@ -346,6 +357,42 @@ keyboardTestContext.handleArrowNavigation({
 });
 expect(keyboardTestContext.document.activeElement === bgmMenuButton,
     'start screen ArrowLeft selects the BGM button without using Tab');
+keyboardTestContext.isUiNavigationActive = () => true;
+keyboardTestContext.handleUiActivation({
+    code: 'Space',
+    repeat: false,
+    preventDefault() { },
+    stopImmediatePropagation() { }
+});
+expect(arrowBgmMenu.open,
+    'Space opens the focused BGM menu without starting the game');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { },
+    stopImmediatePropagation() { }
+});
+expect(keyboardTestContext.document.activeElement === bgmTrackOne,
+    'BGM ArrowDown enters the first soundtrack button');
+keyboardTestContext.handleArrowNavigation({
+    key: 'ArrowDown',
+    preventDefault() { },
+    stopImmediatePropagation() { }
+});
+expect(keyboardTestContext.document.activeElement === bgmTrackTwo,
+    'BGM ArrowDown moves through soundtrack buttons');
+keyboardTestContext.handleUiActivation({
+    code: 'Enter',
+    repeat: false,
+    preventDefault() { },
+    stopImmediatePropagation() { }
+});
+expect(selectedBgmTrack === 1 && keyboardTestContext.document.activeElement === bgmTrackTwo,
+    'Enter selects the focused soundtrack button without losing focus');
+keyboardTestContext.requestAnimationFrame = callback => callback();
+keyboardTestContext.closeMenuDialog();
+expect(!arrowBgmMenu.open && keyboardTestContext.document.activeElement === bgmMenuButton,
+    'Escape helper closes BGM and returns focus to its summary');
+keyboardTestContext.isUiNavigationActive = () => false;
 keyboardTestContext.handleArrowNavigation({
     key: 'ArrowRight',
     preventDefault() { },

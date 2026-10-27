@@ -431,16 +431,23 @@ canvas {
     font-size: 20px;
     margin-top: 5px;
     margin-bottom: 15px;
+    padding-inline: 32px;
 }
 
 .dialog-close-btn {
     position: absolute;
-    top: 8px;
-    right: 10px;
+    top: 10px;
+    left: 12px;
     background: none;
     border: none;
     color: #fff;
     font-size: 20px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    line-height: 1;
+    display: grid;
+    place-items: center;
     cursor: pointer;
 }
 
