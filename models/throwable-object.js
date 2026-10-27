@@ -1,4 +1,3 @@
-
 /**
  * Represents a thrown salsa bottle flying in an arc.
  * @extends MovableObject
@@ -55,15 +54,27 @@ class ThrowableObject extends MovableObject {
         this.animate();
     }
 
-    /** Starts bottle flight. */
+    /** Triggers splash effects when the bottle hits the ground floor. */
+    handleGroundImpact(groundY) {
+        this.y = groundY - this.height;
+        this.splash();
+        
+        // Remove the bottle after its splash animation.
+        if (typeof world !== 'undefined' && world) {
+            world.removeBottleAfterDelay(this, 450);
+        }
 
+        // Ground impact sound only.
+        playBottleSmashAt(this.x + this.width / 2);
+    }
+
+    /** Starts bottle flight. */
     throw() {
         this.speedY = 30;
         this.applyGravity();
 
         this.throwInterval = setInterval(() => {
-            if (isPaused) return;
-            if (this.isSplashed) return;
+            if (isPaused || this.isSplashed) return;
 
             // Keep the current 20% shorter horizontal throw.
             this.x += this.otherDirection ? -8 : 8;
@@ -72,42 +83,26 @@ class ThrowableObject extends MovableObject {
             const groundY = 420;
 
             if (this.y + this.height >= groundY) {
-                this.y = groundY - this.height;
-                this.splash();
-
-                // Remove the bottle after its splash animation.
-                if (typeof world !== 'undefined' && world) {
-                    world.removeBottleAfterDelay(this, 450);
-                }
-
-                // Ground impact sound only.
-                playBottleSmashAt(this.x + this.width / 2);
+                this.handleGroundImpact(groundY);
             }
         }, 25);
     }
-
 
     /** Plays rotating or splash animation. */
     animate() {
         this.animationInterval = setInterval(() => {
             if (isPaused) return;
+            
             if (!this.isSplashed) {
                 this.playAnimation(this.IMAGES_ROTATING);
             }
         }, 60);
     }
 
-    splash() {
-        if (this.isSplashed) return;
-
-        this.isSplashed = true;
-        this.speedY = 0;
-
-        clearInterval(this.throwInterval);
-        clearInterval(this.animationInterval);
-
+    /** Executes the sequence of splash frames sequentially. */
+    runSplashFrames() {
         let frame = 0;
-
+        
         // Play the splash animation exactly once.
         this.img = this.imageCache[this.IMAGES_SPLASH[frame]];
 
@@ -121,6 +116,19 @@ class ThrowableObject extends MovableObject {
 
             this.img = this.imageCache[this.IMAGES_SPLASH[frame]];
         }, 60);
+    }
+
+    /** Breaks the bottle and halts its movement. */
+    splash() {
+        if (this.isSplashed) return;
+
+        this.isSplashed = true;
+        this.speedY = 0;
+
+        clearInterval(this.throwInterval);
+        clearInterval(this.animationInterval);
+
+        this.runSplashFrames();
     }
 
     /** Returns whether bottle is still airborne. */

@@ -17,6 +17,26 @@ class MovableObject extends DrawableObject {
         right: 0
     };
 
+    /** Logs the character's descent path for top-landing calculations. */
+    recordFallStep() {
+        let feetBefore = this.y + this.height - this.offset.bottom;
+        let feetAfter = feetBefore - this.speedY;
+        
+        let fallStep = {
+            from: feetBefore,
+            to: feetAfter,
+            left: this.x + this.offset.left,
+            right: this.x + this.width - this.offset.right,
+            time: Date.now()
+        };
+        
+        this.lastFallStep = fallStep;
+        this.lastFallSteps = [
+            ...(this.lastFallSteps || []),
+            fallStep
+        ].filter(step => fallStep.time - step.time < 120);
+    }
+
     /**
      * Applies gravity pull downward when object is airborne.
      */
@@ -27,24 +47,7 @@ class MovableObject extends DrawableObject {
             if (this.isAboveGround() || this.speedY > 0) {
                 // Remember Pepe's downward movement.
                 if (this instanceof Character && this.speedY < 0) {
-                    let feetBefore = this.y + this.height
-                        - this.offset.bottom;
-
-                    let feetAfter = feetBefore - this.speedY;
-
-                    let fallStep = {
-                        from: feetBefore,
-                        to: feetAfter,
-                        left: this.x + this.offset.left,
-                        right: this.x + this.width - this.offset.right,
-                        time: Date.now()
-                    };
-
-                    this.lastFallStep = fallStep;
-                    this.lastFallSteps = [
-                        ...(this.lastFallSteps || []),
-                        fallStep
-                    ].filter(step => fallStep.time - step.time < 120);
+                    this.recordFallStep();
                 }
 
                 this.y -= this.speedY;

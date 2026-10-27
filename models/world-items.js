@@ -1,10 +1,10 @@
-
 /** World item collection and throwing methods. */
 
 /** Creates a bottle when the throw key, stock, and cooldown permit it. */
 World.prototype.checkThrowObjects = function () {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
+        
     if (this.keyboard.D && this.canThrow && this.availableBottles > 0) {
         let offset = this.character.otherDirection ? 0 : 60;
 
@@ -77,6 +77,25 @@ World.prototype.respawnBottle = function (bottle) {
     }, this.bottleRespawnTime);
 };
 
+/** Processes the health or coin stash logic upon picking up a coin. */
+World.prototype.applyCoinPickup = function (coin) {
+    if (this.character.energy < 100) {
+        // A coin restores 10 HP and is consumed immediately.
+        this.character.energy = Math.min(100, this.character.energy + 10);
+        this.statusBar.setPercentage(this.character.energy);
+        return true;
+    }
+    
+    if (this.collectedCoins < this.maxCoins) {
+        // Store coins for protection only when HP is full.
+        this.collectedCoins++;
+        this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
+        return true;
+    }
+    
+    return false;
+};
+
 /** Collects coins as health recovery or stored revive protection. */
 World.prototype.checkCollectCoins = function () {
     if (!this.level.coins) return;
@@ -84,26 +103,9 @@ World.prototype.checkCollectCoins = function () {
     for (let idx = this.level.coins.length - 1; idx >= 0; idx--) {
         let coin = this.level.coins[idx];
 
-        if (!this.character.isColliding(coin)) continue;
-        if (this.character.isDead()) continue;
-
-        if (this.character.energy < 100) {
-            // A coin restores 10 HP and is consumed immediately.
-            this.character.energy = Math.min(
-                100, this.character.energy + 10
-            );
-
-            this.statusBar.setPercentage(this.character.energy);
-        } else if (this.collectedCoins < this.maxCoins) {
-            // Store coins for protection only when HP is full.
-            this.collectedCoins++;
-
-            this.statusBarCoin.setPercentage(
-                (this.collectedCoins / this.maxCoins) * 100
-            );
-        } else {
-            continue;
-        }
+        if (!this.character.isColliding(coin) || this.character.isDead()) continue;
+        
+        if (!this.applyCoinPickup(coin)) continue;
 
         rememberCollectedCoin(this.levelNumber, coin);
         recordCollectedCoin();

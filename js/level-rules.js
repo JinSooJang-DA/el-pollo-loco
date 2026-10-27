@@ -1,13 +1,9 @@
-
 /** Loads the text rules before a level starts. */
 let pendingLevelNumber = null;
 let rulesRequestId = 0;
 
-async function showLevelRules(levelNumber) {
-    pendingLevelNumber = levelNumber;
-    let requestId = ++rulesRequestId;
-
-    let screen = document.getElementById('levelRulesScreen');
+/** Sets up the level rules UI elements. */
+function setupLevelRulesUi(levelNumber) {
     let title = document.getElementById('levelRulesTitle');
     let image = document.getElementById('levelRulesImage');
     let content = document.getElementById('levelRulesText');
@@ -19,31 +15,37 @@ async function showLevelRules(levelNumber) {
     content.textContent = 'Loading level rules...';
     button.textContent = 'START LEVEL ' + levelNumber;
     button.disabled = true;
-    screen.classList.remove('d-none');
 
+    document.getElementById('levelRulesScreen').classList.remove('d-none');
+}
+
+/** Fetches the rules text for the specified level. */
+async function fetchLevelRules(levelNumber, requestId) {
+    let content = document.getElementById('levelRulesText');
     try {
         let response = await fetch('levels/rules/level' + levelNumber + '.txt');
-
-        if (!response.ok) {
-            throw new Error('Rules file not found');
-        }
+        if (!response.ok) throw new Error('Rules file not found');
 
         let rulesText = await response.text();
-        if (requestId !== rulesRequestId) return;
-
-        content.textContent = rulesText;
+        if (requestId === rulesRequestId) content.textContent = rulesText;
     } catch (error) {
         if (requestId !== rulesRequestId) return;
-
         content.textContent =
-            'Rules could not be loaded. You can still start Level ' +
-            levelNumber + '.';
-
+            'Rules could not be loaded. You can still start Level ' + levelNumber + '.';
         console.error('Level rules:', error);
     }
+}
+
+/** Prepares and shows the level rules screen. */
+async function showLevelRules(levelNumber) {
+    pendingLevelNumber = levelNumber;
+    let requestId = ++rulesRequestId;
+
+    setupLevelRulesUi(levelNumber);
+    await fetchLevelRules(levelNumber, requestId);
 
     if (requestId === rulesRequestId) {
-        button.disabled = false;
+        document.getElementById('levelRulesStartBtn').disabled = false;
     }
 }
 

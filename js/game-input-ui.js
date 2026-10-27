@@ -28,27 +28,47 @@ function getFocusableControls(scope) {
     )).filter(control => control.getClientRects().length > 0);
 }
 
-/** Returns the visible controls available in the current non-gameplay UI. */
-function getUiNavigationControls() {
+/**
+ * Returns top-level controls available for current UI mode.
+ * @returns {Element[]} Visible top-level controls.
+ */
+function getTopNavControls() {
+    const bgmSummary = document.getElementById('bgmMenu')?.querySelector('summary');
+    const gameMenuSummary = document.querySelector('.game-menu')?.querySelector('summary');
+    const soundButton = document.getElementById('soundBtn');
+    
+    return [bgmSummary, soundButton, gameMenuSummary].filter(c => c && c.getClientRects().length > 0);
+}
+
+/**
+ * Returns scoped overlay controls if any overlay is visible.
+ * @returns {Element[]} Visible controls within active overlay.
+ */
+function getActiveScopeControls() {
     const startScreen = document.getElementById('startScreen');
-    const gameMenu = document.querySelector('.game-menu');
-    const bgmMenu = document.getElementById('bgmMenu');
     const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
         .map(id => document.getElementById(id))
         .find(dialog => dialog && !dialog.classList.contains('d-none'));
-    const visibleOverlay = Array.from(document.querySelectorAll(
+    const overlays = Array.from(document.querySelectorAll(
         '.overlay-screen:not(.d-none), .story-video-screen:not(.d-none)'
-    )).find(overlay => overlay.getClientRects().length > 0);
-    const topControls = [
-        bgmMenu?.querySelector('summary'),
-        document.getElementById('soundBtn'),
-        gameMenu?.querySelector('summary')
-    ].filter(control => control && control.getClientRects().length > 0);
+    ));
+    const visibleOverlay = overlays.find(o => o.id === 'restartScreen') || 
+        overlays.find(o => o.getClientRects().length > 0);
+
     const activeScope = visibleDialog || visibleOverlay;
-    const scopedControls = activeScope ? getFocusableControls(activeScope) :
-        (startScreen && !startScreen.classList.contains('d-none')
-            ? [document.getElementById('startBtn')]
-            : []);
+    if (activeScope) return getFocusableControls(activeScope);
+    if (startScreen && !startScreen.classList.contains('d-none')) {
+        return [document.getElementById('startBtn')];
+    }
+    return [];
+}
+
+/** Returns the visible controls available in the current non-gameplay UI. */
+function getUiNavigationControls() {
+    const gameMenu = document.querySelector('.game-menu');
+    const bgmMenu = document.getElementById('bgmMenu');
+    const topControls = getTopNavControls();
+    const scopedControls = getActiveScopeControls();
     const menuControls = gameMenu?.open ? getFocusableControls(gameMenu) : [];
     const bgmControls = bgmMenu?.open ? getFocusableControls(bgmMenu) : [];
 
@@ -110,9 +130,12 @@ function getMenuButtons(menu) {
 
 /** Returns controls that stay available while Menu Credits are open. */
 function getMenuCreditsControls() {
-    const bgmMenu = document.getElementById('bgmMenu');
+    const bgmMenu = document.getElementById('bgmMenu')?.querySelector('summary');
+    const soundButton = document.getElementById('soundBtn');
+    const gameMenu = document.querySelector('.game-menu summary');
     const backButton = document.getElementById('menuCreditsBackBtn');
-    return [...getFocusableControls(bgmMenu), backButton]
+    
+    return [bgmMenu, soundButton, gameMenu, backButton]
         .filter(control => control && control.getClientRects().length > 0);
 }
 
@@ -174,4 +197,3 @@ function isUiArrowKey(key) {
     return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
         'Up', 'Down', 'Left', 'Right'].includes(key);
 }
-

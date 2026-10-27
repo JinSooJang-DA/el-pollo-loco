@@ -1,4 +1,3 @@
-
 /** @type {HTMLCanvasElement} */
 let canvas;
 /** @type {World} */
@@ -187,8 +186,8 @@ function focusAfterMenuCredits(origin) {
             focusPauseResumeButton();
             return;
         }
-        setGameMenuOpen(true);
-        document.getElementById('creditsBtn')?.focus();
+        setGameMenuOpen(false);
+        focusGameMenuButton();
     });
 }
 

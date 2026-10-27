@@ -79,21 +79,14 @@ function getStartScreenNextControl(event, controls) {
 }
 
 /**
- * Moves focus between BGM and Back to Menu in Menu Credits.
+ * Moves focus between the available controls in Menu Credits.
  * @param {KeyboardEvent} event The pressed arrow key.
  */
 function handleMenuCreditsArrowNavigation(event) {
     const controls = getMenuCreditsControls();
     if (!controls.includes(document.activeElement)) return;
 
-    const bgmButton = controls[0];
-    const backButton = controls[controls.length - 1];
-    const isBgmDirection = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
-    const nextButton = isBgmDirection ? bgmButton : backButton;
-
-    event.preventDefault();
-    closeInactiveSubmenus(nextButton);
-    nextButton.focus();
+    moveMenuFocus(event, controls);
 }
 
 /** Returns the scrollable content of the visible information dialog. */
@@ -283,4 +276,3 @@ function focusStartScreenControls(event) {
     if (!startScreen || startScreen.classList.contains('d-none') || bgmMenu?.open) return;
     keepFocusInControls(event, getStartScreenControls());
 }
-

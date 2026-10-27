@@ -1,4 +1,3 @@
-
 /** World collision and combat methods. */
 
 /** Checks Pepe's collision with every living enemy in the current level. */
@@ -22,121 +21,90 @@ World.prototype.checkCharacterCollisions = function () {
 World.prototype.handleEnemyContact = function (enemy) {
     if (typeof hasReviveProtection === 'function' &&
         hasReviveProtection(this.character)) return;
+        
     if (enemy instanceof SmallChicken) {
-        this.hurtCharacter();
-        return;
+        return this.hurtCharacter();
     }
 
     if (enemy instanceof Endboss) {
-        this.handleBossContact(enemy);
-        return;
+        return this.handleBossContact(enemy);
     }
 
     this.handleChickenContact(enemy);
 };
 
-/** Applies boss stomp rules or damages Pepe after boss contact. */
-World.prototype.handleBossContact = function (enemy) {
-    let pepeFeet = this.character.y + this.character.height
-        - this.character.offset.bottom;
+/** Checks if Pepe is currently stomping the boss. */
+World.prototype.isBossStompCondition = function (enemy) {
+    let pepeFeet = this.character.y + this.character.height - this.character.offset.bottom;
     let bossHead = enemy.y + enemy.height * 0.13;
     let bossHeadBottom = enemy.y + enemy.height * 0.43;
     let pepeLeft = this.character.x + this.character.offset.left;
-    let pepeRight = this.character.x + this.character.width
-        - this.character.offset.right;
-    let headLeft = enemy.otherDirection
-        ? enemy.x + enemy.width * 0.52
-        : enemy.x + enemy.width * 0.08;
+    let pepeRight = this.character.x + this.character.width - this.character.offset.right;
+    let headLeft = enemy.otherDirection ? enemy.x + enemy.width * 0.52 : enemy.x + enemy.width * 0.08;
     let headRight = headLeft + enemy.width * 0.38;
+    
+    return this.character.speedY < 0 && pepeFeet >= bossHead && pepeFeet <= bossHeadBottom &&
+        pepeRight > headLeft && pepeLeft < headRight;
+};
 
-    let isStomping = this.character.speedY < 0 &&
-        pepeFeet >= bossHead &&
-        pepeFeet <= bossHeadBottom &&
-        pepeRight > headLeft &&
-        pepeLeft < headRight;
+/** Executes the boss stomp effect and damage if applicable. */
+World.prototype.executeBossStomp = function (enemy, now, attackMode) {
+    enemy.lastStompBounce = now;
+    this.character.speedY = 15;
+    
+    if (attackMode === 'bottle') return;
+    
+    enemy.energy = Math.max(0, enemy.energy - 20);
+    enemy.lastHit = now;
+    this.statusBarEndboss.setPercentage((enemy.energy / enemy.maxEnergy) * 100);
+    playSound(AUDIO_HUB.bossHurt);
+};
 
-    if (isStomping) {
+/** Applies boss stomp rules or damages Pepe after boss contact. */
+World.prototype.handleBossContact = function (enemy) {
+    if (this.isBossStompCondition(enemy)) {
         let now = Date.now();
-
-        // All levels: same 3-second stomp cooldown.
-        if (now - (enemy.lastStompBounce || 0) < 3000) {
-            return;
-        }
-
+        if (now - (enemy.lastStompBounce || 0) < 3000) return;
+        
         let attackMode = this.getBossAttackMode();
-
-        // Levels 1, 2 and 4:
-        // Respect the existing boss damage cooldown.
-        if (attackMode !== 'bottle' &&
-            now - enemy.lastHit < 3000) {
-            return;
-        }
-
-        // A successful stomp always gives the same bounce.
-        enemy.lastStompBounce = now;
-        this.character.speedY = 15;
-
-        // Levels 3 and 5: bounce without boss damage.
-        if (attackMode === 'bottle') {
-            return;
-        }
-
-        // Levels 1, 2 and 4: boss takes 20 damage.
-        enemy.energy = Math.max(0, enemy.energy - 20);
-        enemy.lastHit = now;
-
-        this.statusBarEndboss.setPercentage(
-            (enemy.energy / enemy.maxEnergy) * 100
-        );
-
-        // Stomping sounds remain centered.
-        playSound(AUDIO_HUB.bossHurt);
+        if (attackMode !== 'bottle' && now - enemy.lastHit < 3000) return;
+        
+        this.executeBossStomp(enemy, now, attackMode);
         return;
     }
-
+    
     if (Date.now() - enemy.lastHit < 2000) return;
     this.hurtCharacter(40);
 };
 
-/** Applies a normal-chicken stomp only when Pepe crossed its top edge. */
-World.prototype.handleChickenContact = function (enemy) {
-    // Normal chicken: only a downward landing counts as a stomp.
-    let pepeFeet = this.character.y + this.character.height
-        - this.character.offset.bottom;
+/** Verifies if Pepe's fall path crossed the top of the chicken. */
+World.prototype.checkChickenTopLanding = function (enemy) {
     let chickenTop = enemy.y + enemy.offset.top;
-    let pepeLeft = this.character.x + this.character.offset.left;
-    let pepeRight = this.character.x + this.character.width
-        - this.character.offset.right;
     let chickenLeft = enemy.x + enemy.offset.left;
     let chickenRight = enemy.x + enemy.width - enemy.offset.right;
-
-    let recentFallSteps = this.character.lastFallSteps ||
-        [this.character.lastFallStep].filter(Boolean);
-
-    let collisionTops = [chickenTop, enemy.previousCollisionTop]
-        .filter((top, index, tops) =>
-            Number.isFinite(top) && tops.indexOf(top) === index
-        );
-
-    let crossedChickenTop = recentFallSteps.some(lastStep =>
-        Date.now() - lastStep.time < 120 &&
-        collisionTops.some(top =>
-            lastStep.from <= top && lastStep.to >= top
-        ) &&
-        lastStep.right > chickenLeft && lastStep.left < chickenRight
+    let recentFallSteps = this.character.lastFallSteps || [this.character.lastFallStep].filter(Boolean);
+    let collisionTops = [chickenTop, enemy.previousCollisionTop].filter((top, i, tops) => Number.isFinite(top) && tops.indexOf(top) === i);
+    
+    return recentFallSteps.some(step =>
+        Date.now() - step.time < 120 &&
+        collisionTops.some(top => step.from <= top && step.to >= top) &&
+        step.right > chickenLeft && step.left < chickenRight
     );
+};
 
-    let landsOnTop = crossedChickenTop &&
-        pepeRight > chickenLeft &&
-        pepeLeft < chickenRight;
-
+/** Applies a normal-chicken stomp only when Pepe crossed its top edge. */
+World.prototype.handleChickenContact = function (enemy) {
+    let pepeLeft = this.character.x + this.character.offset.left;
+    let pepeRight = this.character.x + this.character.width - this.character.offset.right;
+    let chickenLeft = enemy.x + enemy.offset.left;
+    let chickenRight = enemy.x + enemy.width - enemy.offset.right;
+    
+    let landsOnTop = this.checkChickenTopLanding(enemy) && pepeRight > chickenLeft && pepeLeft < chickenRight;
+    
     if (landsOnTop) {
         if (this.stompEnemy(enemy)) {
             this.character.lastFallStep = null;
             this.character.lastFallSteps = [];
-            // Gravity updates every 40 ms but contacts are checked every
-            // 50 ms. Pepe can still overlap this (or a neighboring) chicken
-            // while the automatic stomp bounce has already started.
             this.character.stompBounceUntil = Date.now() + 200;
         }
     } else if (Date.now() >= (this.character.stompBounceUntil || 0)) {
@@ -150,27 +118,18 @@ World.prototype.hurtCharacter = function (damage = 40) {
         hasReviveProtection(this.character)) return;
     if (this.character.isHurt() || this.character.isDead()) return;
 
-    let coinsUsed = Math.min(
-        this.collectedCoins,
-        Math.ceil(damage / 10)
-    );
-
+    let coinsUsed = Math.min(this.collectedCoins, Math.ceil(damage / 10));
     this.collectedCoins -= coinsUsed;
-    this.statusBarCoin.setPercentage(
-        (this.collectedCoins / this.maxCoins) * 100
-    );
+    this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
 
     let remainingDamage = Math.max(0, damage - coinsUsed * 10);
-    this.character.energy = Math.max(
-        0, this.character.energy - remainingDamage
-    );
+    this.character.energy = Math.max(0, this.character.energy - remainingDamage);
 
     this.statusBar.setPercentage(this.character.energy);
     this.character.lastHit = Date.now();
 
     if (this.character.isDead()) {
-        this.startPepeDeathSequence();
-        return;
+        return this.startPepeDeathSequence();
     }
 
     playRandomPepeHurtVoice();
@@ -182,8 +141,7 @@ World.prototype.hurtCharacter = function (damage = 40) {
  * @returns {boolean} Whether the stomp was accepted.
  */
 World.prototype.stompEnemy = function (enemy) {
-    if (typeof hasReviveProtection === 'function' &&
-        hasReviveProtection(this.character)) return false;
+    if (typeof hasReviveProtection === 'function' && hasReviveProtection(this.character)) return false;
     if (!(enemy instanceof Chicken)) return false;
 
     let now = Date.now();
@@ -222,71 +180,67 @@ World.prototype.checkBottleCollisions = function () {
     this.throwableObjects.forEach(bottle => {
         if (bottle.isSplashed) return;
 
-        // Determine all collisions before triggering splash.
         let hitEnemies = this.level.enemies.filter(enemy => {
-            let alive = typeof enemy.isDead === 'function'
-                ? !enemy.isDead() : !enemy.isDead;
-
+            let alive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
             return alive && bottle.isColliding(enemy);
         });
 
         if (hitEnemies.length === 0) return;
 
-        // One bottle can damage multiple overlapping enemies.
-        hitEnemies.forEach(enemy => {
-            this.handleBottleImpact(bottle, enemy);
-        });
-
+        hitEnemies.forEach(enemy => this.handleBottleImpact(bottle, enemy));
         bottle.splash();
         this.removeBottleAfterDelay(bottle, 100);
     });
 };
 
+/** Handles bottle collision specifically for the Endboss. */
+World.prototype.applyBossBottleImpact = function (bottle, enemy) {
+    enemy.hadFirstContact = true;
+    if (this.getBossAttackMode() === 'stomp') return;
+    
+    if (enemy.isHitOnHead(bottle) && Date.now() - enemy.lastHit >= 3000) {
+        enemy.hit();
+        playSpatialSound(AUDIO_HUB.bossHurt, enemy.x + enemy.width / 2);
+        this.statusBarEndboss.setPercentage((enemy.energy / enemy.maxEnergy) * 100);
+    }
+};
+
+/** Handles bottle collision for small chickens. */
+World.prototype.applySmallChickenBottleImpact = function (bottle, enemy) {
+    if (!bottle.hasPlayedSmallChickenHitSound) {
+        playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
+        bottle.hasPlayedSmallChickenHitSound = true;
+    }
+    if (typeof enemy.die === 'function') enemy.die();
+    this.removeEnemyAfterDelay(enemy, 500);
+};
+
+/** Handles bottle collision for normal chickens. */
+World.prototype.applyChickenBottleDamage = function (bottle, enemy) {
+    enemy.energy = Math.max(0, enemy.energy - 2);
+    let isDead = enemy.energy === 0;
+    let sound = isDead ? AUDIO_HUB.chickenDead1 : AUDIO_HUB.chickenStomp;
+    
+    if (!bottle.hasPlayedChickenHitSound) {
+        playSpatialSound(sound, enemy.x + enemy.width / 2);
+        bottle.hasPlayedChickenHitSound = true;
+    }
+    
+    if (isDead) {
+        enemy.die();
+        this.removeEnemyAfterDelay(enemy, 500);
+    } else {
+        enemy.showStompReaction();
+    }
+};
+
 /** Applies one bottle's damage and type-specific sound to an enemy. */
 World.prototype.handleBottleImpact = function (bottle, enemy) {
-    if (typeof hasReviveProtection === 'function' &&
-        hasReviveProtection(this.character)) return;
-    if (enemy instanceof Endboss) {
-        enemy.hadFirstContact = true;
-
-        if (this.getBossAttackMode() === 'stomp') return;
-
-        if (enemy.isHitOnHead(bottle) &&
-            Date.now() - enemy.lastHit >= 3000) {
-            enemy.hit();
-            playSpatialSound(AUDIO_HUB.bossHurt, enemy.x + enemy.width / 2);
-
-            this.statusBarEndboss.setPercentage(
-                (enemy.energy / enemy.maxEnergy) * 100
-            );
-        }
-    } else if (enemy instanceof SmallChicken) {
-        if (!bottle.hasPlayedSmallChickenHitSound) {
-            playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
-            bottle.hasPlayedSmallChickenHitSound = true;
-        }
-
-        if (typeof enemy.die === 'function') enemy.die();
-        this.removeEnemyAfterDelay(enemy, 500);
-    } else if (enemy instanceof Chicken) {
-        // One bottle = two stomp attacks.
-        enemy.energy = Math.max(0, enemy.energy - 2);
-
-        if (enemy.energy === 0) {
-            if (!bottle.hasPlayedChickenHitSound) {
-                playSpatialSound(AUDIO_HUB.chickenDead1, enemy.x + enemy.width / 2);
-                bottle.hasPlayedChickenHitSound = true;
-            }
-            enemy.die();
-            this.removeEnemyAfterDelay(enemy, 500);
-        } else {
-            if (!bottle.hasPlayedChickenHitSound) {
-                playSpatialSound(AUDIO_HUB.chickenStomp, enemy.x + enemy.width / 2);
-                bottle.hasPlayedChickenHitSound = true;
-            }
-            enemy.showStompReaction();
-        }
-    }
+    if (typeof hasReviveProtection === 'function' && hasReviveProtection(this.character)) return;
+    
+    if (enemy instanceof Endboss) return this.applyBossBottleImpact(bottle, enemy);
+    if (enemy instanceof SmallChicken) return this.applySmallChickenBottleImpact(bottle, enemy);
+    if (enemy instanceof Chicken) this.applyChickenBottleDamage(bottle, enemy);
 };
 
 /** Removes a splashed bottle after its short visual delay. */

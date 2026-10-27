@@ -72,6 +72,7 @@ class Endboss extends MovableObject {
         this.animate();
     }
 
+    /** Evaluates if a bottle collision struck the boss's head area. */
     isHitOnHead(bottle) {
         let headX = this.otherDirection
             ? this.x + this.width * 0.52
@@ -99,10 +100,22 @@ class Endboss extends MovableObject {
         }
     }
 
+    /** Moves the boss according to its current combat phase. */
+    updateBossMovement() {
+        if (isPaused || this.isDead()) return;
+        if (!this.hadFirstContact || this.animationStep < 10) return;
+        if (this.isHurt() || this.isPreparingAttack) return;
+
+        if (this.isCharging) {
+            this.chargeCharacter(18);
+        } else {
+            this.chaseCharacter(6);
+        }
+    }
+
     /**
      * Initiates main animation and state loop for the boss.
      */
-
     animate() {
         let mainInterval = setInterval(() => {
             if (isPaused) return;
@@ -117,32 +130,13 @@ class Endboss extends MovableObject {
         }, 150);
 
         let moveInterval = setInterval(() => {
-            if (isPaused) return;
-            if (this.isDead()) return;
-            if (!this.hadFirstContact || this.animationStep < 10) return;
-            if (this.isHurt() || this.isPreparingAttack) return;
-
-            if (this.isCharging) {
-                this.chargeCharacter(18);
-            } else {
-                this.chaseCharacter(6);
-            }
+            this.updateBossMovement();
         }, 50);
     }
 
-
-    /**
-     * Handles hurt, alert, and attack behaviors depending on current state.
-     */
-
-    handleBossActions() {
-        this.checkContactTrigger();
-
-        if (this.isHurt()) {
-            this.playAnimation(this.IMAGES_HURT);
-        } else if (!this.hadFirstContact || this.animationStep < 10) {
-            this.playAnimation(this.IMAGES_ALERT);
-        } else if (this.isPreparingAttack) {
+    /** Manages the animation sequences during combat engagement. */
+    handleActiveBossAnimation() {
+        if (this.isPreparingAttack) {
             this.playAnimation(this.IMAGES_ALERT);
         } else if (this.isCharging) {
             this.playAnimation(this.IMAGES_ATTACK);
@@ -150,12 +144,26 @@ class Endboss extends MovableObject {
             this.playAnimation(this.IMAGES_ATTACK);
             this.checkSpecialAttack();
         }
+    }
+
+    /**
+     * Handles hurt, alert, and attack behaviors depending on current state.
+     */
+    handleBossActions() {
+        this.checkContactTrigger();
+
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+        } else if (!this.hadFirstContact || this.animationStep < 10) {
+            this.playAnimation(this.IMAGES_ALERT);
+        } else {
+            this.handleActiveBossAnimation();
+        }
 
         if (this.hadFirstContact) this.animationStep++;
     }
 
-
-
+    /** Determines if the boss should trigger a special charge attack. */
     checkSpecialAttack() {
         if (Date.now() - this.lastSpecialAttack < 4000) return;
 
@@ -215,7 +223,6 @@ class Endboss extends MovableObject {
         this.specialAttackRemaining = 0;
     }
 
-
     /**
      * Checks distance to character to trigger first boss contact.
      */
@@ -236,6 +243,7 @@ class Endboss extends MovableObject {
         let frame = 0;
         let deadInterval = setInterval(() => {
             if (isPaused) return;
+            
             if (frame < this.IMAGES_DEAD.length) {
                 this.img = this.imageCache[this.IMAGES_DEAD[frame]];
                 frame++;
@@ -273,6 +281,7 @@ class Endboss extends MovableObject {
         }
     }
 
+    /** Makes the boss perform its high-speed dash attack. */
     chargeCharacter(step = 54) {
         if (!world || !world.character) return;
 

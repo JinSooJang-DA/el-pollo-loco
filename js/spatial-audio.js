@@ -1,4 +1,3 @@
-
 /**
  * Plays sound effects based on their screen position.
  * -0.8 = left, 0 = center, +0.8 = right
@@ -8,6 +7,7 @@ let spatialAudioContext;
 
 const BOTTLE_SMASH_PATH = 'audio/bottle-smash.mp3';
 
+/** Retrieves or creates the spatial audio context. */
 function getSpatialAudioContext() {
     if (!spatialAudioContext) {
         spatialAudioContext = new (
@@ -18,6 +18,7 @@ function getSpatialAudioContext() {
     return spatialAudioContext;
 }
 
+/** Calculates the pan value based on the object's world position. */
 function getSoundPan(worldX) {
     if (typeof world === 'undefined' || !world) return 0;
 
@@ -29,21 +30,32 @@ function getSoundPan(worldX) {
     return Math.max(-0.8, Math.min(0.8, pan));
 }
 
-function playSpatialSound(sound, worldX) {
-    if (typeof isMuted !== 'undefined' && isMuted) return;
-    if (typeof isStoryVideoPlaying === 'function' && isStoryVideoPlaying()) return;
+/** Checks if conditions allow for playing spatial sounds. */
+function canPlaySpatialSound() {
+    if (typeof isMuted !== 'undefined' && isMuted) return false;
+    if (typeof isStoryVideoPlaying === 'function' && isStoryVideoPlaying()) return false;
+    
+    return true;
+}
 
+/** Creates and configures the audio element for spatial playback. */
+function createSpatialAudioElement(sound) {
     let audioPath = typeof sound === 'string'
         ? sound
         : sound.src;
 
-    if (!audioPath) return;
+    if (!audioPath) return null;
 
     let audio = new Audio(audioPath);
     audio.volume = typeof sound === 'string'
         ? 0.5
         : sound.volume;
 
+    return audio;
+}
+
+/** Routes the audio element through a stereo panner node. */
+function routeSpatialAudio(audio, worldX) {
     let audioContext = getSpatialAudioContext();
     let source = audioContext.createMediaElementSource(audio);
     let panner = audioContext.createStereoPanner();
@@ -58,6 +70,18 @@ function playSpatialSound(sound, worldX) {
         panner.disconnect();
     }, { once: true });
 
+    return audioContext;
+}
+
+/** Orchestrates the playback of a spatial sound effect. */
+function playSpatialSound(sound, worldX) {
+    if (!canPlaySpatialSound()) return;
+
+    let audio = createSpatialAudioElement(sound);
+    if (!audio) return;
+
+    let audioContext = routeSpatialAudio(audio, worldX);
+
     audioContext.resume().then(() => {
         audio.play().catch(error => {
             console.warn('Spatial sound could not play:', error);
@@ -65,6 +89,7 @@ function playSpatialSound(sound, worldX) {
     });
 }
 
+/** Helper function to play the bottle smash sound with panning. */
 function playBottleSmashAt(worldX) {
     playSpatialSound(BOTTLE_SMASH_PATH, worldX);
 }

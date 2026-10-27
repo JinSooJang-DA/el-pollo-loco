@@ -12,7 +12,6 @@ function isStoryVideoPlaying() {
 function syncStoryVideoMute() {
     let video = document.getElementById('storyVideo');
     if (!video) return;
-
     video.muted = isMuted;
     video.volume = sfxVolume;
 }
@@ -24,6 +23,26 @@ function clearGameplayInput() {
     });
 }
 
+function setupStoryVideo(video, videoNumber) {
+    video.src = `videos/loco-0${videoNumber}.mp4`;
+    video.currentTime = 0;
+    syncStoryVideoMute();
+    video.onended = () => finishStoryVideo();
+    video.onerror = () => finishStoryVideo();
+    video.play().catch(() => { });
+}
+
+function startStoryPlayback(videoNumber, onComplete) {
+    storyVideoActive = true;
+    storyVideoFinishing = false;
+    storyVideoComplete = onComplete;
+    clearGameplayInput();
+    if (currentBgm) currentBgm.pause();
+    stopSoundEffects();
+    document.getElementById('storyVideoScreen').classList.remove('d-none');
+    setupStoryVideo(document.getElementById('storyVideo'), videoNumber);
+}
+
 /**
  * Plays one story chapter and completes its callback exactly once.
  * @param {number} videoNumber The chapter video number.
@@ -31,28 +50,13 @@ function clearGameplayInput() {
  */
 function playStoryVideo(videoNumber, onComplete) {
     if (storyVideoActive || storyVideoFinishing) return;
-
     let screen = document.getElementById('storyVideoScreen');
     let video = document.getElementById('storyVideo');
     if (!screen || !video) {
         onComplete();
         return;
     }
-
-    storyVideoActive = true;
-    storyVideoFinishing = false;
-    storyVideoComplete = onComplete;
-    clearGameplayInput();
-    if (currentBgm) currentBgm.pause();
-    stopSoundEffects();
-
-    screen.classList.remove('d-none');
-    video.src = `videos/loco-0${videoNumber}.mp4`;
-    video.currentTime = 0;
-    syncStoryVideoMute();
-    video.onended = () => finishStoryVideo();
-    video.onerror = () => finishStoryVideo();
-    video.play().catch(() => { });
+    startStoryPlayback(videoNumber, onComplete);
 }
 
 /** Skips the active story chapter from the on-screen button or Space. */
@@ -65,7 +69,6 @@ function cancelStoryVideo() {
     storyVideoActive = false;
     storyVideoFinishing = false;
     storyVideoComplete = null;
-
     let screen = document.getElementById('storyVideoScreen');
     let video = document.getElementById('storyVideo');
     if (video) {
@@ -74,17 +77,14 @@ function cancelStoryVideo() {
         video.onerror = null;
     }
     if (screen) screen.classList.add('d-none');
-
     clearGameplayInput();
 }
 
 /** Hides the chapter and runs the next transition once. */
 function finishStoryVideo() {
     if (!storyVideoActive || storyVideoFinishing) return;
-
     storyVideoFinishing = true;
     storyVideoActive = false;
-
     let screen = document.getElementById('storyVideoScreen');
     let video = document.getElementById('storyVideo');
     if (video) {
@@ -93,7 +93,6 @@ function finishStoryVideo() {
         video.onerror = null;
     }
     if (screen) screen.classList.add('d-none');
-
     clearGameplayInput();
     let onComplete = storyVideoComplete;
     storyVideoComplete = null;
@@ -104,7 +103,6 @@ function finishStoryVideo() {
 /** Captures Space before gameplay input can receive it. */
 document.addEventListener('keydown', event => {
     if (!storyVideoActive || event.code !== 'Space') return;
-
     event.preventDefault();
     event.stopImmediatePropagation();
     skipStoryVideo();

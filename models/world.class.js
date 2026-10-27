@@ -1,4 +1,3 @@
-
 /**
  * Represents the game world.
  */
@@ -36,40 +35,39 @@ class World {
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.levelNumber = levelNumber;
+        this.loadCurrentLevel(levelNumber);
+        this.initHudIcons();
+        this.scaleEnemyDifficulty();
+        this.setWorld();
+        this.run();
+    }
 
-        if (levelNumber === 1) this.level = level1;
-        else if (levelNumber === 2) this.level = level2;
-        else if (levelNumber === 3) this.level = level3;
-        else if (levelNumber === 4) this.level = level4;
-        else if (levelNumber === 5) this.level = level5;
+    /** Loads the corresponding level data. */
+    loadCurrentLevel(levelNumber) {
+        const levels = [level1, level2, level3, level4, level5];
+        this.level = levels[levelNumber - 1] || level1;
+    }
 
+    /** Initializes the HUD icons. */
+    initHudIcons() {
         this.bottleIcon = new Image();
         this.bottleIcon.src = 'img/salsa-hud.webp';
         this.coinIcon = new Image();
         this.coinIcon.src = 'img/coin-full.webp';
+    }
 
-
-
+    /** Scales enemy speed and health based on the level. */
+    scaleEnemyDifficulty() {
+        let speedMultiplier = 1 + (this.levelNumber - 1) * 0.2;
         this.level.enemies.forEach(enemy => {
-            let speedMultiplier = 1 + (this.levelNumber - 1) * 0.2;
-
             if (enemy instanceof SmallChicken) {
-                // 병아리: 기존 속도 유지
                 enemy.speed *= speedMultiplier;
             } else if (enemy instanceof Chicken) {
-                // 일반닭: 레벨별 증가
                 enemy.speed *= speedMultiplier;
-
-                // 일반닭 체력은 기존 레벨별 설정 유지
                 enemy.energy = this.levelNumber;
                 enemy.maxEnergy = this.levelNumber;
             }
         });
-
-
-
-        this.setWorld();
-        this.run();
     }
 
     /** Connects Pepe to this world instance. */
@@ -115,6 +113,19 @@ class World {
         return 'both';
     }
 
+    /** Creates and configures the Endboss instance. */
+    createConfiguredBoss() {
+        let boss = new Endboss();
+        let bossHealth = { 1: 50, 2: 70, 3: 50, 4: 100, 5: 100 };
+        boss.energy = bossHealth[this.levelNumber] || 50;
+        boss.maxEnergy = boss.energy;
+        this.statusBarEndboss.setPercentage(100);
+        let distance = 500;
+        boss.x = this.character.otherDirection ? this.character.x - distance : this.character.x + distance;
+        boss.x = Math.max(0, Math.min(boss.x, this.level.level_end_x - boss.width));
+        return boss;
+    }
+
     /** Spawns and configures the boss after all regular enemies are defeated. */
     checkBossSpawn() {
         if (this.bossSpawned || this.gameEnded) return;
@@ -125,34 +136,7 @@ class World {
 
         if (remainingEnemies.length === 0) {
             this.bossSpawned = true;
-            let boss = new Endboss();
-
-            let bossHealth = {
-                1: 50,
-                2: 70,
-                3: 50,
-                4: 100,
-                5: 100
-            };
-
-            boss.energy = bossHealth[this.levelNumber] || 50;
-            boss.maxEnergy = boss.energy;
-            this.statusBarEndboss.setPercentage(100);
-
-            let distance = 500;
-
-            if (this.character.otherDirection) {
-                boss.x = this.character.x - distance;
-            } else {
-                boss.x = this.character.x + distance;
-            }
-
-            boss.x = Math.max(
-                0,
-                Math.min(boss.x, this.level.level_end_x - boss.width)
-            );
-
-            this.level.enemies.push(boss);
+            this.level.enemies.push(this.createConfiguredBoss());
         }
     }
 
@@ -176,6 +160,21 @@ class World {
         }
     }
 
+    /** Handles the logic for death audio ending. */
+    handleDeathAudioEnd(deathAudio, onFinish) {
+        let deathFinished = false;
+        let triggerFinish = () => {
+            if (deathFinished || this !== world || !this.gameEnded) return;
+            deathFinished = true;
+            onFinish();
+        };
+        let finishFallback = () => window.setTimeout(triggerFinish, 1000);
+        
+        deathAudio.voice.addEventListener('ended', triggerFinish, { once: true });
+        deathAudio.voice.addEventListener('error', finishFallback, { once: true });
+        deathAudio.playback.then(played => { if (!played) finishFallback(); });
+    }
+
     /** Starts Pepe's one-time death voice and finishes safely without audio. */
     startPepeDeathSequence() {
         if (this.gameEnded) return;
@@ -185,25 +184,27 @@ class World {
         if (currentBgm) currentBgm.pause();
 
         let deathAudio = playRandomPepeDeadVoice();
-        let deathFinished = false;
-        let finishDeath = () => {
-            if (deathFinished || this !== world || !this.gameEnded) return;
-
-            deathFinished = true;
-
+        
+        this.handleDeathAudioEnd(deathAudio, () => {
             playBgm(AUDIO_HUB.bgmLost);
             this.showEndScreen('img/You won, you lost/You lost.png');
-        };
-        let finishAfterDeathAnimation = () => {
-            // Six DEAD frames run every 150 ms; leave a small margin for the last frame.
-            window.setTimeout(finishDeath, 1000);
-        };
-
-        deathAudio.voice.addEventListener('ended', finishDeath, { once: true });
-        deathAudio.voice.addEventListener('error', finishAfterDeathAnimation, { once: true });
-        deathAudio.playback.then(played => {
-            if (!played) finishAfterDeathAnimation();
         });
+    }
+
+    /** Updates the end screen view state based on victory or loss. */
+    updateEndScreenView(isVictory, imagePath) {
+        let endScreenImg = document.getElementById('endScreenImg');
+        let endCredits = document.getElementById('endCredits');
+
+        if (isVictory) {
+            endScreenImg.classList.add('d-none');
+            endCredits.classList.remove('d-none');
+            playEndVideo();
+        } else {
+            stopEndVideo();
+            endCredits.classList.add('d-none');
+            this.setEndScreenImage(endScreenImg, imagePath);
+        }
     }
 
     /**
@@ -220,31 +221,13 @@ class World {
             stopAllIntervals();
         }
 
-        let endScreenImg = document.getElementById('endScreenImg');
-        let restartScreen = document.getElementById('restartScreen');
-        let endCredits = document.getElementById('endCredits');
+        this.updateEndScreenView(isVictory, imagePath);
 
-        if (isVictory) {
-            endScreenImg.classList.add('d-none');
-            endCredits.classList.remove('d-none');
-            playEndVideo();
-        } else {
-            stopEndVideo();
-            endCredits.classList.add('d-none');
-            this.setEndScreenImage(endScreenImg, imagePath);
-        }
-
-        let retryButton = document.getElementById('retryLevelBtn');
-        let canRetry = canRevive;
-
-        if (retryButton) {
-            retryButton.classList.toggle('d-none', !canRetry);
-        }
-
-        if (restartScreen) restartScreen.classList.remove('d-none');
+        document.getElementById('retryLevelBtn')?.classList.toggle('d-none', !canRevive);
+        document.getElementById('restartScreen')?.classList.remove('d-none');
 
         if (typeof focusGameOverButton === 'function') {
-            focusGameOverButton(canRetry);
+            focusGameOverButton(canRevive);
         }
     }
 

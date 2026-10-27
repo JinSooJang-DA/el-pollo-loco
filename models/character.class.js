@@ -1,4 +1,3 @@
-
 /**
  * Represents the playable hero Pepe.
  * @extends MovableObject
@@ -98,14 +97,16 @@ class Character extends MovableObject {
     /** Initializes Pepe's images and animation loops. */
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
-        this.loadImages(this.IMAGES_IDLE);
-        this.loadImages(this.IMAGES_LONG_IDLE);
-        this.loadImages(this.IMAGES_WALKING);
-        this.loadImages(this.IMAGES_JUMPING);
-        this.loadImages(this.IMAGES_HURT);
-        this.loadImages(this.IMAGES_DEAD);
+        this.loadCharacterImages();
         this.applyGravity();
         this.animate();
+    }
+
+    /** Loads all image arrays for the character. */
+    loadCharacterImages() {
+        [this.IMAGES_IDLE, this.IMAGES_LONG_IDLE, this.IMAGES_WALKING,
+         this.IMAGES_JUMPING, this.IMAGES_HURT, this.IMAGES_DEAD]
+         .forEach(images => this.loadImages(images));
     }
 
     /** Draws DEAD frames with an isolated hop, fall, and landing transform. */
@@ -114,20 +115,19 @@ class Character extends MovableObject {
             super.draw(ctx);
             return;
         }
+        this.drawDeadFrame(ctx);
+    }
 
-        let frameIndex = this.IMAGES_DEAD.findIndex(path =>
-            this.imageCache[path] === this.img
-        );
+    /** Handles the complex rendering of the death animation frame. */
+    drawDeadFrame(ctx) {
+        let frameIndex = this.IMAGES_DEAD.findIndex(path => this.imageCache[path] === this.img);
         let rotation = this.getDeathRotation(frameIndex);
         let floorOffset = this.getDeathFloorOffset(frameIndex, rotation);
         let visualOffset = this.getDeathVisualOffset(frameIndex);
         let edgeOffset = this.getDeathEdgeOffset(frameIndex);
-
+        
         ctx.save();
-        ctx.translate(
-            this.x + this.width / 2 + edgeOffset,
-            this.y + this.height + floorOffset + visualOffset
-        );
+        ctx.translate(this.x + this.width / 2 + edgeOffset, this.y + this.height + floorOffset + visualOffset);
         ctx.rotate(rotation);
         ctx.drawImage(this.img, -this.width / 2, -this.height, this.width, this.height);
         ctx.restore();
@@ -147,47 +147,41 @@ class Character extends MovableObject {
     /** Smoothly shifts a DEAD-only render back inside the visible canvas. */
     getDeathEdgeOffset(frameIndex) {
         if (!this.world?.canvas || frameIndex < 0) return 0;
-
-        let allBounds = this.IMAGES_DEAD.map((_, index) =>
-            this.getDeathScreenBounds(index, this.getDeathRotation(index))
-        );
-        let animationLeft = Math.min(...allBounds.map(bounds => bounds.left));
-        let animationRight = Math.max(...allBounds.map(bounds => bounds.right));
+        let allBounds = this.IMAGES_DEAD.map((_, i) => this.getDeathScreenBounds(i, this.getDeathRotation(i)));
+        
+        let animLeft = Math.min(...allBounds.map(b => b.left));
+        let animRight = Math.max(...allBounds.map(b => b.right));
         let margin = 8;
         let targetScreenOffset = 0;
-
-        if (animationLeft < margin) {
-            targetScreenOffset = margin - animationLeft;
-        } else if (animationRight > this.world.canvas.width - margin) {
-            targetScreenOffset = this.world.canvas.width - margin - animationRight;
-        }
-
+        
+        if (animLeft < margin) targetScreenOffset = margin - animLeft;
+        else if (animRight > this.world.canvas.width - margin) targetScreenOffset = this.world.canvas.width - margin - animRight;
+        
         let progress = [0, 0, 0.2, 0.45, 0.75, 1][frameIndex] || 0;
         let localOffset = targetScreenOffset * progress;
+        
         return this.otherDirection ? -localOffset : localOffset;
+    }
+
+    /** Calculates rotated screen vertices for bounds checking. */
+    calculateScreenVertices(bounds, rotation) {
+        let scaleX = this.width / 610, scaleY = this.height / 1200;
+        let xVals = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
+        let yVals = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
+        let cos = Math.cos(rotation), sin = Math.sin(rotation);
+        let mirror = this.otherDirection ? -1 : 1;
+        let worldX = this.otherDirection ? -this.x : this.x;
+        let pivotX = worldX + this.width / 2 + (this.world?.camera_x || 0);
+        
+        return xVals.flatMap(x => yVals.map(y => pivotX + mirror * (cos * x - sin * y)));
     }
 
     /** Returns the rotated alpha bounds in visible screen coordinates. */
     getDeathScreenBounds(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return { left: 0, right: 0 };
-
-        let scaleX = this.width / 610;
-        let scaleY = this.height / 1200;
-        let xValues = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
-        let yValues = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
-        let cos = Math.cos(rotation);
-        let sin = Math.sin(rotation);
-        let mirror = this.otherDirection ? -1 : 1;
-        // World temporarily negates x while drawing a left-facing character.
-        // Reconstruct the world coordinate before calculating screen bounds;
-        // the mirror below already represents Canvas scale(-1, 1).
-        let worldX = this.otherDirection ? -this.x : this.x;
-        let pivotX = worldX + this.width / 2 + (this.world?.camera_x || 0);
-        let screenX = xValues.flatMap(x => yValues.map(y =>
-            pivotX + mirror * (cos * x - sin * y)
-        ));
-
+        
+        let screenX = this.calculateScreenVertices(bounds, rotation);
         return { left: Math.min(...screenX), right: Math.max(...screenX) };
     }
 
@@ -195,24 +189,21 @@ class Character extends MovableObject {
     getDeathFloorOffset(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return 0;
-
-        let scaleX = this.width / 610;
-        let scaleY = this.height / 1200;
-        let sin = Math.sin(rotation);
-        let cos = Math.cos(rotation);
+        
+        let scaleX = this.width / 610, scaleY = this.height / 1200;
+        let sin = Math.sin(rotation), cos = Math.cos(rotation);
         let xValues = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
         let yValues = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
         let lowestPixel = Math.max(...xValues.flatMap(x => yValues.map(y => sin * x + cos * y)));
-
+        
         return Math.min(0, -lowestPixel);
     }
 
     /** Remembers when Pepe lands after falling. */
     handleGroundContact() {
         let wasFalling = this.speedY < 0;
-
         super.handleGroundContact();
-
+        
         if (wasFalling) {
             this.lastLandingTime = Date.now();
         }
@@ -224,14 +215,11 @@ class Character extends MovableObject {
         setInterval(() => this.processAnimations(), 150);
     }
 
-    /**
-     * Handles movement and jump input.
-     * @returns {boolean}
-     */
     /** Handles walking and jumping input. */
     handleWalkAndJump() {
         let movedRight = this.walkRight();
         let movedLeft = this.walkLeft();
+        
         if (this.world.keyboard.SPACE && !this.isAboveGround()) {
             this.jump();
             return true;
@@ -256,40 +244,21 @@ class Character extends MovableObject {
         return true;
     }
 
-    /** Updates the camera smoothly around the boss. */
-
-
-    updateCameraPosition() {
-        let screenWidth = this.world.canvas.width;
-
-        // Pepe's visible body center, considering the collision offsets.
-        let pepeCenter = this.x + this.offset.left +
-            (this.width - this.offset.left - this.offset.right) / 2;
-
-        // Leave more space in the direction Pepe is facing.
-        let targetPosition = this.otherDirection
-            ? screenWidth * 0.85
-            : screenWidth * 0.15;
-
+    /** Calculates the target camera X position based on direction. */
+    calculateTargetCameraX(screenWidth) {
+        let pepeCenter = this.x + this.offset.left + (this.width - this.offset.left - this.offset.right) / 2;
+        let targetPosition = this.otherDirection ? screenWidth * 0.85 : screenWidth * 0.15;
         let targetCameraX = targetPosition - pepeCenter;
-
-        // Keep the camera inside the level boundaries.
-        let maxScroll = Math.max(
-            0,
-            this.world.level.level_end_x + this.width - screenWidth
-        );
-
-        targetCameraX = Math.max(
-            -maxScroll,
-            Math.min(0, targetCameraX)
-        );
-
-        // Smooth camera movement.
-        this.world.camera_x +=
-            (targetCameraX - this.world.camera_x) * 0.08;
+        let maxScroll = Math.max(0, this.world.level.level_end_x + this.width - screenWidth);
+        
+        return Math.max(-maxScroll, Math.min(0, targetCameraX));
     }
 
-
+    /** Updates the camera smoothly around the boss or player. */
+    updateCameraPosition() {
+        let targetCameraX = this.calculateTargetCameraX(this.world.canvas.width);
+        this.world.camera_x += (targetCameraX - this.world.camera_x) * 0.08;
+    }
 
     /** Plays Pepe's death animation. */
     playDeathAnimation() {
@@ -319,7 +288,7 @@ class Character extends MovableObject {
         let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
         if (timePassed > 4) {
             this.playAnimation(this.IMAGES_LONG_IDLE);
-            if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && AUDIO_HUB.pepeSnore.paused) {
+            if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore?.paused) {
                 playSound(AUDIO_HUB.pepeSnore);
             }
         } else {
@@ -339,6 +308,7 @@ class Character extends MovableObject {
     processMovement() {
         if (!this.world || this.isDead() || isPaused) return;
         let isMoving = this.handleWalkAndJump();
+        
         if (isMoving || this.world.keyboard.D) {
             this.resetIdleTimer();
         }
@@ -348,11 +318,14 @@ class Character extends MovableObject {
     /** Plays the correct animation for Pepe's state. */
     processAnimations() {
         if (isPaused) return AUDIO_HUB.run.pause();
+        
         if (this.isDead() || this.isHurt() || this.isAboveGround()) {
             AUDIO_HUB.run.pause();
             AUDIO_HUB.run.currentTime = 0;
         }
+        
         if (this.isDead()) return this.playDeathAnimation();
+        
         if (this.isHurt() || this.isAboveGround()) {
             this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
             this.resetIdleTimer();
@@ -369,5 +342,4 @@ class Character extends MovableObject {
             AUDIO_HUB.pepeSnore.currentTime = 0;
         }
     }
-
 }

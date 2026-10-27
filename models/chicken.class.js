@@ -1,4 +1,3 @@
-
 /**
  * Represents a standard walking chicken enemy.
  * @extends MovableObject
@@ -48,36 +47,34 @@ class Chicken extends MovableObject {
         this.animate();
     }
 
-    /** Runs movement and sprite animation timers. */
+    /** Updates the chicken's movement direction relative to Pepe. */
+    updateChickenMovement() {
+        if (this.isDeadChicken || isPaused || !world) return;
+        
+        // Stop moving during the stomp reaction.
+        if (this.isStompReacting) return;
 
+        // Compare the center positions.
+        let chickenCenter = this.x + this.width / 2;
+        let pepeCenter = world.character.x + world.character.width / 2;
+        let distance = pepeCenter - chickenCenter;
+
+        // Stop only after the collision boxes actually touch.
+        if (this.isColliding(world.character)) return;
+
+        if (distance < 0) {
+            this.moveLeft();
+            if (Math.abs(distance) >= 50) this.otherDirection = false;
+        } else {
+            this.moveRight();
+            if (Math.abs(distance) >= 50) this.otherDirection = true;
+        }
+    }
+
+    /** Runs movement and sprite animation timers. */
     animate() {
         this.walkInterval = setInterval(() => {
-            if (this.isDeadChicken || isPaused || !world) return;
-
-            // Stop moving during the stomp reaction.
-            if (this.isStompReacting) return;
-
-            // Compare the center positions.
-            let chickenCenter = this.x + this.width / 2;
-            let pepeCenter = world.character.x +
-                world.character.width / 2;
-
-            let distance = pepeCenter - chickenCenter;
-
-            // Stop only after the collision boxes actually touch.
-            if (this.isColliding(world.character)) return;
-
-            if (distance < 0) {
-                this.moveLeft();
-                if (Math.abs(distance) >= 50) {
-                    this.otherDirection = false;
-                }
-            } else {
-                this.moveRight();
-                if (Math.abs(distance) >= 50) {
-                    this.otherDirection = true;
-                }
-            }
+            this.updateChickenMovement();
         }, 1000 / 60);
 
         this.animationInterval = setInterval(() => {
@@ -88,7 +85,7 @@ class Chicken extends MovableObject {
         }, 200);
     }
 
-
+    /** Plays a brief squishing reaction when jumped on. */
     showStompReaction() {
         if (this.isDeadChicken || this.isStompReacting) return;
 
