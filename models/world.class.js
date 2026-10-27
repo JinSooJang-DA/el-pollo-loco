@@ -161,7 +161,7 @@ class World {
         }
     }
 
-    /** Starts Pepe's one-time death voice and waits for it before Game Over. */
+    /** Starts Pepe's one-time death voice and finishes safely without audio. */
     startPepeDeathSequence() {
         if (this.gameEnded) return;
 
@@ -169,16 +169,26 @@ class World {
         this.character.resetIdleTimer();
         if (currentBgm) currentBgm.pause();
 
-        let deathVoice = playRandomPepeDeadVoice();
+        let deathAudio = playRandomPepeDeadVoice();
+        let deathFinished = false;
         let finishDeath = () => {
-            if (this !== world || !this.gameEnded) return;
+            if (deathFinished || this !== world || !this.gameEnded) return;
+
+            deathFinished = true;
 
             playBgm(AUDIO_HUB.bgmLost);
             this.showEndScreen('img/You won, you lost/You lost.png');
         };
+        let finishAfterDeathAnimation = () => {
+            // Six DEAD frames run every 150 ms; leave a small margin for the last frame.
+            window.setTimeout(finishDeath, 1000);
+        };
 
-        deathVoice.addEventListener('ended', finishDeath, { once: true });
-        deathVoice.addEventListener('error', finishDeath, { once: true });
+        deathAudio.voice.addEventListener('ended', finishDeath, { once: true });
+        deathAudio.voice.addEventListener('error', finishAfterDeathAnimation, { once: true });
+        deathAudio.playback.then(played => {
+            if (!played) finishAfterDeathAnimation();
+        });
     }
 
     showEndScreen(imagePath, isVictory = false) {

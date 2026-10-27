@@ -240,13 +240,21 @@ function isMainMenuVisible() {
  * @param {HTMLAudioElement} sound
  */
 function playSound(sound) {
-    if (!sound || isMuted || isPaused || isStoryVideoPlaying()) return;
+    if (!sound || isMuted || isPaused || isStoryVideoPlaying()) {
+        return Promise.resolve(false);
+    }
 
     sound.volume = sfxVolume;
     sound.muted = isMuted;
     sound.currentTime = 0;
 
-    sound.play().catch(() => { });
+    try {
+        return sound.play()
+            .then(() => true)
+            .catch(() => false);
+    } catch (error) {
+        return Promise.resolve(false);
+    }
 }
 
 /** Returns one of Pepe's bundled voice lines at random. */
@@ -273,12 +281,14 @@ function playRandomPepeHurtVoice() {
     playSound(getRandomPepeVoice('hurt'));
 }
 
-/** Stops Hurt and starts one Death line, returning it for end-of-line handling. */
+/** Stops Hurt and starts one Death line with its playback result. */
 function playRandomPepeDeadVoice() {
     stopPepeHurtVoices();
     let voice = getRandomPepeVoice('dead');
-    playSound(voice);
-    return voice;
+    return {
+        voice,
+        playback: playSound(voice)
+    };
 }
 
 /** Stops all sound effects except the current BGM. */
