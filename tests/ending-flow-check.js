@@ -16,7 +16,12 @@ const worldRender = read('models/world-render.js');
 const baseStyles = read('styles/base.css');
 const componentStyles = read('styles/components.css');
 const levelRulesStyles = read('styles/level-rules.css');
-const gameInput = read('js/game-input.js');
+const gameInput = [
+    'js/game-input-touch.js',
+    'js/game-input-ui.js',
+    'js/game-input-navigation.js',
+    'js/game-input-menu.js'
+].map(file => read(file)).join('\n');
 const responsiveStyles = read('styles/responsive.css');
 
 function expect(condition, message) {
