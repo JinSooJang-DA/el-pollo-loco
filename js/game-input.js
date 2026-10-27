@@ -85,7 +85,7 @@ function updateKeyboardState(event, pressed) {
 
     if (isMenuControlTarget(event.target)) return;
 
-    if (property && isGameMenuOpen()) {
+    if (property && isUiNavigationActive()) {
         if (pressed) event.preventDefault();
         return;
     }
@@ -115,6 +115,60 @@ function getFocusableControls(scope) {
     )).filter(control => control.getClientRects().length > 0);
 }
 
+/** Returns the visible controls available in the current non-gameplay UI. */
+function getUiNavigationControls() {
+    const startScreen = document.getElementById('startScreen');
+    const gameMenu = document.querySelector('.game-menu');
+    const bgmMenu = document.getElementById('bgmMenu');
+    const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
+        .map(id => document.getElementById(id))
+        .find(dialog => dialog && !dialog.classList.contains('d-none'));
+    const visibleOverlay = Array.from(document.querySelectorAll(
+        '.overlay-screen:not(.d-none), .story-video-screen:not(.d-none)'
+    )).find(overlay => overlay.getClientRects().length > 0);
+    const topControls = [
+        bgmMenu?.querySelector('summary'),
+        document.getElementById('soundBtn'),
+        gameMenu?.querySelector('summary')
+    ].filter(control => control && control.getClientRects().length > 0);
+    const activeScope = visibleDialog || visibleOverlay;
+    const scopedControls = activeScope ? getFocusableControls(activeScope) :
+        (startScreen && !startScreen.classList.contains('d-none')
+            ? [document.getElementById('startBtn')]
+            : []);
+    const menuControls = gameMenu?.open ? getFocusableControls(gameMenu) : [];
+
+    return [...new Set([...topControls, ...menuControls, ...scopedControls])]
+        .filter(control => !control.disabled && control.getClientRects().length > 0);
+}
+
+/** Returns whether visible UI should receive keyboard input instead of gameplay. */
+function isUiNavigationActive() {
+    const startScreen = document.getElementById('startScreen');
+    return isGameMenuOpen() || Boolean(
+        startScreen && !startScreen.classList.contains('d-none')
+    ) || Array.from(document.querySelectorAll(
+        '.dialog-overlay:not(.d-none), .overlay-screen:not(.d-none), .story-video-screen:not(.d-none)'
+    )).some(overlay => overlay.getClientRects().length > 0);
+}
+
+/** Moves focus through all controls visible in the current UI state. */
+function handleUiArrowNavigation(event) {
+    if (!isUiNavigationActive()) return false;
+
+    const controls = getUiNavigationControls();
+    const isHorizontalArrow = ['ArrowLeft', 'ArrowRight', 'Left', 'Right']
+        .includes(event.key);
+    if (!controls.length || document.activeElement?.matches('select, textarea') ||
+        (isHorizontalArrow && document.activeElement?.matches('input[type="range"]'))) {
+        return false;
+    }
+
+    moveMenuFocus(event, controls);
+    event.stopImmediatePropagation();
+    return true;
+}
+
 /** Returns visible buttons inside a menu. */
 function getMenuButtons(menu) {
     return getFocusableControls(menu).filter(control => control.tagName === 'BUTTON');
@@ -133,7 +187,8 @@ function moveMenuFocus(event, controls) {
     if (!controls.length) return;
 
     let currentIndex = controls.indexOf(document.activeElement);
-    let direction = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
+    let direction = ['ArrowDown', 'ArrowRight', 'Down', 'Right']
+        .includes(event.key) ? 1 : -1;
     let nextIndex = currentIndex + direction;
 
     if (currentIndex === -1) {
@@ -146,6 +201,12 @@ function moveMenuFocus(event, controls) {
 
     event.preventDefault();
     controls[nextIndex].focus();
+}
+
+/** Returns whether a key represents one of the four UI navigation arrows. */
+function isUiArrowKey(key) {
+    return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+        'Up', 'Down', 'Left', 'Right'].includes(key);
 }
 
 /** Returns the visible existing actions shown after a game ends. */
@@ -175,9 +236,11 @@ function getStartScreenControls() {
     const bgmMenu = document.getElementById('bgmMenu');
     const gameMenu = document.querySelector('.game-menu');
     const startButton = document.getElementById('startBtn');
+    const soundButton = document.getElementById('soundBtn');
 
     return [
         bgmMenu?.querySelector('summary'),
+        soundButton,
         gameMenu?.querySelector('summary'),
         startButton
     ].filter(control => control && control.getClientRects().length > 0);
@@ -189,13 +252,7 @@ function syncStartScreenSelection(target) {
     const startButton = document.getElementById('startBtn');
     if (!startScreen || startScreen.classList.contains('d-none') || !startButton) return;
 
-    const [bgmButton, menuButton] = getStartScreenControls();
-    const selectedElsewhere = target === bgmButton || target === menuButton ||
-        document.getElementById('bgmMenu')?.contains(target) ||
-        document.querySelector('.game-menu')?.contains(target);
-
-    if (target === startButton) startButton.classList.add('is-keyboard-selected');
-    if (selectedElsewhere) startButton.classList.remove('is-keyboard-selected');
+    startButton.classList.toggle('is-keyboard-selected', target === startButton);
 }
 
 /** Moves focus between the BGM, Menu, and Start Game controls. */
@@ -261,9 +318,11 @@ function scrollDialogContent(event) {
 
 /** Handles arrow-key navigation for start screen, Menu, BGM, and volume controls. */
 function handleArrowNavigation(event) {
-    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+    const isArrowKey = isUiArrowKey(event.key);
     const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
     if (!isArrowKey) return;
+
+    if (handleUiArrowNavigation(event)) return;
 
     if (handleGameOverArrowNavigation(event)) return;
 
@@ -388,6 +447,11 @@ function clearGameMenuInput() {
 
 /** Keeps the native Menu dropdown and existing pause state in sync. */
 function syncGameMenuPause(menu) {
+    if (!menu.open && menuCloseKeepsPause) {
+        menuCloseKeepsPause = false;
+        return;
+    }
+
     if (isGameResultVisible()) {
         if (menu.open) {
             clearGameMenuInput();
@@ -415,8 +479,9 @@ function syncGameMenuPause(menu) {
         return;
     }
 
-    // Release keyboard focus when the gameplay menu closes.
-    if (menu.contains(document.activeElement)) {
+    // Return Space and arrow keys to gameplay after leaving the game UI.
+    if (!isGameplayFlowOverlayVisible() && !isGameResultVisible() &&
+        isMenuControlTarget(document.activeElement)) {
         document.activeElement.blur();
     }
 
@@ -500,11 +565,49 @@ function initGameMenuControls() {
     if (!menu) return;
 
     menu.addEventListener('toggle', () => syncGameMenuPause(menu));
+    menu.addEventListener('click', closeGameMenuForSelectedAction, true);
     document.addEventListener('keydown', handleGameMenuEscape, true);
     document.addEventListener('keydown', handleMenuFocus, true);
     document.addEventListener('keydown', handleArrowNavigation, true);
+    document.addEventListener('keydown', handleUiActivation, true);
+    document.addEventListener('keydown', preventRepeatedUiActivation, true);
     document.addEventListener('focusin', event => syncStartScreenSelection(event.target), true);
     document.addEventListener('pointerdown', closeGameMenuOnOutsidePointer, true);
+}
+
+let menuCloseKeepsPause = false;
+
+/** Closes the dropdown for a selected action without resuming gameplay. */
+function closeGameMenuForSelectedAction(event) {
+    const menu = document.querySelector('.game-menu');
+    if (!menu?.open || !event.target.closest('button')) return;
+
+    menuCloseKeepsPause = true;
+    menu.open = false;
+}
+
+/** Activates the focused UI button without letting gameplay input handle the key. */
+function handleUiActivation(event) {
+    if (event.repeat || !['Enter', 'Space'].includes(event.code) ||
+        !isUiNavigationActive()) return;
+
+    const control = document.activeElement;
+    if (!control?.matches('button, summary') ||
+        !getUiNavigationControls().includes(control)) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    control.click();
+}
+
+/** Prevents held Enter or Space from repeatedly activating a focused UI button. */
+function preventRepeatedUiActivation(event) {
+    if (!event.repeat || !isUiNavigationActive()) return;
+    if ((event.code === 'Enter' || event.code === 'Space') &&
+        isMenuControlTarget(document.activeElement)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
 }
 
 /** Closes an open Menu from a blank outer area before gameplay input can run. */

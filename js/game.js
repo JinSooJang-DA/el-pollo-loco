@@ -19,6 +19,7 @@ let bgmVolume = 0.25;
 let sfxVolume = 0.5;
 /** @type {'start'|'game'|null} */
 let menuCreditsOrigin = null;
+let menuCreditsBgmState = null;
 
 /** Contains all background music and sound effects. */
 const AUDIO_HUB = {
@@ -317,6 +318,10 @@ function togglePause() {
     updatePauseUI();
     handlePauseAudio();
 
+    if (wasPaused && document.activeElement === document.getElementById('resumeBtn')) {
+        document.activeElement.blur();
+    }
+
     if (wasPaused && typeof isGameMenuOpen === 'function' && isGameMenuOpen()) {
         setGameMenuOpen(false);
     }
@@ -570,6 +575,10 @@ function openMenuCredits() {
     if (!openedFromStart && !openedFromGame) return;
 
     menuCreditsOrigin = openedFromStart ? 'start' : 'game';
+    menuCreditsBgmState = openedFromGame && currentBgm ? {
+        track: currentBgm,
+        currentTime: currentBgm.currentTime
+    } : null;
 
     const menu = document.querySelector('.game-menu');
     const restartScreen = document.getElementById('restartScreen');
@@ -602,6 +611,8 @@ function closeMenuCredits() {
     if (!origin) return;
 
     menuCreditsOrigin = null;
+    const savedBgmState = menuCreditsBgmState;
+    menuCreditsBgmState = null;
 
     const restartScreen = document.getElementById('restartScreen');
     const endCredits = document.getElementById('endCredits');
@@ -619,12 +630,21 @@ function closeMenuCredits() {
         playStartVideo();
         playBgm(AUDIO_HUB.bgmMenu);
     } else {
+        document.getElementById('pauseScreen')?.classList.remove('d-none');
         updatePauseUI();
-        playBgm(AUDIO_HUB.bgmGame);
+        playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);
+        if (savedBgmState) currentBgm.currentTime = savedBgmState.currentTime;
     }
 
-    setGameMenuOpen(true);
-    requestAnimationFrame(() => document.getElementById('creditsBtn')?.focus());
+    requestAnimationFrame(() => {
+        if (origin === 'game') {
+            focusPauseResumeButton();
+            return;
+        }
+
+        setGameMenuOpen(true);
+        document.getElementById('creditsBtn')?.focus();
+    });
 }
 
 /** Shows the ending locally without exposing a test control to players. */
@@ -714,6 +734,19 @@ function focusGameMenuButton() {
     document.querySelector('.game-menu > summary')?.focus();
 }
 
+/** Focuses Resume only after the paused game screen is visible. */
+function focusPauseResumeButton() {
+    const pauseScreen = document.getElementById('pauseScreen');
+    const resumeButton = document.getElementById('resumeBtn');
+    if (!world || isMainMenuVisible() || !isPaused ||
+        pauseScreen?.classList.contains('d-none') || !resumeButton) {
+        return false;
+    }
+
+    requestAnimationFrame(() => resumeButton.focus());
+    return true;
+}
+
 /** Closes the parent Menu and restores the correct screen-specific focus. */
 function closeMenuAfterDialog() {
     const menu = document.querySelector('.game-menu');
@@ -724,6 +757,8 @@ function closeMenuAfterDialog() {
         requestAnimationFrame(focusGameMenuButton);
         return;
     }
+
+    if (focusPauseResumeButton()) return;
 
     document.activeElement?.blur();
 }

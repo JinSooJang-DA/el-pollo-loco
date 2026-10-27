@@ -8,7 +8,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    z-index: 25;
+    z-index: 60;
     font-family: 'Rye', cursive;
 }
 
@@ -593,7 +593,7 @@ body:has(#restartScreen:not(.d-none)) .mobile-controls-container {
 .sound-toggle-btn {
     position: absolute;
     top: 12px;
-    left: 12px;
+    right: 96px;
     z-index: 60;
     width: 35px;
     height: 35px;
@@ -607,8 +607,8 @@ body:has(#loadingScreen) .sound-toggle-btn {
     display: none;
 }
 
-.game-container:has(#startScreen:not(.d-none)) .sound-toggle-btn {
-    left: 96px;
+body:has(#loadingScreen) .game-menu {
+    display: none;
 }
 
 .sound-toggle-btn img {
@@ -627,7 +627,7 @@ body:has(#loadingScreen) .sound-toggle-btn {
 
 .start-controls-guide {
     display: block;
-    height: 48px; /* 기존 34px → 48px */
+    height: 96px; /* 기존 48px → 96px */
     width: auto;
     max-width: calc(100% - 24px);
     object-fit: contain;

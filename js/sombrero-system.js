@@ -326,7 +326,9 @@ function cancelEndingSequence() {
 
 /** Continue the sombrero reward screen with Space. */
 document.addEventListener('keydown', function (event) {
-    if (event.code === 'Space' && !event.repeat && toggleEndingPause()) {
+    if (event.code === 'Space' && !event.repeat &&
+        document.getElementById('menuCreditsBackBtn')?.classList.contains('d-none') &&
+        toggleEndingPause()) {
         event.preventDefault();
         event.stopImmediatePropagation();
         return;

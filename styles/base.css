@@ -64,11 +64,6 @@ body:has(#restartScreen:not(.d-none) #endCredits:not(.d-none))::after {
     text-shadow: 0 2px 0 #6a3714, 0 5px 14px rgba(26, 12, 4, 0.6);
 }
 
-body:has(#startScreen:not(.d-none)) h1,
-body:has(#endCredits:not(.d-none)) h1 {
-    display: none;
-}
-
 .game-container {
     position: relative;
     width: 720px;

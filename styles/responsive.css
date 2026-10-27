@@ -234,13 +234,9 @@ screen and (orientation: portrait) and (max-width: 600px) {
 
     .sound-toggle-btn {
         top: 8px;
-        left: 12px;
+        right: 110px;
         width: 36px;
         height: 36px;
-    }
-
-    .game-container:has(#startScreen:not(.d-none)) .sound-toggle-btn {
-        left: 102px;
     }
 
     .game-menu summary,
@@ -360,6 +356,12 @@ screen and (orientation: portrait) and (max-width: 600px) {
     }
 }
 
+@media (hover: none) and (pointer: coarse) {
+    .start-controls-guide {
+        display: none;
+    }
+}
+
 /* Larger touch screens enlarge this same layout and keep both groups at the bottom. */
 @media screen and (orientation: landscape) and (any-pointer: coarse) and (min-width: 721px) and (min-height: 600px) {
     :root {
@@ -413,4 +415,18 @@ screen and (orientation: portrait) and (max-width: 600px) {
     .game-presentation:fullscreen .mobile-controls-container {
         display: none !important;
     }
+}
+
+/* Keep the document h1 available to assistive technology without layout space. */
+.game-presentation > h1 {
+    display: block !important;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
