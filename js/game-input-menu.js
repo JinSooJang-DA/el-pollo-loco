@@ -29,43 +29,52 @@ function syncGameMenuPause(menu) {
         menuCloseKeepsPause = false;
         return;
     }
-
-    if (isGameResultVisible()) {
-        if (menu.open) {
-            clearGameMenuInput();
-            document.getElementById('pauseBtn').classList.add('d-none');
-            requestAnimationFrame(focusGameMenuControl);
-        }
-        return;
-    }
+    if (isGameResultVisible()) return syncResultScreenMenu(menu);
     if (isMenuCreditsOpen()) return;
+    if (menu.open) return openGameMenuPause();
+    closeGameMenuPause();
+}
 
+/**
+ * Hides pause controls while the result screen owns the Menu.
+ * @param {HTMLDetailsElement} menu The native Menu dropdown.
+ */
+function syncResultScreenMenu(menu) {
+    if (!menu.open) return;
+    clearGameMenuInput();
+    document.getElementById('pauseBtn').classList.add('d-none');
+    requestAnimationFrame(focusGameMenuControl);
+}
+
+/** Applies the open-Menu pause lifecycle. */
+function openGameMenuPause() {
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
+    clearGameMenuInput();
+    requestAnimationFrame(focusGameMenuControl);
+    document.getElementById('pauseBtn').classList.remove('d-none');
+    if (isStartScreenVisible || isGameplayFlowOverlayVisible()) return;
+    if (!isPaused) togglePause();
+}
 
-    if (menu.open) {
-        clearGameMenuInput();
-        requestAnimationFrame(focusGameMenuControl);
-        document.getElementById('pauseBtn').classList.remove('d-none');
-        if (isStartScreenVisible || isGameplayFlowOverlayVisible()) return;
-        if (!isPaused) togglePause();
-        return;
-    }
-
-    // Keep the closed start-screen Menu button focused after a dialog closes.
+/** Applies the closed-Menu pause lifecycle. */
+function closeGameMenuPause() {
+    const startScreen = document.getElementById('startScreen');
+    const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
     if (isStartScreenVisible) {
         return;
     }
+    blurGameplayMenuFocus();
+    if (isGameplayFlowOverlayVisible() || isGameResultVisible()) return;
+    if (isPaused) togglePause();
+}
 
-    // Return Space and arrow keys to gameplay after leaving the game UI.
-    if (!isGameplayFlowOverlayVisible() && !isGameResultVisible() &&
-        isMenuControlTarget(document.activeElement)) {
+/** Returns keyboard focus to gameplay when no overlay owns it. */
+function blurGameplayMenuFocus() {
+    if (isGameplayFlowOverlayVisible() || isGameResultVisible()) return;
+    if (isMenuControlTarget(document.activeElement)) {
         document.activeElement.blur();
     }
-
-    if (isGameplayFlowOverlayVisible() || isGameResultVisible()) return;
-
-    if (isPaused) togglePause();
 }
 
 /**
@@ -87,26 +96,33 @@ function setGameMenuOpen(isOpen) {
 
 /** Closes an open dialog and returns focus to the parent Menu. */
 function closeMenuDialog() {
-    const bgmMenu = document.getElementById('bgmMenu');
-    if (bgmMenu && bgmMenu.open) {
-        bgmMenu.open = false;
-        requestAnimationFrame(() => bgmMenu.querySelector('summary')?.focus());
-        return true;
-    }
+    if (closeBgmMenuDialog()) return true;
+    const openDialog = getOpenMenuDialog();
+    if (!openDialog) return false;
+    openDialog[1]();
+    return true;
+}
 
+/** Closes the BGM dropdown and restores focus to its summary. */
+function closeBgmMenuDialog() {
+    const bgmMenu = document.getElementById('bgmMenu');
+    if (!bgmMenu || !bgmMenu.open) return false;
+    bgmMenu.open = false;
+    requestAnimationFrame(() => bgmMenu.querySelector('summary')?.focus());
+    return true;
+}
+
+/** Returns the first visible dialog together with its close handler. */
+function getOpenMenuDialog() {
     const dialogs = [
         ['settingsDialog', closeSettingsDialog],
         ['infoDialog', closeInfoDialog],
         ['legalDialog', closeLegalNotice]
     ];
-    const openDialog = dialogs.find(([id]) => {
+    return dialogs.find(([id]) => {
         const dialog = document.getElementById(id);
         return dialog && !dialog.classList.contains('d-none');
     });
-
-    if (!openDialog) return false;
-    openDialog[1]();
-    return true;
 }
 
 /**
@@ -115,29 +131,43 @@ function closeMenuDialog() {
  */
 function handleGameMenuEscape(event) {
     if (event.key !== 'Escape' || event.repeat) return;
-    if (isMenuCreditsOpen()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        closeMenuCredits();
-        return;
-    }
-
-    if (closeMenuDialog()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-    }
-
+    if (isMenuCreditsOpen()) return closeCreditsForEscape(event);
+    if (closeMenuDialog()) return consumeEscapeEvent(event);
     if (isGameplayFlowOverlayVisible()) return;
+    if (!canToggleGameplayMenu()) return;
+    consumeEscapeEvent(event);
+    toggleGameMenuFromEscape();
+}
 
+/**
+ * Closes Menu Credits for Escape and consumes the key.
+ * @param {KeyboardEvent} event The pressed Escape key.
+ */
+function closeCreditsForEscape(event) {
+    consumeEscapeEvent(event);
+    closeMenuCredits();
+}
+
+/**
+ * Prevents other handlers from processing a consumed Escape.
+ * @param {KeyboardEvent} event The consumed keyboard event.
+ */
+function consumeEscapeEvent(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+}
+
+/** Returns whether Escape may open or close the gameplay Menu. */
+function canToggleGameplayMenu() {
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
     const canControlGameplayMenu = pendingLevelNumber === null &&
         ((world && !world.gameEnded) || isGameResultVisible());
-    if (!isStartScreenVisible && !canControlGameplayMenu) return;
+    return isStartScreenVisible || canControlGameplayMenu;
+}
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
+/** Toggles the gameplay Menu and restores focus when closing. */
+function toggleGameMenuFromEscape() {
     const wasMenuOpen = isGameMenuOpen();
     setGameMenuOpen(!wasMenuOpen);
     if (wasMenuOpen) focusGameMenuButton();
@@ -239,20 +269,30 @@ document.addEventListener('keyup', event => {
  * @returns {boolean}
  */
 function handleStartKey(event) {
+    if (!isStartKeyEligible(event)) return false;
+    event.preventDefault();
+    if (!event.repeat && areStartDialogsClosed()) startGame();
+    return true;
+}
+
+/**
+ * Returns whether the event may start the game from the start screen.
+ * @param {KeyboardEvent} event The keyboard event to test.
+ * @returns {boolean}
+ */
+function isStartKeyEligible(event) {
     const startScreen = document.getElementById('startScreen');
     if (startScreen.classList.contains('d-none')) return false;
     if (event.code !== 'Enter' && event.code !== 'Space') return false;
     if (isMenuControlTarget(event.target)) return false;
     if (!document.getElementById('startBtn').classList.contains('is-keyboard-selected')) return false;
-    if (isGameMenuOpen() || document.getElementById('bgmMenu').open) return false;
-    event.preventDefault();
-    const infoClosed = document.getElementById('infoDialog').classList.contains('d-none');
-    const settingsClosed = document.getElementById('settingsDialog').classList.contains('d-none');
-    const legalClosed = document.getElementById('legalDialog').classList.contains('d-none');
-    if (!event.repeat && infoClosed && settingsClosed && legalClosed) {
-        startGame();
-    }
-    return true;
+    return !isGameMenuOpen() && !document.getElementById('bgmMenu').open;
+}
+
+/** Returns whether the info, settings, and legal dialogs are all closed. */
+function areStartDialogsClosed() {
+    const isClosed = id => document.getElementById(id).classList.contains('d-none');
+    return isClosed('infoDialog') && isClosed('settingsDialog') && isClosed('legalDialog');
 }
 
 window.addEventListener('keydown', event => {
@@ -283,15 +323,31 @@ document.addEventListener('click', event => {
 
 /** Plays the short Pepe loading animation. */
 function startLoadingAnimation() {
-    let frame = 21;
     const pepe = document.getElementById('loadingPepe');
     if (!pepe) return;
-
+    let frame = 21;
     const animation = setInterval(() => {
-        pepe.src = `img/2_character_pepe/2_walk/W-${frame}.png`;
-        frame = frame < 26 ? frame + 1 : 21;
+        frame = showLoadingPepeFrame(pepe, frame);
     }, 120);
+    stopLoadingAnimation(animation);
+}
 
+/**
+ * Shows one loading frame and returns the next frame number.
+ * @param {HTMLImageElement} pepe The loading animation image.
+ * @param {number} frame The current frame number.
+ * @returns {number} The next frame number.
+ */
+function showLoadingPepeFrame(pepe, frame) {
+    pepe.src = `img/2_character_pepe/2_walk/W-${frame}.png`;
+    return frame < 26 ? frame + 1 : 21;
+}
+
+/**
+ * Clears the loading animation after the intro delay.
+ * @param {number} animation The interval id to clear.
+ */
+function stopLoadingAnimation(animation) {
     setTimeout(() => {
         clearInterval(animation);
         document.getElementById('loadingScreen').remove();

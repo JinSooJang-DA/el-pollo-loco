@@ -58,20 +58,24 @@ function syncStartScreenSelection(target) {
 function handleStartScreenArrowNavigation(event) {
     const controls = getStartScreenControls();
     if (!controls.includes(document.activeElement)) return;
-
-    const bgmButton = controls[0];
-    const menuButton = controls[1];
-    const startButton = controls[2];
-    let nextButton = null;
-
-    if (event.key === 'ArrowLeft') nextButton = bgmButton;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') nextButton = menuButton;
-    if (event.key === 'ArrowDown') nextButton = startButton;
-
+    const nextButton = getStartScreenNextControl(event, controls);
     if (!nextButton) return;
     event.preventDefault();
     closeInactiveSubmenus(nextButton);
     nextButton.focus();
+}
+
+/**
+ * Returns the start-screen control the pressed arrow key targets.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @param {Element[]} controls The visible start-screen controls.
+ * @returns {Element|null} The next control, if any.
+ */
+function getStartScreenNextControl(event, controls) {
+    if (event.key === 'ArrowLeft') return controls[0];
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') return controls[1];
+    if (event.key === 'ArrowDown') return controls[2];
+    return null;
 }
 
 /**
@@ -129,41 +133,70 @@ function scrollDialogContent(event) {
  * @param {KeyboardEvent} event The pressed arrow key.
  */
 function handleArrowNavigation(event) {
-    const isArrowKey = isUiArrowKey(event.key);
     const isVerticalArrow = event.key === 'ArrowUp' || event.key === 'ArrowDown';
-    if (!isArrowKey) return;
+    if (!isUiArrowKey(event.key)) return;
+    if (handleGlobalArrowNavigation(event)) return;
+    if (isVerticalArrow && handleSettingsArrowNavigation(event)) return;
+    if (handleCreditsAndMenuArrowNavigation(event, isVerticalArrow)) return;
+    handleStartScreenArrowNavigationWhenClosed(event);
+}
 
-    if (scrollDialogContent(event)) return;
+/**
+ * Runs dialog, BGM, UI, and result arrow handlers in their original order.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @returns {boolean} Whether a handler consumed the key.
+ */
+function handleGlobalArrowNavigation(event) {
+    if (scrollDialogContent(event)) return true;
+    if (handleBgmMenuArrowNavigation(event)) return true;
+    if (handleUiArrowNavigation(event)) return true;
+    return handleGameOverArrowNavigation(event);
+}
 
-    if (handleBgmMenuArrowNavigation(event)) return;
-
-    if (handleUiArrowNavigation(event)) return;
-
-    if (handleGameOverArrowNavigation(event)) return;
-
+/**
+ * Moves focus between the two volume sliders.
+ * @param {KeyboardEvent} event The pressed vertical arrow key.
+ * @returns {boolean} Whether the settings dialog consumed the key.
+ */
+function handleSettingsArrowNavigation(event) {
     const settings = document.getElementById('settingsDialog');
-    if (settings && !settings.classList.contains('d-none') && isVerticalArrow) {
-        moveMenuFocus(event, [
-            document.getElementById('bgmSlider'),
-            document.getElementById('sfxSlider')
-        ].filter(Boolean));
-        return;
-    }
+    if (!settings || settings.classList.contains('d-none')) return false;
+    const sliders = [
+        document.getElementById('bgmSlider'),
+        document.getElementById('sfxSlider')
+    ].filter(Boolean);
+    moveMenuFocus(event, sliders);
+    return true;
+}
 
-    const bgmMenu = document.getElementById('bgmMenu');
-
+/**
+ * Moves focus inside Menu Credits or the open gameplay Menu.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ * @param {boolean} isVerticalArrow Whether the key is Up or Down.
+ * @returns {boolean} Whether credits or the Menu consumed the key.
+ */
+function handleCreditsAndMenuArrowNavigation(event, isVerticalArrow) {
     if (isMenuCreditsOpen()) {
         handleMenuCreditsArrowNavigation(event);
-        return;
+        return true;
     }
-
     const gameMenu = document.querySelector('.game-menu');
     if (gameMenu?.open && isVerticalArrow) {
         moveMenuFocus(event, getMenuButtons(gameMenu));
-        return;
+        return true;
     }
+    return false;
+}
 
-    if (!bgmMenu?.open && !gameMenu?.open) handleStartScreenArrowNavigation(event);
+/**
+ * Moves start-screen focus when no dropdown is open.
+ * @param {KeyboardEvent} event The pressed arrow key.
+ */
+function handleStartScreenArrowNavigationWhenClosed(event) {
+    const bgmMenu = document.getElementById('bgmMenu');
+    const gameMenu = document.querySelector('.game-menu');
+    if (bgmMenu?.open || gameMenu?.open) return;
+    handleStartScreenArrowNavigation(event);
 }
 
 /** Focuses Retry Level when available, otherwise Play Again. */
@@ -198,18 +231,26 @@ function keepFocusInScope(event, scope) {
 function keepFocusInControls(event, controls) {
     if (event.key !== 'Tab') return;
     if (!controls.length) return;
+    const target = getWrappedFocusTarget(event, controls);
+    if (!target) return;
+    event.preventDefault();
+    target.focus();
+}
 
+/**
+ * Returns the control that should receive wrapped Tab focus.
+ * @param {KeyboardEvent} event The pressed Tab key.
+ * @param {Element[]} controls The controls allowed to receive focus.
+ * @returns {Element|null} The wrapped focus target, if any.
+ */
+function getWrappedFocusTarget(event, controls) {
     const first = controls[0];
     const last = controls[controls.length - 1];
     const active = document.activeElement;
     const isOutsideControls = !controls.includes(active);
-    if (event.shiftKey && (active === first || isOutsideControls)) {
-        event.preventDefault();
-        last.focus();
-    } else if (!event.shiftKey && (active === last || isOutsideControls)) {
-        event.preventDefault();
-        first.focus();
-    }
+    if (event.shiftKey && (active === first || isOutsideControls)) return last;
+    if (!event.shiftKey && (active === last || isOutsideControls)) return first;
+    return null;
 }
 
 /**
@@ -217,29 +258,29 @@ function keepFocusInControls(event, controls) {
  * @param {KeyboardEvent} event The pressed keyboard event.
  */
 function handleMenuFocus(event) {
-    if (isMenuCreditsOpen()) {
-        keepFocusInControls(event, getMenuCreditsControls());
-        return;
-    }
+    if (isMenuCreditsOpen()) return keepFocusInControls(event, getMenuCreditsControls());
+    const visibleDialog = getVisibleFocusDialog();
+    if (visibleDialog) return keepFocusInScope(event, visibleDialog.querySelector('.dialog-card'));
+    const menu = document.querySelector('.game-menu');
+    if (menu?.open) return keepFocusInScope(event, menu);
+    focusStartScreenControls(event);
+}
 
-    const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
+/** Returns the first visible settings, info, or legal dialog. */
+function getVisibleFocusDialog() {
+    return ['settingsDialog', 'infoDialog', 'legalDialog']
         .map(id => document.getElementById(id))
         .find(dialog => dialog && !dialog.classList.contains('d-none'));
-    if (visibleDialog) {
-        keepFocusInScope(event, visibleDialog.querySelector('.dialog-card'));
-        return;
-    }
+}
 
-    const menu = document.querySelector('.game-menu');
-    if (menu?.open) {
-        keepFocusInScope(event, menu);
-        return;
-    }
-
+/**
+ * Keeps focus inside the start screen when no dropdown is open.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ */
+function focusStartScreenControls(event) {
     const startScreen = document.getElementById('startScreen');
     const bgmMenu = document.getElementById('bgmMenu');
-    if (startScreen && !startScreen.classList.contains('d-none') && !bgmMenu?.open) {
-        keepFocusInControls(event, getStartScreenControls());
-    }
+    if (!startScreen || startScreen.classList.contains('d-none') || bgmMenu?.open) return;
+    keepFocusInControls(event, getStartScreenControls());
 }
 
