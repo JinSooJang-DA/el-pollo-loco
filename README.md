@@ -5,6 +5,8 @@ Help Pepe fight his way through five levels of angry chickens and defeat the gia
 
 **[▶ Play it live](https://jinsoojang-da.github.io/el-pollo-loco/)**
 
+![Gameplay demo](docs/screenshots/gameplay-demo.webp)
+
 Created during the Frontend course at [Developer Akademie](https://developerakademie.com/),
 based on the original El Pollo Loco tutorial and extended with my own game design and features.
 
@@ -22,6 +24,14 @@ based on the original El Pollo Loco tutorial and extended with my own game desig
 - **Fullscreen mode** – leaving fullscreen with Escape pauses the game and opens the Menu
 - **Full keyboard navigation** for all menus and dialogs
 - **Mobile support** – touch controls in landscape mode, rotate-device hint in portrait mode
+
+## Screenshots
+
+| Start screen | Gameplay |
+|---|---|
+| ![Start screen](docs/screenshots/start-screen.webp) | ![Gameplay](docs/screenshots/gameplay.webp) |
+| **Mobile touch controls** | **Sombrero ending reward** |
+| ![Mobile touch controls](docs/screenshots/mobile-touch.webp) | ![Sombrero ending reward](docs/screenshots/sombrero-reward.webp) |
 
 ## Controls
 
@@ -52,6 +62,7 @@ js/        Game flow, input, audio, menus and reward systems
 levels/    Level data and level rule texts
 styles/    Stylesheets
 img/ audio/ videos/ fonts/   Assets
+docs/      README screenshots
 tests/     Node regression checks
 ```
 
