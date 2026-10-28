@@ -9,7 +9,7 @@ let level1;
  * @returns {number[]} Shuffled coin heights in placement order.
  */
 function createShuffledCoinHeights() {
-    const coinHeights = [50, 51, 51, 52, 52];
+    const coinHeights = [Coin.highCoinY, 51, 51, 52, 52];
 
     for (let i = coinHeights.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

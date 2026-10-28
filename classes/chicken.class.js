@@ -143,7 +143,10 @@ class Chicken extends MovableObject {
         clearInterval(this.animationInterval);
     }
 
-    /** Returns whether the chicken has died. */
+    /**
+     * Returns whether the chicken has died.
+     * @returns {boolean} True if the chicken is dead.
+     */
     isDead() {
         return this.isDeadChicken;
     }

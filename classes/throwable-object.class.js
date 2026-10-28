@@ -51,7 +51,10 @@ class ThrowableObject extends MovableObject {
         this.animate();
     }
 
-    /** Triggers splash effects when the bottle hits the ground floor. */
+    /**
+     * Triggers splash effects when the bottle hits the ground floor.
+     * @param {number} groundY The y position of the ground surface.
+     */
     handleGroundImpact(groundY) {
         this.y = groundY - this.height;
         this.splash();
@@ -121,7 +124,10 @@ class ThrowableObject extends MovableObject {
         this.runSplashFrames();
     }
 
-    /** Returns whether bottle is still airborne. */
+    /**
+     * Returns whether bottle is still airborne.
+     * @returns {boolean} True while the bottle has not splashed.
+     */
     isAboveGround() {
         return !this.isSplashed;
     }

@@ -142,7 +142,10 @@ function stopCurrentBgm() {
     currentBgm.currentTime = 0;
 }
 
-/** Configures and resumes the selected background track. */
+/**
+ * Configures and resumes the selected background track.
+ * @param {boolean} [allowWhilePaused=false] Whether playback may start during Pause.
+ */
 function configureAndResumeBgm(allowWhilePaused) {
     currentBgm.loop = !playlistActive || playlistRepeat === 'track';
     currentBgm.volume = bgmVolume;
@@ -150,7 +153,10 @@ function configureAndResumeBgm(allowWhilePaused) {
     resumeCurrentBgm(allowWhilePaused);
 }
 
-/** Resumes background music when its current game state permits it. */
+/**
+ * Resumes background music when its current game state permits it.
+ * @param {boolean} [allowWhilePaused=false] Whether playback may resume during Pause.
+ */
 function resumeCurrentBgm(allowWhilePaused = false) {
     if (!currentBgm || isMuted || (!allowWhilePaused && isPaused) || isStoryVideoPlaying()) return;
     if (currentBgm === audioHub.bgmMenu && !isMainMenuVisible()) return;

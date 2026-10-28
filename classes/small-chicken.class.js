@@ -66,7 +66,10 @@ class SmallChicken extends MovableObject {
         this.loadImage(this.IMAGE_DEAD);
     }
 
-    /** Checks whether small chicken is dead. */
+    /**
+     * Checks whether small chicken is dead.
+     * @returns {boolean} True if the small chicken is dead.
+     */
     isDead() {
         return this.isDeadChicken;
     }

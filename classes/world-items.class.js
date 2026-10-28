@@ -124,18 +124,20 @@ World.prototype.respawnBottle = function (bottle) {
  * @returns {boolean} True if the coin was collected.
  */
 World.prototype.applyCoinPickup = function (coin) {
-    if (this.character.energy < 100) return this.applyCoinHealth();
+    if (this.character.energy < 100) return this.applyCoinHealth(coin);
     if (this.collectedCoins < this.maxCoins) return this.applyCoinStash();
 
     return false;
 };
 
 /**
- * Restores a small amount of health from a collected coin.
+ * Restores health from a collected coin: 10 points, or full health for the high coin.
+ * @param {Coin} coin The collected coin.
  * @returns {boolean} Always true because the coin is consumed.
  */
-World.prototype.applyCoinHealth = function () {
-    this.character.energy = Math.min(100, this.character.energy + 10);
+World.prototype.applyCoinHealth = function (coin) {
+    let healAmount = coin.isHighCoin ? 100 : 10;
+    this.character.energy = Math.min(100, this.character.energy + healAmount);
     this.statusBar.setPercentage(this.character.energy);
     return true;
 };

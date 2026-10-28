@@ -42,7 +42,10 @@ class World {
         this.run();
     }
 
-    /** Loads the corresponding level data. */
+    /**
+     * Loads the corresponding level data.
+     * @param {number} levelNumber The level to load.
+     */
     loadCurrentLevel(levelNumber) {
         const levels = [level1, level2, level3, level4, level5];
         this.level = levels[levelNumber - 1] || level1;
@@ -113,7 +116,10 @@ class World {
         return 'both';
     }
 
-    /** Creates and configures the Endboss instance. */
+    /**
+     * Creates and configures the Endboss instance.
+     * @returns {Endboss} The configured Endboss instance.
+     */
     createConfiguredBoss() {
         let boss = new Endboss();
         let bossHealth = { 1: 50, 2: 70, 3: 50, 4: 100, 5: 100 };
@@ -163,7 +169,11 @@ class World {
         finishCompletedLevel(this);
     }
 
-    /** Handles the logic for death audio ending. */
+    /**
+     * Handles the logic for death audio ending.
+     * @param {HTMLAudioElement} deathAudio The death sound being played.
+     * @param {Function} onFinish Callback run when the sound ends.
+     */
     handleDeathAudioEnd(deathAudio, onFinish) {
         let deathFinished = false;
         let triggerFinish = () => {
@@ -194,7 +204,11 @@ class World {
         });
     }
 
-    /** Updates the end screen view state based on victory or loss. */
+    /**
+     * Updates the end screen view state based on victory or loss.
+     * @param {boolean} isVictory True if the player won.
+     * @param {string} imagePath Path of the end screen image.
+     */
     updateEndScreenView(isVictory, imagePath) {
         let endScreenImg = document.getElementById('endScreenImg');
         let endCredits = document.getElementById('endCredits');
@@ -210,7 +224,10 @@ class World {
         }
     }
 
-    /** Terminates rendering and logic loops if no revive is available. */
+    /**
+     * Terminates rendering and logic loops if no revive is available.
+     * @param {boolean} canRevive True if a sombrero revive is available.
+     */
     haltGameIfNotRevivable(canRevive) {
         if (!canRevive) {
             this.stopDrawing = true;
@@ -218,7 +235,10 @@ class World {
         }
     }
 
-    /** Configures and displays the action buttons available after a run. */
+    /**
+     * Configures and displays the action buttons available after a run.
+     * @param {boolean} canRevive True if a sombrero revive is available.
+     */
     showRestartUI(canRevive) {
         document.getElementById('retryLevelBtn')?.classList.toggle('d-none', !canRevive);
         document.getElementById('restartScreen')?.classList.remove('d-none');

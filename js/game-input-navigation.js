@@ -1,4 +1,7 @@
-/** Returns the visible existing actions shown after a game ends. */
+/**
+ * Returns the visible existing actions shown after a game ends.
+ * @returns {HTMLElement[]} The visible result screen buttons.
+ */
 function getGameOverButtons() {
     const restartScreen = document.getElementById('restartScreen');
     if (!restartScreen || restartScreen.classList.contains('d-none')) return [];
@@ -24,7 +27,10 @@ function handleGameOverArrowNavigation(event) {
     return true;
 }
 
-/** Returns the three visible controls on the start screen. */
+/**
+ * Returns the three visible controls on the start screen.
+ * @returns {HTMLElement[]} The start screen controls.
+ */
 function getStartScreenControls() {
     const bgmMenu = document.getElementById('bgmMenu');
     const gameMenu = document.querySelector('.game-menu');
@@ -89,7 +95,10 @@ function handleMenuCreditsArrowNavigation(event) {
     moveMenuFocus(event, controls);
 }
 
-/** Returns the scrollable content of the visible information dialog. */
+/**
+ * Returns the scrollable content of the visible information dialog.
+ * @returns {HTMLElement|null} The scrollable content element, or null.
+ */
 function getScrollableDialogContent() {
     const dialogs = [
         ['infoDialog', '.dialog-content'],
@@ -192,7 +201,10 @@ function handleStartScreenArrowNavigationWhenClosed(event) {
     handleStartScreenArrowNavigation(event);
 }
 
-/** Focuses Retry Level when available, otherwise Play Again. */
+/**
+ * Focuses Retry Level when available, otherwise Play Again.
+ * @param {boolean} canRetry True if Retry Level is available.
+ */
 function focusGameOverButton(canRetry) {
     const buttonId = canRetry ? 'retryLevelBtn' : 'restartBtn';
     requestAnimationFrame(() => document.getElementById(buttonId)?.focus());
@@ -259,7 +271,10 @@ function handleMenuFocus(event) {
     focusStartScreenControls(event);
 }
 
-/** Returns the first visible settings, info, or legal dialog. */
+/**
+ * Returns the first visible settings, info, or legal dialog.
+ * @returns {HTMLElement|undefined} The visible dialog, or undefined.
+ */
 function getVisibleFocusDialog() {
     return ['settingsDialog', 'infoDialog', 'legalDialog']
         .map(id => document.getElementById(id))

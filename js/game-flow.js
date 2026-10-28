@@ -13,7 +13,10 @@ function togglePause() {
     restorePauseFocus(wasPaused);
 }
 
-/** Returns whether gameplay may enter or leave Pause. */
+/**
+ * Returns whether gameplay may enter or leave Pause.
+ * @returns {boolean} True if Pause can be toggled.
+ */
 function canTogglePause() {
     return Boolean(world) && pendingLevelNumber === null;
 }
@@ -72,14 +75,21 @@ function resumeBossAttackTimers() {
     boss?.resumeSpecialAttack();
 }
 
-/** Keeps gameplay cooldowns and temporary protection from expiring during Pause. */
+/**
+ * Keeps gameplay cooldowns and temporary protection from expiring during Pause.
+ * @param {number} pausedFor Pause duration in milliseconds.
+ */
 function shiftPausedGameplayTimes(pausedFor) {
     if (!world || pausedFor <= 0) return;
     shiftCharacterPauseTimes(world.character, pausedFor);
     shiftEnemyPauseTimes(world.level.enemies, pausedFor);
 }
 
-/** Moves the character's cooldown and protection timestamps forward. */
+/**
+ * Moves the character's cooldown and protection timestamps forward.
+ * @param {Character} character The player character.
+ * @param {number} pausedFor Pause duration in milliseconds.
+ */
 function shiftCharacterPauseTimes(character, pausedFor) {
     shiftPauseTime(character, 'lastActionTime', pausedFor);
     shiftPauseTime(character, 'lastHit', pausedFor);
@@ -92,7 +102,11 @@ function shiftCharacterPauseTimes(character, pausedFor) {
     shiftPauseTime(character.lastFallStep, 'time', pausedFor);
 }
 
-/** Moves every enemy's hit and attack timestamps forward. */
+/**
+ * Moves every enemy's hit and attack timestamps forward.
+ * @param {MovableObject[]} enemies The enemies of the current level.
+ * @param {number} pausedFor Pause duration in milliseconds.
+ */
 function shiftEnemyPauseTimes(enemies, pausedFor) {
     enemies.forEach(enemy => {
         shiftPauseTime(enemy, 'lastHit', pausedFor);
@@ -102,7 +116,12 @@ function shiftEnemyPauseTimes(enemies, pausedFor) {
     });
 }
 
-/** Moves one existing timestamp forward by the paused duration. */
+/**
+ * Moves one existing timestamp forward by the paused duration.
+ * @param {Object} target The object that owns the timestamp.
+ * @param {string} property Name of the timestamp property.
+ * @param {number} pausedFor Pause duration in milliseconds.
+ */
 function shiftPauseTime(target, property, pausedFor) {
     if (target && Number.isFinite(target[property]) && target[property] > 0) {
         target[property] += pausedFor;
@@ -156,7 +175,10 @@ function startLevel(levelNumber) {
     showLevelRules(levelNumber);
 }
 
-/** Creates a fresh world only after the player accepts the rules. */
+/**
+ * Creates a fresh world only after the player accepts the rules.
+ * @param {number} levelNumber The level to start.
+ */
 function beginLevel(levelNumber) {
     initLevelData(levelNumber);
     removeCollectedCoins(levelNumber);
@@ -166,7 +188,10 @@ function beginLevel(levelNumber) {
     ensureGameBgm();
 }
 
-/** Loads the selected level's coin and enemy layout. */
+/**
+ * Loads the selected level's coin and enemy layout.
+ * @param {number} levelNumber The level to load.
+ */
 function initLevelData(levelNumber) {
     if (levelNumber === 1) initLevel();
     else if (levelNumber === 2) initLevel2();

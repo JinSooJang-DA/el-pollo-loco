@@ -91,7 +91,10 @@ function getEndingRewardCards(result) {
     ].filter(Boolean);
 }
 
-/** Concludes the reward phase and opens the main credits screen. */
+/**
+ * Concludes the reward phase and opens the main credits screen.
+ * @param {World} finishedWorld The cleared world instance.
+ */
 function finishEndingRewards(finishedWorld) {
     document.getElementById('endingRewardScreen').classList.add('d-none');
     finishedWorld.showEndScreen('', true);
@@ -170,7 +173,10 @@ function pauseEndingPlayback() {
     document.getElementById('endingRewardVideo')?.pause();
 }
 
-/** Continues the frozen ending timer and multimedia playback. */
+/**
+ * Continues the frozen ending timer and multimedia playback.
+ * @param {boolean} rewardOpen True if a reward card is currently shown.
+ */
 function resumeEndingPlayback(rewardOpen) {
     if (currentBgm) resumeCurrentBgm(true);
     if (!rewardOpen) return;

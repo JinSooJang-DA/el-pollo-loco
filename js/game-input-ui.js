@@ -1,4 +1,7 @@
-/** Returns whether the existing Menu dropdown is currently open. */
+/**
+ * Returns whether the existing Menu dropdown is currently open.
+ * @returns {boolean} True if the Menu is open.
+ */
 function isGameMenuOpen() {
     const menu = document.querySelector('.game-menu');
     return Boolean(menu && menu.open);
@@ -82,7 +85,10 @@ function getStartScreenFallback() {
     return [];
 }
 
-/** Returns the visible controls available in the current non-gameplay UI. */
+/**
+ * Returns the visible controls available in the current non-gameplay UI.
+ * @returns {HTMLElement[]} The navigable UI controls.
+ */
 function getUiNavigationControls() {
     const gameMenu = document.querySelector('.game-menu');
     const bgmMenu = document.getElementById('bgmMenu');
@@ -94,7 +100,10 @@ function getUiNavigationControls() {
         .filter(control => !control.disabled && control.getClientRects().length > 0);
 }
 
-/** Returns whether visible UI should receive keyboard input instead of gameplay. */
+/**
+ * Returns whether visible UI should receive keyboard input instead of gameplay.
+ * @returns {boolean} True if UI navigation is active.
+ */
 function isUiNavigationActive() {
     const startScreen = document.getElementById('startScreen');
     return isGameMenuOpen() || Boolean(
@@ -136,12 +145,19 @@ function handleBgmMenuArrowNavigation(event) {
     return true;
 }
 
-/** Returns visible buttons inside a menu. */
+/**
+ * Returns visible buttons inside a menu.
+ * @param {HTMLElement} menu The menu container.
+ * @returns {HTMLButtonElement[]} The visible buttons in the menu.
+ */
 function getMenuButtons(menu) {
     return getFocusableControls(menu).filter(control => control.tagName === 'BUTTON');
 }
 
-/** Returns controls that stay available while Menu Credits are open. */
+/**
+ * Returns controls that stay available while Menu Credits are open.
+ * @returns {HTMLElement[]} The controls usable during Menu Credits.
+ */
 function getMenuCreditsControls() {
     const bgmMenu = document.getElementById('bgmMenu')?.querySelector('summary');
     const soundButton = document.getElementById('soundBtn');

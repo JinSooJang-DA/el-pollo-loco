@@ -3,7 +3,10 @@ let storyVideoActive = false;
 let storyVideoFinishing = false;
 let storyVideoComplete = null;
 
-/** Returns whether gameplay input must be blocked for a story video. */
+/**
+ * Returns whether gameplay input must be blocked for a story video.
+ * @returns {boolean} True while a story video is playing.
+ */
 function isStoryVideoPlaying() {
     return storyVideoActive;
 }
@@ -23,7 +26,11 @@ function clearGameplayInput() {
     });
 }
 
-/** Configures and begins the story video playback. */
+/**
+ * Configures and begins the story video playback.
+ * @param {HTMLVideoElement} video The story video element.
+ * @param {number} videoNumber The story video to play.
+ */
 function setupStoryVideo(video, videoNumber) {
     video.src = `videos/loco-0${videoNumber}.mp4`;
     video.currentTime = 0;
@@ -33,7 +40,11 @@ function setupStoryVideo(video, videoNumber) {
     video.play().catch(() => { });
 }
 
-/** Stops other audio and transitions to the story video UI. */
+/**
+ * Stops other audio and transitions to the story video UI.
+ * @param {number} videoNumber The story video to play.
+ * @param {Function} onComplete Callback run after the video ends.
+ */
 function startStoryPlayback(videoNumber, onComplete) {
     storyVideoActive = true;
     storyVideoFinishing = false;

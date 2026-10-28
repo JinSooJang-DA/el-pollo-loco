@@ -1,4 +1,7 @@
-/** Returns whether a game-flow overlay must keep Escape unavailable. */
+/**
+ * Returns whether a game-flow overlay must keep Escape unavailable.
+ * @returns {boolean} True if a flow overlay is visible.
+ */
 function isGameplayFlowOverlayVisible() {
     return ['storyVideoScreen', 'levelRulesScreen', 'sombreroRewardScreen']
         .some(id => {
@@ -7,7 +10,10 @@ function isGameplayFlowOverlayVisible() {
         });
 }
 
-/** Returns whether the existing lost or victory result screen is visible. */
+/**
+ * Returns whether the existing lost or victory result screen is visible.
+ * @returns {boolean} True if the result screen is visible.
+ */
 function isGameResultVisible() {
     const resultScreen = document.getElementById('restartScreen');
     return Boolean(resultScreen && !resultScreen.classList.contains('d-none'));
@@ -53,8 +59,9 @@ function openGameMenuPause() {
     clearGameMenuInput();
     requestAnimationFrame(focusGameMenuControl);
     document.getElementById('pauseBtn').classList.remove('d-none');
-    if (isStartScreenVisible || isGameplayFlowOverlayVisible()) return;
-    if (!isPaused) togglePause();
+    if (isStartScreenVisible || isGameplayFlowOverlayVisible() || isPaused) return;
+    togglePause();
+    menuPauseStartedAt = pauseStartedAt;
 }
 
 /** Applies the closed-Menu pause lifecycle. */
@@ -94,7 +101,10 @@ function setGameMenuOpen(isOpen) {
     syncGameMenuPause(menu);
 }
 
-/** Closes an open dialog and returns focus to the parent Menu. */
+/**
+ * Closes an open dialog and returns focus to the parent Menu.
+ * @returns {boolean} True if a dialog was closed.
+ */
 function closeMenuDialog() {
     if (closeBgmMenuDialog()) return true;
     const openDialog = getOpenMenuDialog();
@@ -103,7 +113,10 @@ function closeMenuDialog() {
     return true;
 }
 
-/** Closes the BGM dropdown and restores focus to its summary. */
+/**
+ * Closes the BGM dropdown and restores focus to its summary.
+ * @returns {boolean} True if the BGM dropdown was closed.
+ */
 function closeBgmMenuDialog() {
     const bgmMenu = document.getElementById('bgmMenu');
     if (!bgmMenu || !bgmMenu.open) return false;
@@ -112,7 +125,10 @@ function closeBgmMenuDialog() {
     return true;
 }
 
-/** Returns the first visible dialog together with its close handler. */
+/**
+ * Returns the first visible dialog together with its close handler.
+ * @returns {Array|undefined} [dialogId, closeHandler] of the visible dialog, or undefined.
+ */
 function getOpenMenuDialog() {
     const dialogs = [
         ['settingsDialog', closeSettingsDialog],
@@ -157,7 +173,10 @@ function consumeEscapeEvent(event) {
     event.stopImmediatePropagation();
 }
 
-/** Returns whether Escape may open or close the gameplay Menu. */
+/**
+ * Returns whether Escape may open or close the gameplay Menu.
+ * @returns {boolean} True if Escape may toggle the Menu.
+ */
 function canToggleGameplayMenu() {
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
@@ -190,6 +209,12 @@ function initGameMenuControls() {
 }
 
 let menuCloseKeepsPause = false;
+
+/**
+ * Start time of the Pause opened by the Menu, used to tell it apart from a Pause button Pause.
+ * @type {number|null}
+ */
+let menuPauseStartedAt = null;
 
 /**
  * Closes the dropdown for a selected action without resuming gameplay.
@@ -289,7 +314,10 @@ function isStartKeyEligible(event) {
     return !isGameMenuOpen() && !document.getElementById('bgmMenu').open;
 }
 
-/** Returns whether the info, settings, and legal dialogs are all closed. */
+/**
+ * Returns whether the info, settings, and legal dialogs are all closed.
+ * @returns {boolean} True if all start dialogs are closed.
+ */
 function areStartDialogsClosed() {
     const isClosed = id => document.getElementById(id).classList.contains('d-none');
     return isClosed('infoDialog') && isClosed('settingsDialog') && isClosed('legalDialog');

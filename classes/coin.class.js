@@ -3,6 +3,12 @@
  * @extends MovableObject
  */
 class Coin extends MovableObject {
+    /**
+     * Height of the one coin per level that a normal jump cannot reach.
+     * @type {number}
+     */
+    static highCoinY = 50;
+
     width = 30;
     height = 30;
 
@@ -28,6 +34,7 @@ class Coin extends MovableObject {
         this.loadImages(this.IMAGES);
         this.x = x;
         this.y = y;
+        this.isHighCoin = y === Coin.highCoinY;
         this.animate();
     }
 

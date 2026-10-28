@@ -72,7 +72,11 @@ class Endboss extends MovableObject {
         this.animate();
     }
 
-    /** Evaluates if a bottle collision struck the boss's head area. */
+    /**
+     * Evaluates if a bottle collision struck the boss's head area.
+     * @param {ThrowableObject} bottle The thrown bottle to test.
+     * @returns {boolean} True if the bottle overlaps the head area.
+     */
     isHitOnHead(bottle) {
         let headX = this.otherDirection
             ? this.x + this.width * 0.52
@@ -175,7 +179,11 @@ class Endboss extends MovableObject {
         this.scheduleSpecialAttackPhase('charge', 1000);
     }
 
-    /** Schedules one pause-aware Endboss attack phase. */
+    /**
+     * Schedules one pause-aware Endboss attack phase.
+     * @param {'charge'|'finish'} nextPhase The attack phase to run next.
+     * @param {number} delay Delay in milliseconds before the phase starts.
+     */
     scheduleSpecialAttackPhase(nextPhase, delay) {
         this.specialAttackNextPhase = nextPhase;
         this.specialAttackDeadline = Date.now() + delay;
@@ -280,7 +288,10 @@ class Endboss extends MovableObject {
         }, 1000 / 30);
     }
 
-    /** Chases Pepe after the boss fight begins. */
+    /**
+     * Chases Pepe after the boss fight begins.
+     * @param {number} step Horizontal distance to move this tick.
+     */
     chaseCharacter(step = 18) {
         if (!this.hadFirstContact || !world || !world.character) return;
 
@@ -293,7 +304,10 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Makes the boss perform its high-speed dash attack. */
+    /**
+     * Makes the boss perform its high-speed dash attack.
+     * @param {number} step Horizontal distance to move this tick.
+     */
     chargeCharacter(step = 54) {
         if (!world || !world.character) return;
 

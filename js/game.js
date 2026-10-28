@@ -8,6 +8,12 @@ let keyboard = new Keyboard();
 let isPaused = false;
 /** @type {number} */
 let pauseStartedAt = 0;
+
+/**
+ * True while the fullscreen button itself is leaving fullscreen.
+ * @type {boolean}
+ */
+let fullscreenExitRequested = false;
 /** @type {'start'|'game'|null} */
 let menuCreditsOrigin = null;
 let menuCreditsBgmState = null;
@@ -27,7 +33,10 @@ function init() {
     requestAnimationFrame(focusStartGameButton);
 }
 
-/** Returns whether the main menu is currently displayed. */
+/**
+ * Returns whether the main menu is currently displayed.
+ * @returns {boolean} True if the main menu is visible.
+ */
 function isMainMenuVisible() {
     let startScreen = document.getElementById('startScreen');
     return !startScreen || !startScreen.classList.contains('d-none');
@@ -69,7 +78,10 @@ function stopEndVideo() {
     video.currentTime = 0;
 }
 
-/** Returns whether the shared credits screen was opened from the Menu. */
+/**
+ * Returns whether the shared credits screen was opened from the Menu.
+ * @returns {boolean} True if credits were opened from the Menu.
+ */
 function isMenuCreditsOpen() {
     return menuCreditsOrigin !== null;
 }
@@ -110,7 +122,10 @@ function showMenuCreditsScreen() {
     requestAnimationFrame(() => backButton?.focus());
 }
 
-/** Shows the result screen in credits mode. */
+/**
+ * Shows the result screen in credits mode.
+ * @param {HTMLElement} restartScreen The result screen element.
+ */
 function setMenuCreditsMode(restartScreen) {
     if (!restartScreen) return;
     restartScreen.classList.add('menu-credits-mode');
@@ -162,7 +177,7 @@ function hideMenuCreditsScreen() {
 /**
  * Restores the start-screen or gameplay audio after closing credits.
  * @param {'start'|'game'} origin Where the credits were opened from.
- * @param {{track: HTMLAudioElement, currentTime: number}|null} savedBgmState
+ * @param {{track: HTMLAudioElement, currentTime: number}|null} savedBgmState Saved gameplay BGM state, or null.
  */
 function restoreMenuCreditsAudio(origin, savedBgmState) {
     if (origin === 'start') {
@@ -203,7 +218,10 @@ function showLocalEndingPreview() {
     playBgm(audioHub.bgmWin);
 }
 
-/** Returns whether the local ending preview was requested. */
+/**
+ * Returns whether the local ending preview was requested.
+ * @returns {boolean} True if the local ending preview is active.
+ */
 function isLocalEndingPreview() {
     const isLocalHost = location.hostname === '127.0.0.1' ||
         location.hostname === 'localhost';
@@ -281,7 +299,10 @@ function focusGameMenuButton() {
     document.querySelector('.game-menu > summary')?.focus();
 }
 
-/** Focuses Resume only after the paused game screen is visible. */
+/**
+ * Focuses Resume only after the paused game screen is visible.
+ * @returns {boolean} True if the Resume button was focused.
+ */
 function focusPauseResumeButton() {
     const pauseScreen = document.getElementById('pauseScreen');
     const resumeButton = document.getElementById('resumeBtn');
@@ -352,7 +373,11 @@ function enterFullscreen(presentation) {
  * @returns {Promise<boolean>}
  */
 function exitFullscreen() {
+    fullscreenExitRequested = true;
     return document.exitFullscreen()
         .then(() => false)
-        .catch(() => Boolean(document.fullscreenElement));
+        .catch(() => {
+            fullscreenExitRequested = false;
+            return Boolean(document.fullscreenElement);
+        });
 }
