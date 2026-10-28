@@ -1,4 +1,4 @@
-/** World collision and combat methods. */
+/** Extends World with collision and combat methods. */
 
 /**
  * Checks Pepe's collision with every living enemy in the current level.

@@ -1,4 +1,4 @@
-/** World item collection and throwing methods. */
+/** Extends World with item collection and bottle throwing methods. */
 
 /**
  * Validates whether Pepe is eligible to throw a salsa bottle.

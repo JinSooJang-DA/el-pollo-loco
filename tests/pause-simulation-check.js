@@ -52,7 +52,7 @@ function createTimerContext() {
 }
 
 const movableSource = fs.readFileSync(
-    path.join(root, 'models/movable-object.class.js'), 'utf8'
+    path.join(root, 'classes/movable-object.class.js'), 'utf8'
 );
 const movableContext = createTimerContext();
 vm.createContext(movableContext);
@@ -76,7 +76,7 @@ expect(fallingObject.y === 90,
     'gravity resumes from the existing position without changing its step');
 
 const throwableSource = fs.readFileSync(
-    path.join(root, 'models/throwable-object.js'), 'utf8'
+    path.join(root, 'classes/throwable-object.class.js'), 'utf8'
 );
 vm.runInContext(`${throwableSource}\nthis.TestThrowableObject = ThrowableObject;`, movableContext);
 const bottle = new movableContext.TestThrowableObject(100, 200, false);
@@ -94,7 +94,7 @@ expect(bottle.x === 108,
     'a thrown bottle resumes with its existing horizontal speed');
 
 const bossSource = fs.readFileSync(
-    path.join(root, 'models/endboss.class.js'), 'utf8'
+    path.join(root, 'classes/endboss.class.js'), 'utf8'
 );
 const bossContext = createTimerContext();
 bossContext.MovableObject = class {

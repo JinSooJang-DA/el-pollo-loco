@@ -4,7 +4,7 @@ const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
 const combat = fs.readFileSync(
-    path.join(root, 'models/world-combat.js'),
+    path.join(root, 'classes/world-combat.class.js'),
     'utf8'
 );
 

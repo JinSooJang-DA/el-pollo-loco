@@ -3,7 +3,7 @@ const path = require('path');
 const vm = require('vm');
 
 const source = fs.readFileSync(
-    path.join(__dirname, '..', 'models', 'world.class.js'),
+    path.join(__dirname, '..', 'classes', 'world.class.js'),
     'utf8'
 ) + '\nglobalThis.World = World;';
 

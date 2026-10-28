@@ -1,3 +1,5 @@
+/** Extends Character with movement, jumping and animation methods. */
+
 /**
  * Handles landing behavior when touching the ground.
  */

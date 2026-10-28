@@ -1,4 +1,4 @@
-/** World rendering methods. */
+/** Extends World with rendering methods. */
 
 /**
  * Clears and renders active world layers, UI status bars, and the character.
