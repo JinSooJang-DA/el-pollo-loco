@@ -10,6 +10,7 @@ let endingTimer = null;
 let endingDeadline = 0;
 let endingPaused = false;
 
+/** Resets the sombrero and coin state for a new game. */
 function resetSombreroGame() {
     sombreros = 0;
     collectedCoinsByLevel = {};
@@ -21,6 +22,7 @@ function resetSombreroGame() {
     updateCollectedCoinCounter();
 }
 
+/** Updates the on-screen sombrero icons based on available lives. */
 function updateSombreroCounter() {
     let counter = document.getElementById('sombreroCounter');
     if (!counter) return;
@@ -30,6 +32,10 @@ function updateSombreroCounter() {
     }
 }
 
+/**
+ * Creates the sombrero image element for the HUD.
+ * @returns {HTMLImageElement} The built image node.
+ */
 function createSombreroIcon() {
     let hat = document.createElement('img');
     hat.src = 'img/golden-sombrero-big.webp';
@@ -39,6 +45,7 @@ function createSombreroIcon() {
     return hat;
 }
 
+/** Updates the globally collected coin amount in the HUD. */
 function updateCollectedCoinCounter() {
     let counter = document.getElementById('coinCollectedCounter');
     if (counter) counter.innerHTML =
@@ -46,11 +53,17 @@ function updateCollectedCoinCounter() {
         '<span>× ' + totalCollectedCoins + '</span>';
 }
 
+/** Increments and displays the globally collected coins. */
 function recordCollectedCoin() {
     totalCollectedCoins++;
     updateCollectedCoinCounter();
 }
 
+/**
+ * Records a collected coin to prevent it from respawning on retry.
+ * @param {number} levelNumber The current level index.
+ * @param {Coin} coin The collected coin instance.
+ */
 function rememberCollectedCoin(levelNumber, coin) {
     if (!collectedCoinsByLevel[levelNumber]) {
         collectedCoinsByLevel[levelNumber] = [];
@@ -59,6 +72,10 @@ function rememberCollectedCoin(levelNumber, coin) {
     if (!positions.includes(coin.x)) positions.push(coin.x);
 }
 
+/**
+ * Removes previously collected coins from the target level array.
+ * @param {number} levelNumber The current level index.
+ */
 function removeCollectedCoins(levelNumber) {
     let levels = [level1, level2, level3, level4, level5];
     let currentLevel = levels[levelNumber - 1];
@@ -68,6 +85,10 @@ function removeCollectedCoins(levelNumber) {
     });
 }
 
+/**
+ * Proceeds to the next level or finale after clearing the current one.
+ * @param {World} finishedWorld The cleared world instance.
+ */
 function finishCompletedLevel(finishedWorld) {
     let nextLevel = finishedWorld.levelNumber + 1;
     if (finishedWorld.levelNumber === 5) {
@@ -78,6 +99,10 @@ function finishCompletedLevel(finishedWorld) {
     });
 }
 
+/**
+ * Handles the final level victory condition and triggers the ending flow.
+ * @param {World} finishedWorld The final cleared world instance.
+ */
 function finishFinalLevel(finishedWorld) {
     if (finishedWorld.character.energy === 100) {
         sombreros++;
@@ -88,6 +113,11 @@ function finishFinalLevel(finishedWorld) {
     });
 }
 
+/**
+ * Resolves the level outcome, presenting a reward screen or starting the next level.
+ * @param {World} finishedWorld The cleared world instance.
+ * @param {number} nextLevel The next level index.
+ */
 function showCompletedLevelResult(finishedWorld, nextLevel) {
     if (finishedWorld !== world) return;
     if (finishedWorld.levelNumber !== 1 &&
@@ -97,6 +127,10 @@ function showCompletedLevelResult(finishedWorld, nextLevel) {
     startLevel(nextLevel);
 }
 
+/**
+ * Presents the sombrero reward screen before continuing.
+ * @param {number} nextLevel The next level index to start.
+ */
 function showSombreroReward(nextLevel) {
     sombreros++;
     updateSombreroCounter();
@@ -105,6 +139,7 @@ function showSombreroReward(nextLevel) {
     playBgm(AUDIO_HUB.bgmGame);
 }
 
+/** Continues the pending level after accepting the sombrero reward. */
 function continueAfterSombrero() {
     document.getElementById('sombreroRewardScreen').classList.add('d-none');
     let nextLevel = rewardNextLevel;
@@ -112,11 +147,13 @@ function continueAfterSombrero() {
     if (nextLevel !== null) startLevel(nextLevel);
 }
 
+/** Cancels the pending sombrero reward process. */
 function cancelSombreroReward() {
     document.getElementById('sombreroRewardScreen').classList.add('d-none');
     rewardNextLevel = null;
 }
 
+/** Consumes a sombrero to revive Pepe and reset the current level run. */
 function retryCurrentLevel() {
     if (!world || !world.gameEnded || sombreros < 1) return;
     if (!world.character.isDead()) return;
@@ -130,6 +167,10 @@ function retryCurrentLevel() {
     showReviveMessage();
 }
 
+/**
+ * Restores Pepe's health and grants temporary invincibility.
+ * @param {Character} character The character to revive.
+ */
 function reviveCharacter(character) {
     character.energy = 100;
     character.lastHit = 0;
@@ -139,6 +180,10 @@ function reviveCharacter(character) {
     character.reviveProtectionUntil = Date.now() + 5000;
 }
 
+/**
+ * Re-enables world logic and rendering routines.
+ * @param {World} activeWorld The world instance to reactivate.
+ */
 function reviveWorld(activeWorld) {
     activeWorld.canThrow = true;
     activeWorld.statusBar.setPercentage(100);
@@ -146,10 +191,16 @@ function reviveWorld(activeWorld) {
     activeWorld.stopDrawing = false;
 }
 
+/**
+ * Checks if the character currently holds revive invulnerability.
+ * @param {Character} character The character instance.
+ * @returns {boolean} True if revive protection is active.
+ */
 function hasReviveProtection(character) {
     return Boolean(character && Date.now() < (character.reviveProtectionUntil || 0));
 }
 
+/** Briefly displays a centered message indicating a successful revive. */
 function showReviveMessage() {
     let message = document.getElementById('reviveMessage');
     if (!message) {
@@ -163,20 +214,32 @@ function showReviveMessage() {
     window.setTimeout(() => message.classList.remove('is-visible'), 1800);
 }
 
+/** Stores the final run statistics for the ending sequence. */
 function createFinalRunResult() {
     finalRunResult = { sombreros, totalCollectedCoins };
 }
 
+/**
+ * Evaluates the conditions for the sombrero ending reward.
+ * @param {number} count The earned sombrero amount.
+ * @returns {Object|null} The video source object if conditions are met.
+ */
 function getSombreroEndingReward(count) {
     if (count >= 3) return { type: 'video', src: 'videos/golden-sombrero.mp4' };
     return null;
 }
 
+/**
+ * Evaluates the conditions for the coin ending reward.
+ * @param {number} count The total collected coins.
+ * @returns {Object|null} The video source object if conditions are met.
+ */
 function getCoinEndingReward(count) {
     if (count >= 20) return { type: 'video', src: 'videos/golden-coins.mp4' };
     return null;
 }
 
+/** Applies the global mute and volume settings to the ending reward video. */
 function syncEndingRewardVideoAudio() {
     let video = document.getElementById('endingRewardVideo');
     if (!video) return;
@@ -184,6 +247,10 @@ function syncEndingRewardVideoAudio() {
     video.volume = Math.min(1, sfxVolume * 0.65);
 }
 
+/**
+ * Initiates video playback adhering to browser policies.
+ * @param {HTMLVideoElement} video The video element to play.
+ */
 function playEndingRewardVideo(video) {
     syncEndingRewardVideoAudio();
     video.play().catch(() => {
@@ -193,6 +260,10 @@ function playEndingRewardVideo(video) {
     });
 }
 
+/**
+ * Initiates the ultimate victory ending flow.
+ * @param {World} finishedWorld The final cleared world instance.
+ */
 function startFinalEnding(finishedWorld) {
     createFinalRunResult();
     playBgm(AUDIO_HUB.bgmWin, true);
@@ -201,6 +272,10 @@ function startFinalEnding(finishedWorld) {
     showNextEndingStep(finishedWorld);
 }
 
+/**
+ * Cycles to the next ending reward or finishes the ending sequence.
+ * @param {World} finishedWorld The cleared world instance.
+ */
 function showNextEndingStep(finishedWorld) {
     let result = finalRunResult;
     if (!result || finishedWorld !== world) return;
@@ -212,6 +287,11 @@ function showNextEndingStep(finishedWorld) {
     showEndingRewardCard(finishedWorld, cards[endingStep]);
 }
 
+/**
+ * Assembles the applicable video rewards based on final statistics.
+ * @param {Object} result The final run statistics.
+ * @returns {Object[]} The array of earned video sources.
+ */
 function getEndingRewardCards(result) {
     return [
         getSombreroEndingReward(result.sombreros),
@@ -219,11 +299,17 @@ function getEndingRewardCards(result) {
     ].filter(Boolean);
 }
 
+/** Concludes the reward phase and opens the main credits screen. */
 function finishEndingRewards(finishedWorld) {
     document.getElementById('endingRewardScreen').classList.add('d-none');
     finishedWorld.showEndScreen('', true);
 }
 
+/**
+ * Displays one specific video reward card.
+ * @param {World} finishedWorld The cleared world instance.
+ * @param {Object} card The video source object to display.
+ */
 function showEndingRewardCard(finishedWorld, card) {
     let video = document.getElementById('endingRewardVideo');
     video.classList.remove('d-none');
@@ -236,6 +322,10 @@ function showEndingRewardCard(finishedWorld, card) {
     scheduleEndingStep(finishedWorld, 12000);
 }
 
+/**
+ * Terminates current video playback and shifts to the next ending step.
+ * @param {World} finishedWorld The cleared world instance.
+ */
 function advanceEndingStep(finishedWorld) {
     if (endingTimer) window.clearTimeout(endingTimer);
     endingTimer = null;
@@ -248,11 +338,20 @@ function advanceEndingStep(finishedWorld) {
     if (!endingPaused) showNextEndingStep(finishedWorld);
 }
 
+/**
+ * Registers an automatic timeout to advance the ending flow.
+ * @param {World} finishedWorld The cleared world instance.
+ * @param {number} duration The pause duration in milliseconds.
+ */
 function scheduleEndingStep(finishedWorld, duration) {
     endingDeadline = Date.now() + duration;
     endingTimer = window.setTimeout(() => advanceEndingStep(finishedWorld), duration);
 }
 
+/**
+ * Toggles the pause state specifically for the ending sequence.
+ * @returns {boolean} True if the pause action was performed.
+ */
 function toggleEndingPause() {
     let rewardOpen = !document.getElementById('endingRewardScreen').classList.contains('d-none');
     let creditsOpen = !document.getElementById('endCredits').classList.contains('d-none');
@@ -264,11 +363,13 @@ function toggleEndingPause() {
     return true;
 }
 
+/** Refreshes UI text and styling to reflect ending pause status. */
 function updateEndingPauseUi() {
     document.getElementById('endingPauseBtn').textContent = endingPaused ? 'RESUME' : 'PAUSE';
     document.getElementById('endCredits').classList.toggle('credits-paused', endingPaused);
 }
 
+/** Freezes the ending timer and associated audio/video. */
 function pauseEndingPlayback() {
     if (endingTimer) window.clearTimeout(endingTimer);
     endingTimer = null;
@@ -277,6 +378,7 @@ function pauseEndingPlayback() {
     document.getElementById('endingRewardVideo')?.pause();
 }
 
+/** Continues the frozen ending timer and multimedia playback. */
 function resumeEndingPlayback(rewardOpen) {
     if (currentBgm) resumeCurrentBgm(true);
     if (!rewardOpen) return;
@@ -285,6 +387,7 @@ function resumeEndingPlayback(rewardOpen) {
     scheduleEndingStep(world, endingDeadline);
 }
 
+/** Terminates the active ending flow completely. */
 function cancelEndingSequence() {
     if (endingTimer) window.clearTimeout(endingTimer);
     endingTimer = null;
@@ -295,6 +398,7 @@ function cancelEndingSequence() {
     resetEndingRewardVideo();
 }
 
+/** Clears and purges the ending reward video tag. */
 function resetEndingRewardVideo() {
     let video = document.getElementById('endingRewardVideo');
     if (!video) return;
@@ -305,23 +409,43 @@ function resetEndingRewardVideo() {
     video.load();
 }
 
+/**
+ * Handles toggling the ending pause state using the Space key.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ * @returns {boolean} True if the event was consumed for ending pause.
+ */
 function handleEndingPauseKey(event) {
     if (event.code !== 'Space' || event.repeat) return false;
     if (isMenuControlTarget(document.activeElement)) return false;
-    let backButton = document.getElementById('menuCreditsBackBtn');
-    if (backButton && !backButton.classList.contains('d-none')) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        closeMenuCredits();
-        return true;
-    }
+    if (processMenuCreditsBackKey(event)) return true;
+
     if (!toggleEndingPause()) return false;
     event.preventDefault();
     event.stopImmediatePropagation();
     return true;
 }
 
-document.addEventListener('keydown', function (event) {
+/**
+ * Manages the specific back button action during menu credits via keyboard.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ * @returns {boolean} True if the back operation was executed.
+ */
+function processMenuCreditsBackKey(event) {
+    let backBtn = document.getElementById('menuCreditsBackBtn');
+    if (backBtn && !backBtn.classList.contains('d-none')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closeMenuCredits();
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Consumes the Space key to proceed past the sombrero reward prompt.
+ * @param {KeyboardEvent} event The pressed keyboard event.
+ */
+function handleSombreroRewardKey(event) {
     if (handleEndingPauseKey(event)) return;
     if (event.code !== 'Space' || event.repeat) return;
     let rewardScreen = document.getElementById('sombreroRewardScreen');
@@ -330,4 +454,5 @@ document.addEventListener('keydown', function (event) {
         event.stopImmediatePropagation();
         continueAfterSombrero();
     }
-}, true);
+}
+document.addEventListener('keydown', handleSombreroRewardKey, true);

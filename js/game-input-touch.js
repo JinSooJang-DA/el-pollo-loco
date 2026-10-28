@@ -1,10 +1,3 @@
-
-/**
- * Connects a mobile touch button to the keyboard.
- * @param {string} btnId The touch button element ID.
- * @param {string} keyProperty The matching Keyboard state property.
- */
-
 /**
  * Connects a button to touch input.
  * @param {string} btnId The touch button element ID.
@@ -31,18 +24,23 @@ function handleTouchStart(event, keyProperty) {
     event.preventDefault();
     if (isStoryVideoPlaying()) return;
     keyboard[keyProperty] = true;
+    if (keyProperty === 'SPACE') return processTouchJump();
+    if (keyProperty === 'D') return processTouchThrow();
+}
 
-    if (keyProperty === 'SPACE') {
-        keyboard.SPACE = false;
-        if (world && !isPaused && !world.gameEnded &&
-            !world.character.isDead() && !world.character.isAboveGround()) {
-            world.character.resetIdleTimer();
-            world.character.jump();
-        }
-        return;
+/** Triggers the jump action via touch controls. */
+function processTouchJump() {
+    keyboard.SPACE = false;
+    if (world && !isPaused && !world.gameEnded &&
+        !world.character.isDead() && !world.character.isAboveGround()) {
+        world.character.resetIdleTimer();
+        world.character.jump();
     }
+}
 
-    if (keyProperty === 'D' && world && !isPaused) {
+/** Triggers the bottle throw action via touch controls. */
+function processTouchThrow() {
+    if (world && !isPaused) {
         world.character.resetIdleTimer();
         world.checkThrowObjects();
         keyboard.D = false;
@@ -89,14 +87,10 @@ function clearTouchControlState() {
 function updateKeyboardState(event, pressed) {
     if (isStoryVideoPlaying()) return;
     const keyMap = {
-        39: 'RIGHT', 37: 'LEFT',
-        38: 'UP', 40: 'DOWN',
-        32: 'SPACE', 68: 'D'
+        39: 'RIGHT', 37: 'LEFT', 38: 'UP', 40: 'DOWN', 32: 'SPACE', 68: 'D'
     };
     const property = keyMap[event.keyCode];
-
     if (isMenuControlTarget(event.target)) return;
-
     if (property && isUiNavigationActive()) {
         if (pressed) event.preventDefault();
         return;
@@ -104,4 +98,3 @@ function updateKeyboardState(event, pressed) {
     if (property) keyboard[property] = pressed;
     if (event.keyCode === 32 && pressed) event.preventDefault();
 }
-

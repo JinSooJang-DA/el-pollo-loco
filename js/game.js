@@ -186,8 +186,8 @@ function focusAfterMenuCredits(origin) {
             focusPauseResumeButton();
             return;
         }
-        setGameMenuOpen(false);
-        focusGameMenuButton();
+        setGameMenuOpen(true);
+        document.getElementById('creditsBtn')?.focus();
     });
 }
 

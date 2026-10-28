@@ -22,7 +22,6 @@ function isMenuControlTarget(target) {
  */
 function getFocusableControls(scope) {
     if (!scope) return [];
-
     return Array.from(scope.querySelectorAll(
         'summary, button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )).filter(control => control.getClientRects().length > 0);
@@ -36,7 +35,6 @@ function getTopNavControls() {
     const bgmSummary = document.getElementById('bgmMenu')?.querySelector('summary');
     const gameMenuSummary = document.querySelector('.game-menu')?.querySelector('summary');
     const soundButton = document.getElementById('soundBtn');
-    
     return [bgmSummary, soundButton, gameMenuSummary].filter(c => c && c.getClientRects().length > 0);
 }
 
@@ -54,7 +52,6 @@ function getActiveScopeControls() {
     ));
     const visibleOverlay = overlays.find(o => o.id === 'restartScreen') || 
         overlays.find(o => o.getClientRects().length > 0);
-
     const activeScope = visibleDialog || visibleOverlay;
     if (activeScope) return getFocusableControls(activeScope);
     if (startScreen && !startScreen.classList.contains('d-none')) {
@@ -71,7 +68,6 @@ function getUiNavigationControls() {
     const scopedControls = getActiveScopeControls();
     const menuControls = gameMenu?.open ? getFocusableControls(gameMenu) : [];
     const bgmControls = bgmMenu?.open ? getFocusableControls(bgmMenu) : [];
-
     return [...new Set([...topControls, ...menuControls, ...bgmControls, ...scopedControls])]
         .filter(control => !control.disabled && control.getClientRects().length > 0);
 }
@@ -93,15 +89,12 @@ function isUiNavigationActive() {
  */
 function handleUiArrowNavigation(event) {
     if (!isUiNavigationActive()) return false;
-
     const controls = getUiNavigationControls();
-    const isHorizontalArrow = ['ArrowLeft', 'ArrowRight', 'Left', 'Right']
-        .includes(event.key);
+    const isHorizontalArrow = ['ArrowLeft', 'ArrowRight', 'Left', 'Right'].includes(event.key);
     if (!controls.length || document.activeElement?.matches('select, textarea') ||
         (isHorizontalArrow && document.activeElement?.matches('input[type="range"]'))) {
         return false;
     }
-
     moveMenuFocus(event, controls);
     event.stopImmediatePropagation();
     return true;
@@ -114,11 +107,9 @@ function handleUiArrowNavigation(event) {
  */
 function handleBgmMenuArrowNavigation(event) {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return false;
-
     const bgmMenu = document.getElementById('bgmMenu');
     const controls = bgmMenu?.open ? getFocusableControls(bgmMenu) : [];
     if (!controls.includes(document.activeElement)) return false;
-
     moveMenuFocus(event, controls);
     return true;
 }
@@ -134,9 +125,23 @@ function getMenuCreditsControls() {
     const soundButton = document.getElementById('soundBtn');
     const gameMenu = document.querySelector('.game-menu summary');
     const backButton = document.getElementById('menuCreditsBackBtn');
-    
     return [bgmMenu, soundButton, gameMenu, backButton]
         .filter(control => control && control.getClientRects().length > 0);
+}
+
+/**
+ * Calculates the next index safely resolving wrap-around conditions.
+ * @param {number} currentIndex The currently focused control index.
+ * @param {number} direction The calculated index shift (-1 or 1).
+ * @param {number} maxIndex The highest valid array index.
+ * @returns {number} The safely wrapped index target.
+ */
+function calculateWrappedIndex(currentIndex, direction, maxIndex) {
+    let nextIndex = currentIndex + direction;
+    if (currentIndex === -1) return direction === 1 ? 0 : maxIndex;
+    if (nextIndex < 0) return maxIndex;
+    if (nextIndex > maxIndex) return 0;
+    return nextIndex;
 }
 
 /**
@@ -146,20 +151,10 @@ function getMenuCreditsControls() {
  */
 function moveMenuFocus(event, controls) {
     if (!controls.length) return;
-
     let currentIndex = controls.indexOf(document.activeElement);
-    let direction = ['ArrowDown', 'ArrowRight', 'Down', 'Right']
-        .includes(event.key) ? 1 : -1;
-    let nextIndex = currentIndex + direction;
+    let direction = ['ArrowDown', 'ArrowRight', 'Down', 'Right'].includes(event.key) ? 1 : -1;
 
-    if (currentIndex === -1) {
-        nextIndex = direction === 1 ? 0 : controls.length - 1;
-    } else if (nextIndex < 0) {
-        nextIndex = controls.length - 1;
-    } else if (nextIndex >= controls.length) {
-        nextIndex = 0;
-    }
-
+    let nextIndex = calculateWrappedIndex(currentIndex, direction, controls.length - 1);
     event.preventDefault();
     const nextControl = controls[nextIndex];
     closeInactiveSubmenus(nextControl);
@@ -173,13 +168,11 @@ function moveMenuFocus(event, controls) {
 function closeInactiveSubmenus(nextControl) {
     const bgmMenu = document.getElementById('bgmMenu');
     if (bgmMenu?.open && !bgmMenu.contains(nextControl)) bgmMenu.open = false;
-
     const gameMenu = document.querySelector('.game-menu');
     if (gameMenu?.open && !gameMenu.contains(nextControl)) {
         menuCloseKeepsPause = true;
         gameMenu.open = false;
     }
-
     ['settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {
         const dialog = document.getElementById(id);
         if (dialog && !dialog.classList.contains('d-none') && !dialog.contains(nextControl)) {

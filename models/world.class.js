@@ -148,16 +148,19 @@ class World {
             this.startPepeDeathSequence();
             return;
         }
-
         if (endboss && endboss.deathAnimationFinished && !this.gameEnded) {
-            this.gameEnded = true;
-            this.stopDrawing = true;
-            stopAllIntervals();
-            if (currentBgm) currentBgm.pause();
-            stopSoundEffects();
-
-            finishCompletedLevel(this);
+            this.executeBossDefeat();
         }
+    }
+
+    /** Finalizes game states and invokes level completion flow. */
+    executeBossDefeat() {
+        this.gameEnded = true;
+        this.stopDrawing = true;
+        stopAllIntervals();
+        if (currentBgm) currentBgm.pause();
+        stopSoundEffects();
+        finishCompletedLevel(this);
     }
 
     /** Handles the logic for death audio ending. */
@@ -207,6 +210,23 @@ class World {
         }
     }
 
+    /** Terminates rendering and logic loops if no revive is available. */
+    haltGameIfNotRevivable(canRevive) {
+        if (!canRevive) {
+            this.stopDrawing = true;
+            stopAllIntervals();
+        }
+    }
+
+    /** Configures and displays the action buttons available after a run. */
+    showRestartUI(canRevive) {
+        document.getElementById('retryLevelBtn')?.classList.toggle('d-none', !canRevive);
+        document.getElementById('restartScreen')?.classList.remove('d-none');
+        if (typeof focusGameOverButton === 'function') {
+            focusGameOverButton(canRevive);
+        }
+    }
+
     /**
      * Shows the loss or victory result UI.
      * @param {string} imagePath The result image to display for a loss.
@@ -216,19 +236,9 @@ class World {
         if (this !== world) return;
 
         let canRevive = this.character.isDead() && sombreros > 0;
-        if (!canRevive) {
-            this.stopDrawing = true;
-            stopAllIntervals();
-        }
-
+        this.haltGameIfNotRevivable(canRevive);
         this.updateEndScreenView(isVictory, imagePath);
-
-        document.getElementById('retryLevelBtn')?.classList.toggle('d-none', !canRevive);
-        document.getElementById('restartScreen')?.classList.remove('d-none');
-
-        if (typeof focusGameOverButton === 'function') {
-            focusGameOverButton(canRevive);
-        }
+        this.showRestartUI(canRevive);
     }
 
     /**

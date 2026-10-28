@@ -42,7 +42,6 @@ function unlockAudioOnFirstInteraction() {
         window.removeEventListener('click', resume);
         window.removeEventListener('keydown', resume);
     };
-
     window.addEventListener('click', resume);
     window.addEventListener('keydown', resume);
 }
@@ -129,16 +128,22 @@ function changeSfxVolume(val) {
  * @param {boolean} [allowWhilePaused=false] Whether playback is allowed during Pause.
  */
 function playBgm(bgmTrack, allowWhilePaused = false) {
-    if (currentBgm === bgmTrack) {
-        resumeCurrentBgm(allowWhilePaused);
-        return;
-    }
-    if (currentBgm) {
-        currentBgm.pause();
-        currentBgm.currentTime = 0;
-    }
+    if (currentBgm === bgmTrack) return resumeCurrentBgm(allowWhilePaused);
+    stopCurrentBgm();
     currentBgm = bgmTrack;
     if (!currentBgm) return;
+    configureAndResumeBgm(allowWhilePaused);
+}
+
+/** Stops the current background track. */
+function stopCurrentBgm() {
+    if (!currentBgm) return;
+    currentBgm.pause();
+    currentBgm.currentTime = 0;
+}
+
+/** Configures and resumes the selected background track. */
+function configureAndResumeBgm(allowWhilePaused) {
     currentBgm.loop = !playlistActive || playlistRepeat === 'track';
     currentBgm.volume = bgmVolume;
     currentBgm.muted = isMuted;

@@ -204,7 +204,7 @@ expect(!gameInput.includes('function isStartMenuSummary') &&
 expect(gameInput.includes('function getGameOverButtons()') &&
     gameInput.includes('function handleGameOverArrowNavigation(event)') &&
     gameInput.includes("return ['retryLevelBtn', 'restartBtn', 'homeBtn']") &&
-    world.includes('focusGameOverButton(canRetry);'),
+    world.includes('focusGameOverButton(canRevive);'),
     'loss screen focuses the visible action and keeps arrow navigation on its native buttons');
 
 class KeyboardTestElement {

@@ -8,12 +8,7 @@ class SmallChicken extends MovableObject {
     width = 50;
     isDeadChicken = false;
 
-    offset = {
-        top: 5,
-        bottom: 5,
-        left: 5,
-        right: 5
-    };
+    offset = { top: 5, bottom: 5, left: 5, right: 5 };
 
     IMAGES_WALKING = [
         'img/3_enemies_chicken/chicken_small/1_walk/1_w.png',
@@ -25,20 +20,25 @@ class SmallChicken extends MovableObject {
 
     /**
      * Creates a small chicken enemy.
-     * @param {number} [x] - Horizontal spawn coordinate.
+     * @param {number} [x] Horizontal spawn coordinate.
      */
     constructor(x) {
-        super().loadImage(this.IMAGES_WALKING[0]);
+        super();
+        this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.x = x || 600 + Math.random() * 1500;
         this.speed = 0.25 + Math.random() * 0.45;
         this.animate();
     }
 
-    /**
-     * Starts movement and walking animation loops.
-     */
+    /** Starts movement and walking animation loops. */
     animate() {
+        this.startMovementInterval();
+        this.startAnimationInterval();
+    }
+
+    /** Tracks Pepe's position and adjusts horizontal movement accordingly. */
+    startMovementInterval() {
         setInterval(() => {
             if (this.isDeadChicken || isPaused || !world) return;
 
@@ -50,25 +50,23 @@ class SmallChicken extends MovableObject {
                 this.otherDirection = true;
             }
         }, 1000 / 60);
+    }
 
+    /** Iterates over the walking sprites periodically. */
+    startAnimationInterval() {
         setInterval(() => {
             if (isPaused) return;
             if (!this.isDeadChicken) this.playAnimation(this.IMAGES_WALKING);
         }, 100);
     }
 
-    /**
-     * Eliminates small chicken and shows flattened sprite.
-     */
+    /** Eliminates small chicken and shows flattened sprite. */
     die() {
         this.isDeadChicken = true;
         this.loadImage(this.IMAGE_DEAD);
     }
 
-    /**
-     * Checks whether small chicken is dead.
-     * @returns {boolean} True if dead.
-     */
+    /** Checks whether small chicken is dead. */
     isDead() {
         return this.isDeadChicken;
     }

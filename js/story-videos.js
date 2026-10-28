@@ -23,6 +23,7 @@ function clearGameplayInput() {
     });
 }
 
+/** Configures and begins the story video playback. */
 function setupStoryVideo(video, videoNumber) {
     video.src = `videos/loco-0${videoNumber}.mp4`;
     video.currentTime = 0;
@@ -32,6 +33,7 @@ function setupStoryVideo(video, videoNumber) {
     video.play().catch(() => { });
 }
 
+/** Stops other audio and transitions to the story video UI. */
 function startStoryPlayback(videoNumber, onComplete) {
     storyVideoActive = true;
     storyVideoFinishing = false;
@@ -80,11 +82,8 @@ function cancelStoryVideo() {
     clearGameplayInput();
 }
 
-/** Hides the chapter and runs the next transition once. */
-function finishStoryVideo() {
-    if (!storyVideoActive || storyVideoFinishing) return;
-    storyVideoFinishing = true;
-    storyVideoActive = false;
+/** Hides the visual elements of the story screen. */
+function clearStoryVideoUI() {
     let screen = document.getElementById('storyVideoScreen');
     let video = document.getElementById('storyVideo');
     if (video) {
@@ -94,10 +93,24 @@ function finishStoryVideo() {
     }
     if (screen) screen.classList.add('d-none');
     clearGameplayInput();
+}
+
+/** Processes the stored level completion callback upon video end. */
+function executeStoryVideoCallback() {
     let onComplete = storyVideoComplete;
     storyVideoComplete = null;
     storyVideoFinishing = false;
     if (typeof onComplete === 'function') onComplete();
+}
+
+/** Hides the chapter and runs the next transition once. */
+function finishStoryVideo() {
+    if (!storyVideoActive || storyVideoFinishing) return;
+    storyVideoFinishing = true;
+    storyVideoActive = false;
+
+    clearStoryVideoUI();
+    executeStoryVideoCallback();
 }
 
 /** Captures Space before gameplay input can receive it. */

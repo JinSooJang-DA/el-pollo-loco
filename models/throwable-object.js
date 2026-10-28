@@ -9,13 +9,10 @@ class ThrowableObject extends MovableObject {
     hasPlayedChickenHitSound = false;
     throwInterval;
     animationInterval;
+    splashInterval;
+    splashFrame = 0;
 
-    offset = {
-        top: 15,
-        bottom: 15,
-        left: 10,
-        right: 10
-    };
+    offset = { top: 15, bottom: 15, left: 10, right: 10 };
 
     IMAGES_ROTATING = [
         'img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png',
@@ -35,15 +32,15 @@ class ThrowableObject extends MovableObject {
 
     /**
      * Initializes the thrown bottle.
-     * @param {number} x
-     * @param {number} y
-     * @param {boolean} otherDirection
+     * @param {number} x Horizontal start coordinate.
+     * @param {number} y Vertical start coordinate.
+     * @param {boolean} otherDirection Indicates if the bottle is thrown leftward.
      */
     constructor(x, y, otherDirection) {
-        super().loadImage(this.IMAGES_ROTATING[0]);
+        super();
+        this.loadImage(this.IMAGES_ROTATING[0]);
         this.loadImages(this.IMAGES_ROTATING);
         this.loadImages(this.IMAGES_SPLASH);
-
         this.x = x;
         this.y = y;
         this.otherDirection = otherDirection;
@@ -59,12 +56,9 @@ class ThrowableObject extends MovableObject {
         this.y = groundY - this.height;
         this.splash();
         
-        // Remove the bottle after its splash animation.
         if (typeof world !== 'undefined' && world) {
             world.removeBottleAfterDelay(this, 450);
         }
-
-        // Ground impact sound only.
         playBottleSmashAt(this.x + this.width / 2);
     }
 
@@ -72,23 +66,22 @@ class ThrowableObject extends MovableObject {
     throw() {
         this.speedY = 30;
         this.applyGravity();
-
-        this.throwInterval = setInterval(() => {
-            if (isPaused || this.isSplashed) return;
-
-            // Keep the current 20% shorter horizontal throw.
-            this.x += this.otherDirection ? -8 : 8;
-
-            // Bottle touches the ground.
-            const groundY = 420;
-
-            if (this.y + this.height >= groundY) {
-                this.handleGroundImpact(groundY);
-            }
-        }, 25);
+        this.throwInterval = setInterval(() => this.updateBottleFlight(), 25);
     }
 
-    /** Plays rotating or splash animation. */
+    /** Updates horizontal coordinates per tick and evaluates ground collision. */
+    updateBottleFlight() {
+        if (isPaused || this.isSplashed) return;
+
+        this.x += this.otherDirection ? -8 : 8;
+        const groundY = 420;
+
+        if (this.y + this.height >= groundY) {
+            this.handleGroundImpact(groundY);
+        }
+    }
+
+    /** Plays rotating animation. */
     animate() {
         this.animationInterval = setInterval(() => {
             if (isPaused) return;
@@ -101,21 +94,19 @@ class ThrowableObject extends MovableObject {
 
     /** Executes the sequence of splash frames sequentially. */
     runSplashFrames() {
-        let frame = 0;
-        
-        // Play the splash animation exactly once.
-        this.img = this.imageCache[this.IMAGES_SPLASH[frame]];
+        this.splashFrame = 0;
+        this.img = this.imageCache[this.IMAGES_SPLASH[this.splashFrame]];
+        this.splashInterval = setInterval(() => this.advanceSplashFrame(), 60);
+    }
 
-        let splashInterval = setInterval(() => {
-            frame++;
-
-            if (frame >= this.IMAGES_SPLASH.length) {
-                clearInterval(splashInterval);
-                return;
-            }
-
-            this.img = this.imageCache[this.IMAGES_SPLASH[frame]];
-        }, 60);
+    /** Advances splash animation frame and stops interval upon completion. */
+    advanceSplashFrame() {
+        this.splashFrame++;
+        if (this.splashFrame >= this.IMAGES_SPLASH.length) {
+            clearInterval(this.splashInterval);
+            return;
+        }
+        this.img = this.imageCache[this.IMAGES_SPLASH[this.splashFrame]];
     }
 
     /** Breaks the bottle and halts its movement. */
@@ -127,7 +118,6 @@ class ThrowableObject extends MovableObject {
 
         clearInterval(this.throwInterval);
         clearInterval(this.animationInterval);
-
         this.runSplashFrames();
     }
 
