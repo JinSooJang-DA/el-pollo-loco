@@ -134,7 +134,7 @@ class Character extends MovableObject {
         let floorOffset = this.getDeathFloorOffset(frameIndex, rotation);
         let visualOffset = this.getDeathVisualOffset(frameIndex);
         let edgeOffset = this.getDeathEdgeOffset(frameIndex);
-        
+
         ctx.save();
         ctx.translate(this.x + this.width / 2 + edgeOffset, this.y + this.height + floorOffset + visualOffset);
         ctx.rotate(rotation);
@@ -220,7 +220,7 @@ class Character extends MovableObject {
         let mirror = this.otherDirection ? -1 : 1;
         let worldX = this.otherDirection ? -this.x : this.x;
         let pivotX = worldX + this.width / 2 + (this.world?.camera_x || 0);
-        
+
         return xVals.flatMap(x => yVals.map(y => pivotX + mirror * (cos * x - sin * y)));
     }
 
@@ -233,7 +233,7 @@ class Character extends MovableObject {
     getDeathScreenBounds(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return { left: 0, right: 0 };
-        
+
         let screenX = this.calculateScreenVertices(bounds, rotation);
         return { left: Math.min(...screenX), right: Math.max(...screenX) };
     }
@@ -247,13 +247,13 @@ class Character extends MovableObject {
     getDeathFloorOffset(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return 0;
-        
+
         let scaleX = this.width / 610, scaleY = this.height / 1200;
         let sin = Math.sin(rotation), cos = Math.cos(rotation);
         let xValues = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
         let yValues = [bounds.top * scaleY - this.height, bounds.bottom * scaleY - this.height];
         let lowestPixel = Math.max(...xValues.flatMap(x => yValues.map(y => sin * x + cos * y)));
-        
+
         return Math.min(0, -lowestPixel);
     }
 }

@@ -51,7 +51,9 @@ class World {
         this.level = levels[levelNumber - 1] || level1;
     }
 
-    /** Initializes the HUD icons. */
+    /**
+     * Initializes the HUD icons.
+     */
     initHudIcons() {
         this.bottleIcon = new Image();
         this.bottleIcon.src = 'img/salsa-hud.webp';
@@ -59,7 +61,9 @@ class World {
         this.coinIcon.src = 'img/coin-full.webp';
     }
 
-    /** Scales enemy speed and health based on the level. */
+    /**
+     * Scales enemy speed and health based on the level.
+     */
     scaleEnemyDifficulty() {
         let speedMultiplier = 1 + (this.levelNumber - 1) * 0.2;
         this.level.enemies.forEach(enemy => {
@@ -73,12 +77,16 @@ class World {
         });
     }
 
-    /** Connects Pepe to this world instance. */
+    /**
+     * Connects Pepe to this world instance.
+     */
     setWorld() {
         this.character.world = this;
     }
 
-    /** Starts the existing 50 ms game-state check loop. */
+    /**
+     * Starts the existing 50 ms game-state check loop.
+     */
     run() {
         setInterval(() => {
             if (this !== world || this.gameEnded || isPaused) return;
@@ -93,7 +101,9 @@ class World {
         }, 50);
     }
 
-    /** Switches to boss music after the boss first engages Pepe. */
+    /**
+     * Switches to boss music after the boss first engages Pepe.
+     */
     checkBossMusicTrigger() {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
@@ -132,7 +142,9 @@ class World {
         return boss;
     }
 
-    /** Spawns and configures the boss after all regular enemies are defeated. */
+    /**
+     * Spawns and configures the boss after all regular enemies are defeated.
+     */
     checkBossSpawn() {
         if (this.bossSpawned || this.gameEnded) return;
 
@@ -146,7 +158,9 @@ class World {
         }
     }
 
-    /** Starts Pepe's loss flow or completes a level after the boss dies. */
+    /**
+     * Starts Pepe's loss flow or completes a level after the boss dies.
+     */
     checkGameOver() {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
@@ -159,7 +173,9 @@ class World {
         }
     }
 
-    /** Finalizes game states and invokes level completion flow. */
+    /**
+     * Finalizes game states and invokes level completion flow.
+     */
     executeBossDefeat() {
         this.gameEnded = true;
         this.stopDrawing = true;
@@ -182,13 +198,15 @@ class World {
             onFinish();
         };
         let finishFallback = () => window.setTimeout(triggerFinish, 1000);
-        
+
         deathAudio.voice.addEventListener('ended', triggerFinish, { once: true });
         deathAudio.voice.addEventListener('error', finishFallback, { once: true });
         deathAudio.playback.then(played => { if (!played) finishFallback(); });
     }
 
-    /** Starts Pepe's one-time death voice and finishes safely without audio. */
+    /**
+     * Starts Pepe's one-time death voice and finishes safely without audio.
+     */
     startPepeDeathSequence() {
         if (this.gameEnded) return;
 
@@ -197,7 +215,7 @@ class World {
         if (currentBgm) currentBgm.pause();
 
         let deathAudio = playRandomPepeDeadVoice();
-        
+
         this.handleDeathAudioEnd(deathAudio, () => {
             playBgm(audioHub.bgmLost);
             this.showEndScreen('img/You won, you lost/You lost.png');

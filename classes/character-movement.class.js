@@ -1,4 +1,6 @@
-/** Extends Character with movement, jumping and animation methods. */
+/**
+ * Extends Character with movement, jumping and animation methods.
+ */
 
 /**
  * Handles landing behavior when touching the ground.
@@ -6,7 +8,7 @@
 Character.prototype.handleGroundContact = function () {
     let wasFalling = this.speedY < 0;
     MovableObject.prototype.handleGroundContact.call(this);
-    
+
     if (wasFalling) {
         this.lastLandingTime = Date.now();
     }
@@ -27,7 +29,7 @@ Character.prototype.animate = function () {
 Character.prototype.handleWalkAndJump = function () {
     let movedRight = this.walkRight();
     let movedLeft = this.walkLeft();
-    
+
     if (this.world.keyboard.SPACE && !this.isAboveGround()) {
         this.jump();
         return true;
@@ -68,7 +70,7 @@ Character.prototype.calculateTargetCameraX = function (screenWidth) {
     let targetPosition = this.otherDirection ? screenWidth * 0.85 : screenWidth * 0.15;
     let targetCameraX = targetPosition - pepeCenter;
     let maxScroll = Math.max(0, this.world.level.level_end_x + this.width - screenWidth);
-    
+
     return Math.max(-maxScroll, Math.min(0, targetCameraX));
 };
 
@@ -138,7 +140,7 @@ Character.prototype.jump = function () {
 Character.prototype.processMovement = function () {
     if (!this.world || this.isDead() || isPaused) return;
     let isMoving = this.handleWalkAndJump();
-    
+
     if (isMoving || this.world.keyboard.D) {
         this.resetIdleTimer();
     }
@@ -158,7 +160,9 @@ Character.prototype.processAnimations = function () {
     this.playStateAnimation();
 };
 
-/** Restarts the run sound cycle when the character leaves the ground state. */
+/**
+ * Restarts the run sound cycle when the character leaves the ground state.
+ */
 Character.prototype.syncRunCycleSound = function () {
     if (!(this.isDead() || this.isHurt() || this.isAboveGround())) return;
 
@@ -166,7 +170,9 @@ Character.prototype.syncRunCycleSound = function () {
     audioHub.run.currentTime = 0;
 };
 
-/** Plays the matching hurt, jump, or ground-state animation. */
+/**
+ * Plays the matching hurt, jump, or ground-state animation.
+ */
 Character.prototype.playStateAnimation = function () {
     if (this.isHurt() || this.isAboveGround()) {
         this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);

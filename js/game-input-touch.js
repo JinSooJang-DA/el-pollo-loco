@@ -28,7 +28,9 @@ function handleTouchStart(event, keyProperty) {
     if (keyProperty === 'D') return processTouchThrow();
 }
 
-/** Triggers the jump action via touch controls. */
+/**
+ * Triggers the jump action via touch controls.
+ */
 function processTouchJump() {
     keyboard.SPACE = false;
     if (world && !isPaused && !world.gameEnded &&
@@ -38,7 +40,9 @@ function processTouchJump() {
     }
 }
 
-/** Triggers the bottle throw action via touch controls. */
+/**
+ * Triggers the bottle throw action via touch controls.
+ */
 function processTouchThrow() {
     if (world && !isPaused) {
         world.character.resetIdleTimer();
@@ -57,7 +61,9 @@ function handleTouchEnd(event, keyProperty) {
     keyboard[keyProperty] = false;
 }
 
-/** Connects all mobile touch buttons. */
+/**
+ * Connects all mobile touch buttons.
+ */
 function bindTouchEvents() {
     bindTouchButton('btnLeft', 'LEFT');
     bindTouchButton('btnRight', 'RIGHT');
@@ -71,7 +77,9 @@ function bindTouchEvents() {
     });
 }
 
-/** Releases active touch input when rotation, resizing, or app switching cancels it. */
+/**
+ * Releases active touch input when rotation, resizing, or app switching cancels it.
+ */
 function clearTouchControlState() {
     keyboard.LEFT = false;
     keyboard.RIGHT = false;

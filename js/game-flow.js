@@ -1,4 +1,6 @@
-/** Toggles the game's pause state. */
+/**
+ * Toggles the game's pause state.
+ */
 function togglePause() {
     if (typeof isGameResultVisible === 'function' && isGameResultVisible()) {
         setGameMenuOpen(false);
@@ -34,14 +36,18 @@ function togglePauseState() {
     return wasPaused;
 }
 
-/** Enters the paused state and freezes boss attack timers. */
+/**
+ * Enters the paused state and freezes boss attack timers.
+ */
 function startPausedGameplay() {
     pauseStartedAt = Date.now();
     pauseBossAttackTimers();
     isPaused = true;
 }
 
-/** Leaves the paused state and restores shifted timers. */
+/**
+ * Leaves the paused state and restores shifted timers.
+ */
 function resumePausedGameplay() {
     const pausedFor = Date.now() - pauseStartedAt;
     isPaused = false;
@@ -63,13 +69,17 @@ function restorePauseFocus(wasPaused) {
     }
 }
 
-/** Pauses pending Endboss attack phases without changing their remaining time. */
+/**
+ * Pauses pending Endboss attack phases without changing their remaining time.
+ */
 function pauseBossAttackTimers() {
     let boss = world?.level.enemies.find(enemy => enemy instanceof Endboss);
     boss?.pauseSpecialAttack();
 }
 
-/** Restarts a paused Endboss attack phase with its remaining delay. */
+/**
+ * Restarts a paused Endboss attack phase with its remaining delay.
+ */
 function resumeBossAttackTimers() {
     let boss = world?.level.enemies.find(enemy => enemy instanceof Endboss);
     boss?.resumeSpecialAttack();
@@ -128,7 +138,9 @@ function shiftPauseTime(target, property, pausedFor) {
     }
 }
 
-/** Updates pause screen and button text. */
+/**
+ * Updates pause screen and button text.
+ */
 function updatePauseUI() {
     const screen = document.getElementById('pauseScreen');
     const button = document.getElementById('pauseBtn');
@@ -140,7 +152,9 @@ function updatePauseUI() {
     }
 }
 
-/** Pauses or resumes game audio. */
+/**
+ * Pauses or resumes game audio.
+ */
 function handlePauseAudio() {
     if (isPaused) {
         if (currentBgm) currentBgm.pause();
@@ -151,7 +165,9 @@ function handlePauseAudio() {
     resumeCurrentBgm();
 }
 
-/** Resets the pause state. */
+/**
+ * Resets the pause state.
+ */
 function resetPauseState() {
     isPaused = false;
     pauseStartedAt = 0;
@@ -200,14 +216,18 @@ function initLevelData(levelNumber) {
     else if (levelNumber === 5) initLevel5();
 }
 
-/** Switches to the gameplay track when another track is playing. */
+/**
+ * Switches to the gameplay track when another track is playing.
+ */
 function ensureGameBgm() {
     if (currentBgm !== audioHub.bgmGame) {
         playBgm(audioHub.bgmGame);
     }
 }
 
-/** Starts a new game at Level 1. */
+/**
+ * Starts a new game at Level 1.
+ */
 function startGame() {
     stopSoundEffects();
     resetPauseState();
@@ -222,14 +242,18 @@ function startGame() {
     playStoryVideo(1, () => startLevel(1));
 }
 
-/** Clears the existing game intervals. */
+/**
+ * Clears the existing game intervals.
+ */
 function stopAllIntervals() {
     for (let i = 1; i < 9999; i++) {
         window.clearInterval(i);
     }
 }
 
-/** Restarts the game from Level 1. */
+/**
+ * Restarts the game from Level 1.
+ */
 function restartGame() {
     stopSoundEffects();
     resetPauseState();
@@ -245,7 +269,9 @@ function restartGame() {
     startLevel(1);
 }
 
-/** Returns to the start screen. */
+/**
+ * Returns to the start screen.
+ */
 function backToMainMenu() {
     closeGameOverlays();
     cancelEndingSequence();
@@ -255,7 +281,9 @@ function backToMainMenu() {
     resetPlaylist();
 }
 
-/** Stops rendering the active world and clears its intervals and audio. */
+/**
+ * Stops rendering the active world and clears its intervals and audio.
+ */
 function stopActiveWorld() {
     if (world) {
         world.stopDrawing = true;
@@ -264,7 +292,9 @@ function stopActiveWorld() {
     stopSoundEffects();
 }
 
-/** Restores the start screen, its controls, and the intro video. */
+/**
+ * Restores the start screen, its controls, and the intro video.
+ */
 function showStartScreen() {
     document.getElementById('startControls')?.classList.remove('d-none');
     document.getElementById('startScreen').classList.remove('d-none');
@@ -272,21 +302,27 @@ function showStartScreen() {
     playStartVideo();
 }
 
-/** Closes menu panels and returns keyboard focus to Start Game. */
+/**
+ * Closes menu panels and returns keyboard focus to Start Game.
+ */
 function resetStartScreenMenuState() {
     document.querySelector('.game-menu').open = false;
     document.getElementById('bgmMenu').open = false;
     requestAnimationFrame(focusStartGameButton);
 }
 
-/** Focuses Start Game when the initial screen becomes available. */
+/**
+ * Focuses Start Game when the initial screen becomes available.
+ */
 function focusStartGameButton() {
     const startButton = document.getElementById('startBtn');
     startButton?.classList.add('is-keyboard-selected');
     startButton?.focus();
 }
 
-/** Closes game overlays and cancels their pending continue actions. */
+/**
+ * Closes game overlays and cancels their pending continue actions.
+ */
 function closeGameOverlays() {
     cancelLevelRules();
     cancelSombreroReward();

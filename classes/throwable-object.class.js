@@ -58,21 +58,25 @@ class ThrowableObject extends MovableObject {
     handleGroundImpact(groundY) {
         this.y = groundY - this.height;
         this.splash();
-        
+
         if (typeof world !== 'undefined' && world) {
             world.removeBottleAfterDelay(this, 450);
         }
         playBottleSmashAt(this.x + this.width / 2);
     }
 
-    /** Starts bottle flight. */
+    /**
+     * Starts bottle flight.
+     */
     throw() {
         this.speedY = 30;
         this.applyGravity();
         this.throwInterval = setInterval(() => this.updateBottleFlight(), 25);
     }
 
-    /** Updates horizontal coordinates per tick and evaluates ground collision. */
+    /**
+     * Updates horizontal coordinates per tick and evaluates ground collision.
+     */
     updateBottleFlight() {
         if (isPaused || this.isSplashed) return;
 
@@ -84,25 +88,31 @@ class ThrowableObject extends MovableObject {
         }
     }
 
-    /** Plays rotating animation. */
+    /**
+     * Plays rotating animation.
+     */
     animate() {
         this.animationInterval = setInterval(() => {
             if (isPaused) return;
-            
+
             if (!this.isSplashed) {
                 this.playAnimation(this.IMAGES_ROTATING);
             }
         }, 60);
     }
 
-    /** Executes the sequence of splash frames sequentially. */
+    /**
+     * Executes the sequence of splash frames sequentially.
+     */
     runSplashFrames() {
         this.splashFrame = 0;
         this.img = this.imageCache[this.IMAGES_SPLASH[this.splashFrame]];
         this.splashInterval = setInterval(() => this.advanceSplashFrame(), 60);
     }
 
-    /** Advances splash animation frame and stops interval upon completion. */
+    /**
+     * Advances splash animation frame and stops interval upon completion.
+     */
     advanceSplashFrame() {
         this.splashFrame++;
         if (this.splashFrame >= this.IMAGES_SPLASH.length) {
@@ -112,7 +122,9 @@ class ThrowableObject extends MovableObject {
         this.img = this.imageCache[this.IMAGES_SPLASH[this.splashFrame]];
     }
 
-    /** Breaks the bottle and halts its movement. */
+    /**
+     * Breaks the bottle and halts its movement.
+     */
     splash() {
         if (this.isSplashed) return;
 

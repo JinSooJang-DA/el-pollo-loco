@@ -31,13 +31,17 @@ class SmallChicken extends MovableObject {
         this.animate();
     }
 
-    /** Starts movement and walking animation loops. */
+    /**
+     * Starts movement and walking animation loops.
+     */
     animate() {
         this.startMovementInterval();
         this.startAnimationInterval();
     }
 
-    /** Tracks Pepe's position and adjusts horizontal movement accordingly. */
+    /**
+     * Tracks Pepe's position and adjusts horizontal movement accordingly.
+     */
     startMovementInterval() {
         setInterval(() => {
             if (this.isDeadChicken || isPaused || !world) return;
@@ -52,7 +56,9 @@ class SmallChicken extends MovableObject {
         }, 1000 / 60);
     }
 
-    /** Iterates over the walking sprites periodically. */
+    /**
+     * Iterates over the walking sprites periodically.
+     */
     startAnimationInterval() {
         setInterval(() => {
             if (isPaused) return;
@@ -60,7 +66,9 @@ class SmallChicken extends MovableObject {
         }, 100);
     }
 
-    /** Eliminates small chicken and shows flattened sprite. */
+    /**
+     * Eliminates small chicken and shows flattened sprite.
+     */
     die() {
         this.isDeadChicken = true;
         this.loadImage(this.IMAGE_DEAD);

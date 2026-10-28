@@ -1,4 +1,6 @@
-/** Controls the skippable story videos that separate game chapters. */
+/**
+ * Controls the skippable story videos that separate game chapters.
+ */
 let storyVideoActive = false;
 let storyVideoFinishing = false;
 let storyVideoComplete = null;
@@ -11,7 +13,9 @@ function isStoryVideoPlaying() {
     return storyVideoActive;
 }
 
-/** Applies the game's mute and effect-volume preferences to the story video. */
+/**
+ * Applies the game's mute and effect-volume preferences to the story video.
+ */
 function syncStoryVideoMute() {
     let video = document.getElementById('storyVideo');
     if (!video) return;
@@ -19,7 +23,9 @@ function syncStoryVideoMute() {
     video.volume = sfxVolume;
 }
 
-/** Clears held keys so no movement starts when a video closes. */
+/**
+ * Clears held keys so no movement starts when a video closes.
+ */
 function clearGameplayInput() {
     ['LEFT', 'RIGHT', 'UP', 'DOWN', 'SPACE', 'D'].forEach(key => {
         keyboard[key] = false;
@@ -72,12 +78,16 @@ function playStoryVideo(videoNumber, onComplete) {
     startStoryPlayback(videoNumber, onComplete);
 }
 
-/** Skips the active story chapter from the on-screen button or Space. */
+/**
+ * Skips the active story chapter from the on-screen button or Space.
+ */
 function skipStoryVideo() {
     finishStoryVideo();
 }
 
-/** Closes a story chapter without running its next-level callback. */
+/**
+ * Closes a story chapter without running its next-level callback.
+ */
 function cancelStoryVideo() {
     storyVideoActive = false;
     storyVideoFinishing = false;
@@ -93,7 +103,9 @@ function cancelStoryVideo() {
     clearGameplayInput();
 }
 
-/** Hides the visual elements of the story screen. */
+/**
+ * Hides the visual elements of the story screen.
+ */
 function clearStoryVideoUI() {
     let screen = document.getElementById('storyVideoScreen');
     let video = document.getElementById('storyVideo');
@@ -106,7 +118,9 @@ function clearStoryVideoUI() {
     clearGameplayInput();
 }
 
-/** Processes the stored level completion callback upon video end. */
+/**
+ * Processes the stored level completion callback upon video end.
+ */
 function executeStoryVideoCallback() {
     let onComplete = storyVideoComplete;
     storyVideoComplete = null;
@@ -114,7 +128,9 @@ function executeStoryVideoCallback() {
     if (typeof onComplete === 'function') onComplete();
 }
 
-/** Hides the chapter and runs the next transition once. */
+/**
+ * Hides the chapter and runs the next transition once.
+ */
 function finishStoryVideo() {
     if (!storyVideoActive || storyVideoFinishing) return;
     storyVideoFinishing = true;
@@ -124,7 +140,9 @@ function finishStoryVideo() {
     executeStoryVideoCallback();
 }
 
-/** Captures Space before gameplay input can receive it. */
+/**
+ * Captures Space before gameplay input can receive it.
+ */
 document.addEventListener('keydown', event => {
     if (!storyVideoActive || event.code !== 'Space') return;
     event.preventDefault();

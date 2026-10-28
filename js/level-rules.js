@@ -1,4 +1,6 @@
-/** Loads the text rules before a level starts. */
+/**
+ * Loads the text rules before a level starts.
+ */
 let pendingLevelNumber = null;
 let rulesRequestId = 0;
 
@@ -53,7 +55,9 @@ async function showLevelRules(levelNumber) {
     }
 }
 
-/** Called by the START LEVEL button. */
+/**
+ * Called by the START LEVEL button.
+ */
 function continueLevel() {
     if (pendingLevelNumber === null) return;
     let levelNumber = pendingLevelNumber;
@@ -61,7 +65,9 @@ function continueLevel() {
     beginLevel(levelNumber);
 }
 
-/** Closes the rules screen when starting or leaving a game. */
+/**
+ * Closes the rules screen when starting or leaving a game.
+ */
 function cancelLevelRules() {
     pendingLevelNumber = null;
     rulesRequestId++;

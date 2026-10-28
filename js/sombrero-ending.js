@@ -1,4 +1,6 @@
-/** Final ending reward sequence and its keyboard controls. */
+/**
+ * Final ending reward sequence and its keyboard controls.
+ */
 
 let finalRunResult = null;
 let endingStep = -1;
@@ -6,7 +8,9 @@ let endingTimer = null;
 let endingDeadline = 0;
 let endingPaused = false;
 
-/** Stores the final run statistics for the ending sequence. */
+/**
+ * Stores the final run statistics for the ending sequence.
+ */
 function createFinalRunResult() {
     finalRunResult = { sombreros, totalCollectedCoins };
 }
@@ -31,7 +35,9 @@ function getCoinEndingReward(count) {
     return null;
 }
 
-/** Applies the global mute and volume settings to the ending reward video. */
+/**
+ * Applies the global mute and volume settings to the ending reward video.
+ */
 function syncEndingRewardVideoAudio() {
     let video = document.getElementById('endingRewardVideo');
     if (!video) return;
@@ -158,13 +164,17 @@ function toggleEndingPause() {
     return true;
 }
 
-/** Refreshes UI text and styling to reflect ending pause status. */
+/**
+ * Refreshes UI text and styling to reflect ending pause status.
+ */
 function updateEndingPauseUi() {
     document.getElementById('endingPauseBtn').textContent = endingPaused ? 'RESUME' : 'PAUSE';
     document.getElementById('endCredits').classList.toggle('credits-paused', endingPaused);
 }
 
-/** Freezes the ending timer and associated audio/video. */
+/**
+ * Freezes the ending timer and associated audio/video.
+ */
 function pauseEndingPlayback() {
     if (endingTimer) window.clearTimeout(endingTimer);
     endingTimer = null;
@@ -185,7 +195,9 @@ function resumeEndingPlayback(rewardOpen) {
     scheduleEndingStep(world, endingDeadline);
 }
 
-/** Terminates the active ending flow completely. */
+/**
+ * Terminates the active ending flow completely.
+ */
 function cancelEndingSequence() {
     if (endingTimer) window.clearTimeout(endingTimer);
     endingTimer = null;
@@ -196,7 +208,9 @@ function cancelEndingSequence() {
     resetEndingRewardVideo();
 }
 
-/** Clears and purges the ending reward video tag. */
+/**
+ * Clears and purges the ending reward video tag.
+ */
 function resetEndingRewardVideo() {
     let video = document.getElementById('endingRewardVideo');
     if (!video) return;

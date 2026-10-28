@@ -47,7 +47,9 @@ class Chicken extends MovableObject {
         this.animate();
     }
 
-    /** Updates the chicken's movement direction relative to Pepe. */
+    /**
+     * Updates the chicken's movement direction relative to Pepe.
+     */
     updateChickenMovement() {
         if (!this.canUpdateChickenMovement()) return;
 
@@ -92,7 +94,9 @@ class Chicken extends MovableObject {
         }
     }
 
-    /** Runs movement and sprite animation timers. */
+    /**
+     * Runs movement and sprite animation timers.
+     */
     animate() {
         this.walkInterval = setInterval(() => {
             this.updateChickenMovement();
@@ -106,7 +110,9 @@ class Chicken extends MovableObject {
         }, 200);
     }
 
-    /** Plays a brief squishing reaction when jumped on. */
+    /**
+     * Plays a brief squishing reaction when jumped on.
+     */
     showStompReaction() {
         if (this.isDeadChicken || this.isStompReacting) return;
 
@@ -115,18 +121,24 @@ class Chicken extends MovableObject {
         this.scheduleStompReset();
     }
 
-    /** Applies the squished sprite size and position. */
+    /**
+     * Applies the squished sprite size and position.
+     */
     applyStompedSize() {
         this.height = this.stompedHeight;
         this.y = this.stompedY;
     }
 
-    /** Restores the normal sprite size after the stomp reaction. */
+    /**
+     * Restores the normal sprite size after the stomp reaction.
+     */
     scheduleStompReset() {
         setTimeout(() => this.resetStompReaction(), 120);
     }
 
-    /** Restores normal size unless the chicken died during the reaction. */
+    /**
+     * Restores normal size unless the chicken died during the reaction.
+     */
     resetStompReaction() {
         if (!this.isDeadChicken) {
             this.height = this.normalHeight;
@@ -135,7 +147,9 @@ class Chicken extends MovableObject {
         this.isStompReacting = false;
     }
 
-    /** Kills chicken and stops its animation timers. */
+    /**
+     * Kills chicken and stops its animation timers.
+     */
     die() {
         this.isDeadChicken = true;
         this.loadImage(this.IMAGE_DEAD);

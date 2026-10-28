@@ -44,7 +44,7 @@ function getSoundPan(worldX) {
 function canPlaySpatialSound() {
     if (typeof isMuted !== 'undefined' && isMuted) return false;
     if (typeof isStoryVideoPlaying === 'function' && isStoryVideoPlaying()) return false;
-    
+
     return true;
 }
 

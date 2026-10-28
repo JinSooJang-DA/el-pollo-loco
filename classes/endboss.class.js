@@ -104,7 +104,9 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Moves the boss according to its current combat phase. */
+    /**
+     * Moves the boss according to its current combat phase.
+     */
     updateBossMovement() {
         if (isPaused || this.isDead()) return;
         if (!this.hadFirstContact || this.animationStep < 10) return;
@@ -141,7 +143,9 @@ class Endboss extends MovableObject {
         this.startDeathSequence();
     }
 
-    /** Manages the animation sequences during combat engagement. */
+    /**
+     * Manages the animation sequences during combat engagement.
+     */
     handleActiveBossAnimation() {
         if (this.isPreparingAttack) {
             this.playAnimation(this.IMAGES_ALERT);
@@ -170,7 +174,9 @@ class Endboss extends MovableObject {
         if (this.hadFirstContact) this.animationStep++;
     }
 
-    /** Determines if the boss should trigger a special charge attack. */
+    /**
+     * Determines if the boss should trigger a special charge attack.
+     */
     checkSpecialAttack() {
         if (Date.now() - this.lastSpecialAttack < 4000) return;
 
@@ -192,7 +198,9 @@ class Endboss extends MovableObject {
         }, delay);
     }
 
-    /** Applies the current Endboss attack phase after its delay finishes. */
+    /**
+     * Applies the current Endboss attack phase after its delay finishes.
+     */
     completeSpecialAttackPhase() {
         this.specialAttackTimer = null;
         if (this.isDead()) return;
@@ -204,21 +212,27 @@ class Endboss extends MovableObject {
         this.finishAttackPhase();
     }
 
-    /** Switches the boss into its charge phase and schedules the finish. */
+    /**
+     * Switches the boss into its charge phase and schedules the finish.
+     */
     startChargePhase() {
         this.isPreparingAttack = false;
         this.isCharging = true;
         this.scheduleSpecialAttackPhase('finish', 1000);
     }
 
-    /** Clears all active special-attack state after the charge ends. */
+    /**
+     * Clears all active special-attack state after the charge ends.
+     */
     finishAttackPhase() {
         this.isCharging = false;
         this.specialAttackNextPhase = null;
         this.specialAttackRemaining = 0;
     }
 
-    /** Stores the remaining Endboss attack delay while gameplay is paused. */
+    /**
+     * Stores the remaining Endboss attack delay while gameplay is paused.
+     */
     pauseSpecialAttack() {
         if (!this.specialAttackTimer) return;
 
@@ -230,7 +244,9 @@ class Endboss extends MovableObject {
         );
     }
 
-    /** Continues a paused Endboss attack delay after gameplay resumes. */
+    /**
+     * Continues a paused Endboss attack delay after gameplay resumes.
+     */
     resumeSpecialAttack() {
         if (!this.specialAttackNextPhase || this.specialAttackTimer || this.isDead()) {
             return;
@@ -263,7 +279,7 @@ class Endboss extends MovableObject {
         let frame = 0;
         let deadInterval = setInterval(() => {
             if (isPaused) return;
-            
+
             if (frame < this.IMAGES_DEAD.length) {
                 this.img = this.imageCache[this.IMAGES_DEAD[frame]];
                 frame++;

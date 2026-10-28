@@ -1,4 +1,6 @@
-/** Extends World with rendering methods. */
+/**
+ * Extends World with rendering methods.
+ */
 
 /**
  * Clears and renders active world layers, UI status bars, and the character.
@@ -86,7 +88,7 @@ World.prototype.renderChickenHealthBar = function (enemy) {
 
     this.ctx.fillStyle = '#555555';
     this.ctx.fillRect(x, y, barWidth, barHeight);
-    
+
     this.ctx.fillStyle = this.getHealthBarColor(percentage);
     this.ctx.fillRect(x, y, barWidth * percentage, barHeight);
 };
@@ -172,7 +174,7 @@ World.prototype.addToMap = function (mo) {
         hasReviveProtection(mo)) {
         return this.drawWithReviveProtection(mo);
     }
-    
+
     if (mo.otherDirection) this.flipImage(mo);
     mo.draw(this.ctx);
     if (mo.otherDirection) this.flipImageBack(mo);

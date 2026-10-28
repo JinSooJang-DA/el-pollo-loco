@@ -17,7 +17,9 @@ class MovableObject extends DrawableObject {
         right: 0
     };
 
-    /** Logs the character's descent path for top-landing calculations. */
+    /**
+     * Logs the character's descent path for top-landing calculations.
+     */
     recordFallStep() {
         let fallStep = this.createFallStep();
 
@@ -60,7 +62,9 @@ class MovableObject extends DrawableObject {
         setInterval(() => this.stepGravity(), 1000 / 25);
     }
 
-    /** Advances one gravity tick while gameplay is running. */
+    /**
+     * Advances one gravity tick while gameplay is running.
+     */
     stepGravity() {
         if (isPaused) return;
 
@@ -71,7 +75,9 @@ class MovableObject extends DrawableObject {
         }
     }
 
-    /** Moves the object by its vertical velocity and records Pepe's fall. */
+    /**
+     * Moves the object by its vertical velocity and records Pepe's fall.
+     */
     applyFallVelocity() {
         if (this instanceof Character && this.speedY < 0) {
             this.recordFallStep();

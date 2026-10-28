@@ -1,11 +1,15 @@
-/** Sombrero rewards, HUD counters and level revives. */
+/**
+ * Sombrero rewards, HUD counters and level revives.
+ */
 
 let sombreros = 0;
 let collectedCoinsByLevel = {};
 let rewardNextLevel = null;
 let totalCollectedCoins = 0;
 
-/** Resets the sombrero and coin state for a new game. */
+/**
+ * Resets the sombrero and coin state for a new game.
+ */
 function resetSombreroGame() {
     sombreros = 0;
     collectedCoinsByLevel = {};
@@ -16,7 +20,9 @@ function resetSombreroGame() {
     updateCollectedCoinCounter();
 }
 
-/** Updates the on-screen sombrero icons based on available lives. */
+/**
+ * Updates the on-screen sombrero icons based on available lives.
+ */
 function updateSombreroCounter() {
     let counter = document.getElementById('sombreroCounter');
     let template = document.getElementById('sombreroIconTemplate');
@@ -28,13 +34,17 @@ function updateSombreroCounter() {
     }
 }
 
-/** Updates the globally collected coin amount in the HUD. */
+/**
+ * Updates the globally collected coin amount in the HUD.
+ */
 function updateCollectedCoinCounter() {
     let value = document.getElementById('coinCollectedValue');
     if (value) value.textContent = '× ' + totalCollectedCoins;
 }
 
-/** Increments and displays the globally collected coins. */
+/**
+ * Increments and displays the globally collected coins.
+ */
 function recordCollectedCoin() {
     totalCollectedCoins++;
     updateCollectedCoinCounter();
@@ -120,7 +130,9 @@ function showSombreroReward(nextLevel) {
     playBgm(audioHub.bgmGame);
 }
 
-/** Continues the pending level after accepting the sombrero reward. */
+/**
+ * Continues the pending level after accepting the sombrero reward.
+ */
 function continueAfterSombrero() {
     document.getElementById('sombreroRewardScreen').classList.add('d-none');
     let nextLevel = rewardNextLevel;
@@ -128,13 +140,17 @@ function continueAfterSombrero() {
     if (nextLevel !== null) startLevel(nextLevel);
 }
 
-/** Cancels the pending sombrero reward process. */
+/**
+ * Cancels the pending sombrero reward process.
+ */
 function cancelSombreroReward() {
     document.getElementById('sombreroRewardScreen').classList.add('d-none');
     rewardNextLevel = null;
 }
 
-/** Consumes a sombrero to revive Pepe and reset the current level run. */
+/**
+ * Consumes a sombrero to revive Pepe and reset the current level run.
+ */
 function retryCurrentLevel() {
     if (!world || !world.gameEnded || sombreros < 1) return;
     if (!world.character.isDead()) return;
@@ -181,7 +197,9 @@ function hasReviveProtection(character) {
     return Boolean(character && Date.now() < (character.reviveProtectionUntil || 0));
 }
 
-/** Briefly displays a centered message indicating a successful revive. */
+/**
+ * Briefly displays a centered message indicating a successful revive.
+ */
 function showReviveMessage() {
     let message = document.getElementById('reviveMessage');
     if (!message) return;

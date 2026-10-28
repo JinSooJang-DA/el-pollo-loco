@@ -1,13 +1,23 @@
-/** @type {boolean} */
+/**
+ * @type {boolean}
+ */
 let isMuted = false;
-/** @type {HTMLAudioElement|null} */
+/**
+ * @type {HTMLAudioElement|null}
+ */
 let currentBgm = null;
-/** @type {number} */
+/**
+ * @type {number}
+ */
 let bgmVolume = 0.25;
-/** @type {number} */
+/**
+ * @type {number}
+ */
 let sfxVolume = 0.5;
 
-/** Contains all background music and sound effects. */
+/**
+ * Contains all background music and sound effects.
+ */
 const audioHub = {
     bgmMenu: new Audio('audio/bgm01.mp3'),
     bgmGame: new Audio('audio/bgm02.mp3'),
@@ -35,7 +45,9 @@ const audioHub = {
 
 audioHub.run.loop = true;
 
-/** Allows background music after user interaction. */
+/**
+ * Allows background music after user interaction.
+ */
 function unlockAudioOnFirstInteraction() {
     const resume = () => {
         resumeCurrentBgm();
@@ -46,7 +58,9 @@ function unlockAudioOnFirstInteraction() {
     window.addEventListener('keydown', resume);
 }
 
-/** Loads the saved mute preference. */
+/**
+ * Loads the saved mute preference.
+ */
 function loadMutePreference() {
     const savedMute = localStorage.getItem('isMuted');
     if (savedMute !== null) isMuted = savedMute === 'true';
@@ -54,7 +68,9 @@ function loadMutePreference() {
     applyMuteState();
 }
 
-/** Toggles and saves the mute preference. */
+/**
+ * Toggles and saves the mute preference.
+ */
 function toggleMute() {
     isMuted = !isMuted;
     localStorage.setItem('isMuted', isMuted);
@@ -63,7 +79,9 @@ function toggleMute() {
     if (!isMuted) resumeCurrentBgm();
 }
 
-/** Updates the Sound button image and accessible name. */
+/**
+ * Updates the Sound button image and accessible name.
+ */
 function updateMuteUI() {
     const soundBtn = document.getElementById('soundBtn');
     const soundIcon = document.getElementById('soundIcon');
@@ -74,7 +92,9 @@ function updateMuteUI() {
     if (soundBtn) soundBtn.setAttribute('aria-label', isMuted ? 'Turn sound on' : 'Mute sound');
 }
 
-/** Applies mute state to all audio elements. */
+/**
+ * Applies mute state to all audio elements.
+ */
 function applyMuteState() {
     Object.values(audioHub).forEach(audio => audio.muted = isMuted);
     if (isMuted) stopSoundEffects();
@@ -82,7 +102,9 @@ function applyMuteState() {
     if (typeof syncEndingRewardVideoAudio === 'function') syncEndingRewardVideoAudio();
 }
 
-/** Loads stored volume preferences. */
+/**
+ * Loads stored volume preferences.
+ */
 function loadVolumePreferences() {
     const savedBgm = parseFloat(localStorage.getItem('bgmVolume'));
     const savedSfx = parseFloat(localStorage.getItem('sfxVolume'));
@@ -91,12 +113,16 @@ function loadVolumePreferences() {
     syncVolumeSliders();
 }
 
-/** @param {number} value @returns {number} The value limited to zero through one. */
+/**
+ * @param {number} value @returns {number} The value limited to zero through one.
+ */
 function clampVolume(value) {
     return Math.min(1, Math.max(0, value));
 }
 
-/** Updates both volume sliders. */
+/**
+ * Updates both volume sliders.
+ */
 function syncVolumeSliders() {
     const bgmSlider = document.getElementById('bgmSlider');
     const sfxSlider = document.getElementById('sfxSlider');
@@ -104,7 +130,9 @@ function syncVolumeSliders() {
     if (sfxSlider) sfxSlider.value = sfxVolume;
 }
 
-/** @param {string} val The selected BGM volume. */
+/**
+ * @param {string} val The selected BGM volume.
+ */
 function changeBgmVolume(val) {
     const volume = parseFloat(val);
     if (!Number.isFinite(volume)) return;
@@ -113,7 +141,9 @@ function changeBgmVolume(val) {
     if (currentBgm) currentBgm.volume = bgmVolume;
 }
 
-/** @param {string} val The selected sound-effect volume. */
+/**
+ * @param {string} val The selected sound-effect volume.
+ */
 function changeSfxVolume(val) {
     const volume = parseFloat(val);
     if (!Number.isFinite(volume)) return;
@@ -135,7 +165,9 @@ function playBgm(bgmTrack, allowWhilePaused = false) {
     configureAndResumeBgm(allowWhilePaused);
 }
 
-/** Stops the current background track. */
+/**
+ * Stops the current background track.
+ */
 function stopCurrentBgm() {
     if (!currentBgm) return;
     currentBgm.pause();
@@ -164,7 +196,9 @@ function resumeCurrentBgm(allowWhilePaused = false) {
     currentBgm.play().catch(() => { });
 }
 
-/** @param {HTMLAudioElement} sound The sound effect to play. @returns {Promise<boolean>} Whether playback began. */
+/**
+ * @param {HTMLAudioElement} sound The sound effect to play. @returns {Promise<boolean>} Whether playback began.
+ */
 function playSound(sound) {
     if (!sound || isMuted || isPaused || isStoryVideoPlaying()) return Promise.resolve(false);
     sound.volume = sfxVolume;
@@ -177,7 +211,9 @@ function playSound(sound) {
     }
 }
 
-/** @param {'hurt'|'dead'} type The requested Pepe voice category. @returns {HTMLAudioElement} A random matching voice. */
+/**
+ * @param {'hurt'|'dead'} type The requested Pepe voice category. @returns {HTMLAudioElement} A random matching voice.
+ */
 function getRandomPepeVoice(type) {
     let voices = type === 'hurt'
         ? [audioHub.pepeHurt01, audioHub.pepeHurt02, audioHub.pepeHurt03]
@@ -185,7 +221,9 @@ function getRandomPepeVoice(type) {
     return voices[Math.floor(Math.random() * voices.length)];
 }
 
-/** Stops any active Hurt line before Pepe changes state or takes another hit. */
+/**
+ * Stops any active Hurt line before Pepe changes state or takes another hit.
+ */
 function stopPepeHurtVoices() {
     [audioHub.pepeHurt01, audioHub.pepeHurt02, audioHub.pepeHurt03].forEach(sound => {
         sound.pause();
@@ -193,20 +231,26 @@ function stopPepeHurtVoices() {
     });
 }
 
-/** Plays exactly one non-overlapping Hurt line. */
+/**
+ * Plays exactly one non-overlapping Hurt line.
+ */
 function playRandomPepeHurtVoice() {
     stopPepeHurtVoices();
     playSound(getRandomPepeVoice('hurt'));
 }
 
-/** @returns {{voice: HTMLAudioElement, playback: Promise<boolean>}} The selected death voice and its playback result. */
+/**
+ * @returns {{voice: HTMLAudioElement, playback: Promise<boolean>}} The selected death voice and its playback result.
+ */
 function playRandomPepeDeadVoice() {
     stopPepeHurtVoices();
     let voice = getRandomPepeVoice('dead');
     return { voice, playback: playSound(voice) };
 }
 
-/** Stops all sound effects except the current BGM. */
+/**
+ * Stops all sound effects except the current BGM.
+ */
 function stopSoundEffects() {
     Object.values(audioHub).forEach(audio => {
         if (audio === currentBgm) return;

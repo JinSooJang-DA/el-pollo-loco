@@ -210,7 +210,9 @@ function focusGameOverButton(canRetry) {
     requestAnimationFrame(() => document.getElementById(buttonId)?.focus());
 }
 
-/** Moves focus to the first visible existing Menu control. */
+/**
+ * Moves focus to the first visible existing Menu control.
+ */
 function focusGameMenuControl() {
     const menu = document.querySelector('.game-menu');
     if (!menu?.open) return;

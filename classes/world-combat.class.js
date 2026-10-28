@@ -1,4 +1,6 @@
-/** Extends World with collision and combat methods. */
+/**
+ * Extends World with collision and combat methods.
+ */
 
 /**
  * Checks Pepe's collision with every living enemy in the current level.
@@ -39,7 +41,7 @@ World.prototype.isBossStompCondition = function (enemy) {
     let pepeRight = this.character.x + this.character.width - this.character.offset.right;
     let headLeft = enemy.otherDirection ? enemy.x + enemy.width * 0.52 : enemy.x + enemy.width * 0.08;
     let headRight = headLeft + enemy.width * 0.38;
-    
+
     return this.character.speedY < 0 && pepeFeet >= bossHead && pepeFeet <= bossHeadBottom &&
         pepeRight > headLeft && pepeLeft < headRight;
 };
@@ -67,7 +69,7 @@ World.prototype.executeBossStomp = function (enemy, now, attackMode) {
     enemy.lastStompBounce = now;
     this.character.speedY = 15;
     if (attackMode === 'bottle') return;
-    
+
     enemy.energy = Math.max(0, enemy.energy - 20);
     enemy.lastHit = now;
     this.statusBarEndboss.setPercentage((enemy.energy / enemy.maxEnergy) * 100);
@@ -87,7 +89,7 @@ World.prototype.handleBossContact = function (enemy) {
         this.executeBossStomp(enemy, now, attackMode);
         return;
     }
-    
+
     if (now - enemy.lastHit < 2000) return;
     this.hurtCharacter(40);
 };
@@ -123,7 +125,7 @@ World.prototype.checkChickenTopLanding = function (enemy) {
     let chickenTop = enemy.y + enemy.offset.top;
     let recentSteps = this.character.lastFallSteps || [this.character.lastFallStep].filter(Boolean);
     let tops = [chickenTop, enemy.previousCollisionTop].filter((top, i, list) => Number.isFinite(top) && list.indexOf(top) === i);
-    
+
     return recentSteps.some(step =>
         Date.now() - step.time < 120 &&
         this.isFallCrossingTop(step, tops) &&
@@ -151,9 +153,9 @@ World.prototype.handleChickenContact = function (enemy) {
     let pepeRight = this.character.x + this.character.width - this.character.offset.right;
     let chickenLeft = enemy.x + enemy.offset.left;
     let chickenRight = enemy.x + enemy.width - enemy.offset.right;
-    
+
     let landsOnTop = this.checkChickenTopLanding(enemy) && pepeRight > chickenLeft && pepeLeft < chickenRight;
-    
+
     if (landsOnTop) {
         this.processStompSuccess(enemy);
     } else if (Date.now() >= (this.character.stompBounceUntil || 0)) {
@@ -291,7 +293,7 @@ World.prototype.isLivingBottleTarget = function (bottle, enemy) {
 World.prototype.applyBossBottleImpact = function (bottle, enemy) {
     enemy.hadFirstContact = true;
     if (this.getBossAttackMode() === 'stomp') return;
-    
+
     if (enemy.isHitOnHead(bottle) && Date.now() - enemy.lastHit >= 3000) {
         enemy.hit();
         playSpatialSound(audioHub.bossHurt, enemy.x + enemy.width / 2);

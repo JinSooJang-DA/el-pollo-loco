@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const index = read('index.html');
-const game = read('js/game.js');
+const game = read('js/game.js') + '\n' + read('js/menu-credits.js');
 const gameAudio = read('js/game-audio.js');
 const gameFlow = read('js/game-flow.js');
 const storyVideos = read('js/story-videos.js');

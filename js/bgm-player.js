@@ -1,5 +1,7 @@
 
-/** Start screen playlist state. */
+/**
+ * Start screen playlist state.
+ */
 let playlistActive = true;
 let playlistTrack = 0;
 let playlistShuffle = false;
@@ -24,7 +26,9 @@ function selectPlaylistTrack(index) {
     updatePlaylistUI();
 }
 
-/** Plays the next track. */
+/**
+ * Plays the next track.
+ */
 function playNextTrack() {
     if (playlistShuffle) {
         playlistTrack = getRandomTrack();
@@ -34,7 +38,9 @@ function playNextTrack() {
     selectPlaylistTrack(playlistTrack);
 }
 
-/** Plays the previous track. */
+/**
+ * Plays the previous track.
+ */
 function playPreviousTrack() {
     playlistTrack = (playlistTrack - 1 + playlistTracks.length)
         % playlistTracks.length;
@@ -51,13 +57,17 @@ function getRandomTrack() {
     return next;
 }
 
-/** Toggles random playback. */
+/**
+ * Toggles random playback.
+ */
 function togglePlaylistShuffle() {
     playlistShuffle = !playlistShuffle;
     updatePlaylistUI();
 }
 
-/** Changes the playlist repeat mode. */
+/**
+ * Changes the playlist repeat mode.
+ */
 function togglePlaylistRepeat() {
     const modes = ['track', 'list', 'off'];
     const next = (modes.indexOf(playlistRepeat) + 1) % modes.length;
@@ -66,14 +76,18 @@ function togglePlaylistRepeat() {
     updatePlaylistUI();
 }
 
-/** Sets the audio element's repeat behavior. */
+/**
+ * Sets the audio element's repeat behavior.
+ */
 function updatePlaylistLoop() {
     if (currentBgm) {
         currentBgm.loop = playlistRepeat === 'track';
     }
 }
 
-/** Toggles playback of the selected song. */
+/**
+ * Toggles playback of the selected song.
+ */
 function togglePlaylistPlayback() {
     if (!playlistActive || !currentBgm) return;
     if (currentBgm.paused) {
@@ -84,7 +98,9 @@ function togglePlaylistPlayback() {
     updatePlaylistUI();
 }
 
-/** Updates playlist buttons and selected track. */
+/**
+ * Updates playlist buttons and selected track.
+ */
 function updatePlaylistUI() {
     const tracks = document.querySelectorAll('.playlist-track');
     tracks.forEach((button, index) => {
@@ -97,7 +113,9 @@ function updatePlaylistUI() {
     updatePlaylistPlayButton();
 }
 
-/** Updates the play and pause button. */
+/**
+ * Updates the play and pause button.
+ */
 function updatePlaylistPlayButton() {
     const button = document.getElementById('bgmPlayBtn');
     if (button && currentBgm) {
@@ -115,7 +133,9 @@ function handlePlaylistEnded(event) {
     updatePlaylistUI();
 }
 
-/** Resets the playlist and starts the main theme. */
+/**
+ * Resets the playlist and starts the main theme.
+ */
 function resetPlaylist() {
     playlistActive = true;
     playlistTrack = 0;
@@ -128,7 +148,9 @@ function resetPlaylist() {
     updatePlaylistUI();
 }
 
-/** Disables the playlist during gameplay. */
+/**
+ * Disables the playlist during gameplay.
+ */
 function deactivatePlaylist() {
     playlistActive = false;
     playlistTrack = 0;
@@ -139,7 +161,9 @@ function deactivatePlaylist() {
     menu.classList.add('d-none');
 }
 
-/** Registers the end event for each soundtrack. */
+/**
+ * Registers the end event for each soundtrack.
+ */
 function initPlaylist() {
     playlistTracks.forEach(track => {
         track.addEventListener('ended', handlePlaylistEnded);

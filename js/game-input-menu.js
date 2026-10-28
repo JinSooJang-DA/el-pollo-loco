@@ -19,7 +19,9 @@ function isGameResultVisible() {
     return Boolean(resultScreen && !resultScreen.classList.contains('d-none'));
 }
 
-/** Clears held gameplay controls before a Menu pause can resume. */
+/**
+ * Clears held gameplay controls before a Menu pause can resume.
+ */
 function clearGameMenuInput() {
     ['LEFT', 'RIGHT', 'UP', 'DOWN', 'SPACE', 'D'].forEach(key => {
         keyboard[key] = false;
@@ -52,7 +54,9 @@ function syncResultScreenMenu(menu) {
     requestAnimationFrame(focusGameMenuControl);
 }
 
-/** Applies the open-Menu pause lifecycle. */
+/**
+ * Applies the open-Menu pause lifecycle.
+ */
 function openGameMenuPause() {
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
@@ -64,7 +68,9 @@ function openGameMenuPause() {
     menuPauseStartedAt = pauseStartedAt;
 }
 
-/** Applies the closed-Menu pause lifecycle. */
+/**
+ * Applies the closed-Menu pause lifecycle.
+ */
 function closeGameMenuPause() {
     const startScreen = document.getElementById('startScreen');
     const isStartScreenVisible = startScreen && !startScreen.classList.contains('d-none');
@@ -76,7 +82,9 @@ function closeGameMenuPause() {
     if (isPaused) togglePause();
 }
 
-/** Returns keyboard focus to gameplay when no overlay owns it. */
+/**
+ * Returns keyboard focus to gameplay when no overlay owns it.
+ */
 function blurGameplayMenuFocus() {
     if (isGameplayFlowOverlayVisible() || isGameResultVisible()) return;
     if (isMenuControlTarget(document.activeElement)) {
@@ -185,14 +193,18 @@ function canToggleGameplayMenu() {
     return isStartScreenVisible || canControlGameplayMenu;
 }
 
-/** Toggles the gameplay Menu and restores focus when closing. */
+/**
+ * Toggles the gameplay Menu and restores focus when closing.
+ */
 function toggleGameMenuFromEscape() {
     const wasMenuOpen = isGameMenuOpen();
     setGameMenuOpen(!wasMenuOpen);
     if (wasMenuOpen) focusGameMenuButton();
 }
 
-/** Connects existing Menu clicks and Escape to the same pause lifecycle. */
+/**
+ * Connects existing Menu clicks and Escape to the same pause lifecycle.
+ */
 function initGameMenuControls() {
     const menu = document.querySelector('.game-menu');
     if (!menu) return;
@@ -332,7 +344,9 @@ window.addEventListener('keyup', event => {
     updateKeyboardState(event, false);
 });
 
-/** Closes dropdown menus when another control is clicked. */
+/**
+ * Closes dropdown menus when another control is clicked.
+ */
 document.addEventListener('click', event => {
     const gameMenu = document.querySelector('.game-menu');
     const bgmMenu = document.querySelector('.bgm-menu');
@@ -349,7 +363,9 @@ document.addEventListener('click', event => {
 });
 
 
-/** Plays the short Pepe loading animation. */
+/**
+ * Plays the short Pepe loading animation.
+ */
 function startLoadingAnimation() {
     const pepe = document.getElementById('loadingPepe');
     if (!pepe) return;
