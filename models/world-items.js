@@ -24,7 +24,7 @@ World.prototype.checkThrowObjects = function () {
 
     this.throwableObjects.push(bottle);
     this.availableBottles--;
-    playSound(AUDIO_HUB.throw);
+    playSound(audioHub.throw);
     this.updateBottleBar();
     this.cooldownThrow();
 };
@@ -68,7 +68,7 @@ World.prototype.checkCollisions = function () {
 World.prototype.collectSingleBottle = function (bottle, idx) {
     this.availableBottles++;
     this.level.bottles.splice(idx, 1);
-    playSound(AUDIO_HUB.bottleCollect);
+    playSound(audioHub.bottleCollect);
     this.updateBottleBar();
     this.respawnBottle(bottle);
 };
@@ -138,6 +138,6 @@ World.prototype.checkCollectCoins = function () {
         rememberCollectedCoin(this.levelNumber, coin);
         recordCollectedCoin();
         this.level.coins.splice(idx, 1);
-        playSound(AUDIO_HUB.coinCollect);
+        playSound(audioHub.coinCollect);
     }
 };

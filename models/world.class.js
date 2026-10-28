@@ -95,8 +95,8 @@ class World {
         let endboss = this.level.enemies.find(e => e instanceof Endboss);
 
         if (endboss && endboss.hadFirstContact &&
-            currentBgm !== AUDIO_HUB.bgmBoss && !this.gameEnded) {
-            playBgm(AUDIO_HUB.bgmBoss);
+            currentBgm !== audioHub.bgmBoss && !this.gameEnded) {
+            playBgm(audioHub.bgmBoss);
         }
     }
 
@@ -189,7 +189,7 @@ class World {
         let deathAudio = playRandomPepeDeadVoice();
         
         this.handleDeathAudioEnd(deathAudio, () => {
-            playBgm(AUDIO_HUB.bgmLost);
+            playBgm(audioHub.bgmLost);
             this.showEndScreen('img/You won, you lost/You lost.png');
         });
     }

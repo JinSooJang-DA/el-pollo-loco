@@ -5,12 +5,12 @@ let playlistTrack = 0;
 let playlistShuffle = false;
 let playlistRepeat = 'list';
 
-const PLAYLIST_TRACKS = [
-    AUDIO_HUB.bgmMenu,
-    AUDIO_HUB.bgmGame,
-    AUDIO_HUB.bgmBoss,
-    AUDIO_HUB.bgmLost,
-    AUDIO_HUB.bgmWin
+const playlistTracks = [
+    audioHub.bgmMenu,
+    audioHub.bgmGame,
+    audioHub.bgmBoss,
+    audioHub.bgmLost,
+    audioHub.bgmWin
 ];
 
 /**
@@ -20,7 +20,7 @@ const PLAYLIST_TRACKS = [
 function selectPlaylistTrack(index) {
     if (!playlistActive) return;
     playlistTrack = index;
-    playBgm(PLAYLIST_TRACKS[index]);
+    playBgm(playlistTracks[index]);
     updatePlaylistUI();
 }
 
@@ -29,15 +29,15 @@ function playNextTrack() {
     if (playlistShuffle) {
         playlistTrack = getRandomTrack();
     } else {
-        playlistTrack = (playlistTrack + 1) % PLAYLIST_TRACKS.length;
+        playlistTrack = (playlistTrack + 1) % playlistTracks.length;
     }
     selectPlaylistTrack(playlistTrack);
 }
 
 /** Plays the previous track. */
 function playPreviousTrack() {
-    playlistTrack = (playlistTrack - 1 + PLAYLIST_TRACKS.length)
-        % PLAYLIST_TRACKS.length;
+    playlistTrack = (playlistTrack - 1 + playlistTracks.length)
+        % playlistTracks.length;
     selectPlaylistTrack(playlistTrack);
 }
 
@@ -46,7 +46,7 @@ function playPreviousTrack() {
  * @returns {number} A valid playlist index different from the current track.
  */
 function getRandomTrack() {
-    let next = Math.floor(Math.random() * (PLAYLIST_TRACKS.length - 1));
+    let next = Math.floor(Math.random() * (playlistTracks.length - 1));
     if (next >= playlistTrack) next++;
     return next;
 }
@@ -124,7 +124,7 @@ function resetPlaylist() {
     const menu = document.getElementById('bgmMenu');
     menu.classList.remove('d-none');
     menu.open = false;
-    playBgm(AUDIO_HUB.bgmMenu);
+    playBgm(audioHub.bgmMenu);
     updatePlaylistUI();
 }
 
@@ -141,7 +141,7 @@ function deactivatePlaylist() {
 
 /** Registers the end event for each soundtrack. */
 function initPlaylist() {
-    PLAYLIST_TRACKS.forEach(track => {
+    playlistTracks.forEach(track => {
         track.addEventListener('ended', handlePlaylistEnded);
     });
     updatePlaylistUI();

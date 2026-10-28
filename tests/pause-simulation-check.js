@@ -46,7 +46,7 @@ function createTimerContext() {
             timeouts.delete(id);
         },
         playBottleSmashAt() { },
-        AUDIO_HUB: {},
+        audioHub: {},
         console
     };
 }

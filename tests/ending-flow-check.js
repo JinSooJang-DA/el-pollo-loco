@@ -11,6 +11,7 @@ const gameAudio = read('js/game-audio.js');
 const gameFlow = read('js/game-flow.js');
 const storyVideos = read('js/story-videos.js');
 const sombrero = read('js/sombrero-system.js');
+const sombreroEnding = read('js/sombrero-ending.js');
 const world = read('models/world.class.js');
 const worldRender = read('models/world-render.js');
 const baseStyles = read('styles/base.css');
@@ -136,9 +137,9 @@ expect(index.includes('id="creditsBtn"') && index.includes('onclick="openMenuCre
     'Menu exposes keyboard-accessible Credits and Back controls without duplicating credit markup');
 expect(game.includes('function openMenuCredits()') && game.includes('function closeMenuCredits()') &&
     gameAudio.includes('function playBgm(bgmTrack, allowWhilePaused = false)') &&
-    game.includes('AUDIO_HUB.bgmLost.currentTime = 0;') &&
-    game.includes('playBgm(AUDIO_HUB.bgmMenu);') &&
-    game.includes('playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);') &&
+    game.includes('audioHub.bgmLost.currentTime = 0;') &&
+    game.includes('playBgm(audioHub.bgmMenu);') &&
+    game.includes('playBgm(savedBgmState?.track || audioHub.bgmGame);') &&
     gameInput.includes('if (isMenuCreditsOpen())') &&
     componentStyles.includes('#restartScreen.menu-credits-mode'),
     'Menu credits uses BGM04, restores the source BGM, and keeps Escape focus-aware');
@@ -506,15 +507,15 @@ expect(sombrero.includes('playStoryVideo(6, () => {') &&
     sombrero.includes('sombreros++;') &&
     !sombrero.includes('playStoryVideo(7'),
     'level 5 silently awards its perfect-health sombrero before chapter 6');
-expect(sombrero.includes('startFinalEnding(finishedWorld)') &&
-    sombrero.includes('playBgm(AUDIO_HUB.bgmWin, true)') &&
-    sombrero.includes("showEndScreen('', true)"),
+expect(sombreroEnding.includes('startFinalEnding(finishedWorld)') &&
+    sombreroEnding.includes('playBgm(audioHub.bgmWin, true)') &&
+    sombreroEnding.includes("showEndScreen('', true)"),
     'victory starts final rewards with the existing win music before credits');
-expect(sombrero.includes("if (count >= 3) return { type: 'video', src: 'videos/golden-sombrero.mp4' };") &&
-    sombrero.includes("if (count >= 20) return { type: 'video', src: 'videos/golden-coins.mp4' };") &&
-    !sombrero.includes('2nd-hat-award.webp') && !sombrero.includes('3rd-hat-award.webp') &&
-    !sombrero.includes('2nd-coin-award.webp') && !sombrero.includes('3rd-coin-award.webp') &&
-    !sombrero.includes("{ type: 'image', src: 'img/You won, you lost/You win B.png'"),
+expect(sombreroEnding.includes("if (count >= 3) return { type: 'video', src: 'videos/golden-sombrero.mp4' };") &&
+    sombreroEnding.includes("if (count >= 20) return { type: 'video', src: 'videos/golden-coins.mp4' };") &&
+    !sombreroEnding.includes('2nd-hat-award.webp') && !sombreroEnding.includes('3rd-hat-award.webp') &&
+    !sombreroEnding.includes('2nd-coin-award.webp') && !sombreroEnding.includes('3rd-coin-award.webp') &&
+    !sombreroEnding.includes("{ type: 'image', src: 'img/You won, you lost/You win B.png'"),
     'final ending selects only the two highest reward videos with no clear or lower-tier cards');
 expect(world.includes('showEndScreen(imagePath, isVictory = false)') &&
     world.includes('playEndVideo();') && world.includes('stopEndVideo();'),
@@ -654,12 +655,12 @@ globalThis.menuCreditApi = {
     open: openMenuCredits,
     close: closeMenuCredits,
     getCurrent: () => currentBgm,
-    getAudioHub: () => AUDIO_HUB,
+    getAudioHub: () => audioHub,
     setGameOrigin: () => {
         document.getElementById('startScreen').classList.add('d-none');
         world = { gameEnded: false };
         isPaused = true;
-        currentBgm = AUDIO_HUB.bgmGame;
+        currentBgm = audioHub.bgmGame;
     },
     isPaused: () => isPaused
 };`, menuCreditContext);

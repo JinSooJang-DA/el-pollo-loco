@@ -21,7 +21,7 @@ function init() {
     initGameMenuControls();
     initPlaylist();
     playStartVideo();
-    playBgm(AUDIO_HUB.bgmMenu);
+    playBgm(audioHub.bgmMenu);
     unlockAudioOnFirstInteraction();
     showLocalEndingPreview();
     requestAnimationFrame(focusStartGameButton);
@@ -122,9 +122,9 @@ function playMenuCreditsMedia() {
     stopStartVideo();
     stopSoundEffects();
     playEndVideo();
-    AUDIO_HUB.bgmLost.pause();
-    AUDIO_HUB.bgmLost.currentTime = 0;
-    playBgm(AUDIO_HUB.bgmLost, true);
+    audioHub.bgmLost.pause();
+    audioHub.bgmLost.currentTime = 0;
+    playBgm(audioHub.bgmLost, true);
 }
 
 /** Closes Menu credits and restores the original Menu and BGM state. */
@@ -167,12 +167,12 @@ function hideMenuCreditsScreen() {
 function restoreMenuCreditsAudio(origin, savedBgmState) {
     if (origin === 'start') {
         playStartVideo();
-        playBgm(AUDIO_HUB.bgmMenu);
+        playBgm(audioHub.bgmMenu);
         return;
     }
     document.getElementById('pauseScreen')?.classList.remove('d-none');
     updatePauseUI();
-    playBgm(savedBgmState?.track || AUDIO_HUB.bgmGame);
+    playBgm(savedBgmState?.track || audioHub.bgmGame);
     if (savedBgmState) currentBgm.currentTime = savedBgmState.currentTime;
 }
 
@@ -200,7 +200,7 @@ function showLocalEndingPreview() {
     document.getElementById('endCredits').classList.remove('d-none');
     stopStartVideo();
     playEndVideo();
-    playBgm(AUDIO_HUB.bgmWin);
+    playBgm(audioHub.bgmWin);
 }
 
 /** Returns whether the local ending preview was requested. */

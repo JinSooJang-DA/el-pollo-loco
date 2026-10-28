@@ -5,7 +5,7 @@
 
 let spatialAudioContext;
 
-const BOTTLE_SMASH_PATH = 'audio/bottle-smash.mp3';
+const bottleSmashPath = 'audio/bottle-smash.mp3';
 
 /** Retrieves or creates the spatial audio context. */
 function getSpatialAudioContext() {
@@ -83,13 +83,11 @@ function playSpatialSound(sound, worldX) {
     let audioContext = routeSpatialAudio(audio, worldX);
 
     audioContext.resume().then(() => {
-        audio.play().catch(error => {
-            console.warn('Spatial sound could not play:', error);
-        });
+        audio.play().catch(() => { /* Browser playback rules may block the sound. */ });
     });
 }
 
 /** Helper function to play the bottle smash sound with panning. */
 function playBottleSmashAt(worldX) {
-    playSpatialSound(BOTTLE_SMASH_PATH, worldX);
+    playSpatialSound(bottleSmashPath, worldX);
 }

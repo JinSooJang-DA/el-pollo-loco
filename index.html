@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./styles/responsive.css">
     <link rel="stylesheet" href="./styles/level-rules.css">
 
-    <link rel="icon" type="image/x-icon" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
+    <link rel="icon" type="image/png" href="img/3_enemies_chicken/chicken_small/1_walk/3_w.png">
     <title>El Pollo Loco</title>
 
     <script src="models/drawable-object.class.js"></script>
@@ -48,6 +48,7 @@
     <script src="js/game-flow.js"></script>
     <script src="js/story-videos.js"></script>
     <script src="js/sombrero-system.js"></script>
+    <script src="js/sombrero-ending.js"></script>
     <script src="js/bgm-player.js"></script>
     <script src="js/game-input-touch.js"></script>
     <script src="js/game-input-ui.js"></script>
@@ -74,7 +75,14 @@
         <div class="game-container" id="gameContainer">
 
             <div id="sombreroCounter"></div>
-            <div id="coinCollectedCounter"><img src="img/coin-full.webp" alt="Coin"><span>× 0</span></div>
+            <div id="coinCollectedCounter"><img src="img/coin-full.webp" alt="Coin"><span
+                    id="coinCollectedValue">× 0</span></div>
+
+            <!-- Static HUD and feedback templates toggled or cloned by JS -->
+            <template id="sombreroIconTemplate">
+                <img class="sombrero-icon" src="img/golden-sombrero-big.webp" alt="Sombrero" title="Extra life">
+            </template>
+            <div id="reviveMessage" class="revive-message" aria-live="polite">SOMBRERO SAVED YOU!</div>
             <!-- Collapsible navigation menu -->
             <details class="game-menu">
                 <summary>Menu</summary>

@@ -151,7 +151,7 @@ function startLevel(levelNumber) {
     stopAllIntervals();
     stopSoundEffects();
 
-    playBgm(AUDIO_HUB.bgmGame);
+    playBgm(audioHub.bgmGame);
 
     showLevelRules(levelNumber);
 }
@@ -177,8 +177,8 @@ function initLevelData(levelNumber) {
 
 /** Switches to the gameplay track when another track is playing. */
 function ensureGameBgm() {
-    if (currentBgm !== AUDIO_HUB.bgmGame) {
-        playBgm(AUDIO_HUB.bgmGame);
+    if (currentBgm !== audioHub.bgmGame) {
+        playBgm(audioHub.bgmGame);
     }
 }
 

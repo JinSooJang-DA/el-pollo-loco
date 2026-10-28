@@ -8,7 +8,7 @@ let bgmVolume = 0.25;
 let sfxVolume = 0.5;
 
 /** Contains all background music and sound effects. */
-const AUDIO_HUB = {
+const audioHub = {
     bgmMenu: new Audio('audio/bgm01.mp3'),
     bgmGame: new Audio('audio/bgm02.mp3'),
     bgmBoss: new Audio('audio/bgm03.mp3'),
@@ -33,7 +33,7 @@ const AUDIO_HUB = {
     pepeDead03: new Audio('audio/dead03.mp3')
 };
 
-AUDIO_HUB.run.loop = true;
+audioHub.run.loop = true;
 
 /** Allows background music after user interaction. */
 function unlockAudioOnFirstInteraction() {
@@ -76,7 +76,7 @@ function updateMuteUI() {
 
 /** Applies mute state to all audio elements. */
 function applyMuteState() {
-    Object.values(AUDIO_HUB).forEach(audio => audio.muted = isMuted);
+    Object.values(audioHub).forEach(audio => audio.muted = isMuted);
     if (isMuted) stopSoundEffects();
     if (typeof syncStoryVideoMute === 'function') syncStoryVideoMute();
     if (typeof syncEndingRewardVideoAudio === 'function') syncEndingRewardVideoAudio();
@@ -153,7 +153,7 @@ function configureAndResumeBgm(allowWhilePaused) {
 /** Resumes background music when its current game state permits it. */
 function resumeCurrentBgm(allowWhilePaused = false) {
     if (!currentBgm || isMuted || (!allowWhilePaused && isPaused) || isStoryVideoPlaying()) return;
-    if (currentBgm === AUDIO_HUB.bgmMenu && !isMainMenuVisible()) return;
+    if (currentBgm === audioHub.bgmMenu && !isMainMenuVisible()) return;
     if (!currentBgm.paused) return;
     currentBgm.play().catch(() => { });
 }
@@ -174,14 +174,14 @@ function playSound(sound) {
 /** @param {'hurt'|'dead'} type The requested Pepe voice category. @returns {HTMLAudioElement} A random matching voice. */
 function getRandomPepeVoice(type) {
     let voices = type === 'hurt'
-        ? [AUDIO_HUB.pepeHurt01, AUDIO_HUB.pepeHurt02, AUDIO_HUB.pepeHurt03]
-        : [AUDIO_HUB.pepeDead01, AUDIO_HUB.pepeDead02, AUDIO_HUB.pepeDead03];
+        ? [audioHub.pepeHurt01, audioHub.pepeHurt02, audioHub.pepeHurt03]
+        : [audioHub.pepeDead01, audioHub.pepeDead02, audioHub.pepeDead03];
     return voices[Math.floor(Math.random() * voices.length)];
 }
 
 /** Stops any active Hurt line before Pepe changes state or takes another hit. */
 function stopPepeHurtVoices() {
-    [AUDIO_HUB.pepeHurt01, AUDIO_HUB.pepeHurt02, AUDIO_HUB.pepeHurt03].forEach(sound => {
+    [audioHub.pepeHurt01, audioHub.pepeHurt02, audioHub.pepeHurt03].forEach(sound => {
         sound.pause();
         sound.currentTime = 0;
     });
@@ -202,7 +202,7 @@ function playRandomPepeDeadVoice() {
 
 /** Stops all sound effects except the current BGM. */
 function stopSoundEffects() {
-    Object.values(AUDIO_HUB).forEach(audio => {
+    Object.values(audioHub).forEach(audio => {
         if (audio === currentBgm) return;
         audio.pause();
         audio.currentTime = 0;

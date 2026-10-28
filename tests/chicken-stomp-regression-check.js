@@ -26,7 +26,7 @@ const context = {
     SmallChicken,
     Endboss,
     Date: { now: () => now },
-    AUDIO_HUB: {},
+    audioHub: {},
     playSound() { },
     playSpatialSound() { },
     playRandomPepeHurtVoice() { },

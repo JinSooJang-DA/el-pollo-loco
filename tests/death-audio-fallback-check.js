@@ -38,7 +38,7 @@ async function runDeathSequence(playback) {
             }
         },
         currentBgm: { pause() {} },
-        AUDIO_HUB: { bgmLost: {} },
+        audioHub: { bgmLost: {} },
         playBgm() {
             context.bgmStarts++;
         },

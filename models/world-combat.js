@@ -71,7 +71,7 @@ World.prototype.executeBossStomp = function (enemy, now, attackMode) {
     enemy.energy = Math.max(0, enemy.energy - 20);
     enemy.lastHit = now;
     this.statusBarEndboss.setPercentage((enemy.energy / enemy.maxEnergy) * 100);
-    playSound(AUDIO_HUB.bossHurt);
+    playSound(audioHub.bossHurt);
 };
 
 /**
@@ -213,12 +213,12 @@ World.prototype.applyChickenDamage = function (enemy) {
 
     if (enemy.energy <= 0) {
         enemy.energy = 0;
-        playSound(AUDIO_HUB.chickenDead1);
+        playSound(audioHub.chickenDead1);
         enemy.die();
         this.removeEnemyAfterDelay(enemy, 500);
         return;
     }
-    playSound(AUDIO_HUB.chickenStomp);
+    playSound(audioHub.chickenStomp);
     enemy.showStompReaction();
 };
 
@@ -280,7 +280,7 @@ World.prototype.applyBossBottleImpact = function (bottle, enemy) {
     
     if (enemy.isHitOnHead(bottle) && Date.now() - enemy.lastHit >= 3000) {
         enemy.hit();
-        playSpatialSound(AUDIO_HUB.bossHurt, enemy.x + enemy.width / 2);
+        playSpatialSound(audioHub.bossHurt, enemy.x + enemy.width / 2);
         this.statusBarEndboss.setPercentage((enemy.energy / enemy.maxEnergy) * 100);
     }
 };
@@ -292,7 +292,7 @@ World.prototype.applyBossBottleImpact = function (bottle, enemy) {
  */
 World.prototype.applySmallChickenBottleImpact = function (bottle, enemy) {
     if (!bottle.hasPlayedSmallChickenHitSound) {
-        playSpatialSound(AUDIO_HUB.smallChickenDead, enemy.x + enemy.width / 2);
+        playSpatialSound(audioHub.smallChickenDead, enemy.x + enemy.width / 2);
         bottle.hasPlayedSmallChickenHitSound = true;
     }
     if (typeof enemy.die === 'function') enemy.die();
@@ -307,7 +307,7 @@ World.prototype.applySmallChickenBottleImpact = function (bottle, enemy) {
 World.prototype.applyChickenBottleDamage = function (bottle, enemy) {
     enemy.energy = Math.max(0, enemy.energy - 2);
     let isDead = enemy.energy === 0;
-    let sound = isDead ? AUDIO_HUB.chickenDead1 : AUDIO_HUB.chickenStomp;
+    let sound = isDead ? audioHub.chickenDead1 : audioHub.chickenStomp;
     
     if (!bottle.hasPlayedChickenHitSound) {
         playSpatialSound(sound, enemy.x + enemy.width / 2);

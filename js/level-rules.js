@@ -33,10 +33,9 @@ async function fetchLevelRules(levelNumber, requestId) {
         if (!response.ok) throw new Error('Rules file not found');
         let rulesText = await response.text();
         if (requestId === rulesRequestId) content.textContent = rulesText;
-    } catch (error) {
+    } catch {
         if (requestId !== rulesRequestId) return;
         content.textContent = 'Rules could not be loaded. You can still start Level ' + levelNumber + '.';
-        console.error('Level rules:', error);
     }
 }
 

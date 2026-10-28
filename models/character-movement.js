@@ -95,12 +95,12 @@ Character.prototype.playDeathAnimation = function () {
 Character.prototype.handleGroundState = function () {
     if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
         this.playAnimation(this.IMAGES_WALKING);
-        if (AUDIO_HUB.run.paused && !isMuted && !isPaused) {
-            playSound(AUDIO_HUB.run);
+        if (audioHub.run.paused && !isMuted && !isPaused) {
+            playSound(audioHub.run);
         }
     } else {
-        AUDIO_HUB.run.pause();
-        AUDIO_HUB.run.currentTime = 0;
+        audioHub.run.pause();
+        audioHub.run.currentTime = 0;
         this.handleIdleAnimation();
     }
 };
@@ -112,8 +112,8 @@ Character.prototype.handleIdleAnimation = function () {
     let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
     if (timePassed > 4) {
         this.playAnimation(this.IMAGES_LONG_IDLE);
-        if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore?.paused) {
-            playSound(AUDIO_HUB.pepeSnore);
+        if (typeof audioHub !== 'undefined' && audioHub.pepeSnore?.paused) {
+            playSound(audioHub.pepeSnore);
         }
     } else {
         this.playAnimation(this.IMAGES_IDLE);
@@ -125,8 +125,8 @@ Character.prototype.handleIdleAnimation = function () {
  */
 Character.prototype.jump = function () {
     this.speedY = 30;
-    if (typeof playSound === 'function' && typeof AUDIO_HUB !== 'undefined') {
-        playSound(AUDIO_HUB.jump);
+    if (typeof playSound === 'function' && typeof audioHub !== 'undefined') {
+        playSound(audioHub.jump);
     }
 };
 
@@ -147,11 +147,11 @@ Character.prototype.processMovement = function () {
  * Assigns the appropriate sprite based on the character's current state.
  */
 Character.prototype.processAnimations = function () {
-    if (isPaused) return AUDIO_HUB.run.pause();
+    if (isPaused) return audioHub.run.pause();
     
     if (this.isDead() || this.isHurt() || this.isAboveGround()) {
-        AUDIO_HUB.run.pause();
-        AUDIO_HUB.run.currentTime = 0;
+        audioHub.run.pause();
+        audioHub.run.currentTime = 0;
     }
     
     if (this.isDead()) return this.playDeathAnimation();
@@ -169,8 +169,8 @@ Character.prototype.processAnimations = function () {
  */
 Character.prototype.resetIdleTimer = function () {
     this.lastActionTime = new Date().getTime();
-    if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && !AUDIO_HUB.pepeSnore.paused) {
-        AUDIO_HUB.pepeSnore.pause();
-        AUDIO_HUB.pepeSnore.currentTime = 0;
+    if (typeof audioHub !== 'undefined' && audioHub.pepeSnore && !audioHub.pepeSnore.paused) {
+        audioHub.pepeSnore.pause();
+        audioHub.pepeSnore.currentTime = 0;
     }
 };
