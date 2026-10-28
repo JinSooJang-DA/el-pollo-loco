@@ -80,5 +80,6 @@ This project was developed with the help of several AI tools:
 
 - **Gemini** – early programming, debugging and music creation
 - **ChatGPT** – multimedia, art programming and debugging
+- **Google Flow** – AI cinematics (story and ending videos)
 - **Claude** – final code review, clean-code optimization and JSDoc documentation
 - **Meta Muse** and **DeepSeek** – additional support
