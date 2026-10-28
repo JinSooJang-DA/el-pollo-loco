@@ -148,14 +148,24 @@ Character.prototype.processMovement = function () {
  */
 Character.prototype.processAnimations = function () {
     if (isPaused) return audioHub.run.pause();
-    
-    if (this.isDead() || this.isHurt() || this.isAboveGround()) {
-        audioHub.run.pause();
-        audioHub.run.currentTime = 0;
-    }
-    
+
+    this.syncRunCycleSound();
+
     if (this.isDead()) return this.playDeathAnimation();
-    
+
+    this.playStateAnimation();
+};
+
+/** Restarts the run sound cycle when the character leaves the ground state. */
+Character.prototype.syncRunCycleSound = function () {
+    if (!(this.isDead() || this.isHurt() || this.isAboveGround())) return;
+
+    audioHub.run.pause();
+    audioHub.run.currentTime = 0;
+};
+
+/** Plays the matching hurt, jump, or ground-state animation. */
+Character.prototype.playStateAnimation = function () {
     if (this.isHurt() || this.isAboveGround()) {
         this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
         this.resetIdleTimer();

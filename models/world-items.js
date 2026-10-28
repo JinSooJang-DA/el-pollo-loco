@@ -15,13 +15,29 @@ World.prototype.canThrowBottle = function () {
 World.prototype.checkThrowObjects = function () {
     if (!this.canThrowBottle()) return;
 
+    let bottle = this.createBottle();
+    this.registerThrownBottle(bottle);
+};
+
+/**
+ * Creates a bottle at Pepe's current position and facing direction.
+ * @returns {ThrowableObject} The new bottle instance.
+ */
+World.prototype.createBottle = function () {
     let offset = this.character.otherDirection ? 0 : 60;
-    let bottle = new ThrowableObject(
+
+    return new ThrowableObject(
         this.character.x + offset,
         this.character.y + 140,
         this.character.otherDirection
     );
+};
 
+/**
+ * Stores a thrown bottle and applies its stock, sound, HUD, and cooldown effects.
+ * @param {ThrowableObject} bottle The thrown bottle instance.
+ */
+World.prototype.registerThrownBottle = function (bottle) {
     this.throwableObjects.push(bottle);
     this.availableBottles--;
     playSound(audioHub.throw);
@@ -108,19 +124,30 @@ World.prototype.respawnBottle = function (bottle) {
  * @returns {boolean} True if the coin was collected.
  */
 World.prototype.applyCoinPickup = function (coin) {
-    if (this.character.energy < 100) {
-        this.character.energy = Math.min(100, this.character.energy + 10);
-        this.statusBar.setPercentage(this.character.energy);
-        return true;
-    }
-    
-    if (this.collectedCoins < this.maxCoins) {
-        this.collectedCoins++;
-        this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
-        return true;
-    }
-    
+    if (this.character.energy < 100) return this.applyCoinHealth();
+    if (this.collectedCoins < this.maxCoins) return this.applyCoinStash();
+
     return false;
+};
+
+/**
+ * Restores a small amount of health from a collected coin.
+ * @returns {boolean} Always true because the coin is consumed.
+ */
+World.prototype.applyCoinHealth = function () {
+    this.character.energy = Math.min(100, this.character.energy + 10);
+    this.statusBar.setPercentage(this.character.energy);
+    return true;
+};
+
+/**
+ * Stores a collected coin toward the level coin maximum.
+ * @returns {boolean} Always true because the coin is consumed.
+ */
+World.prototype.applyCoinStash = function () {
+    this.collectedCoins++;
+    this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
+    return true;
 };
 
 /**
@@ -130,14 +157,31 @@ World.prototype.checkCollectCoins = function () {
     if (!this.level.coins) return;
 
     for (let idx = this.level.coins.length - 1; idx >= 0; idx--) {
-        let coin = this.level.coins[idx];
-
-        if (!this.character.isColliding(coin) || this.character.isDead()) continue;
-        if (!this.applyCoinPickup(coin)) continue;
-
-        rememberCollectedCoin(this.levelNumber, coin);
-        recordCollectedCoin();
-        this.level.coins.splice(idx, 1);
-        playSound(audioHub.coinCollect);
+        this.collectCoinAt(idx);
     }
+};
+
+/**
+ * Collects the coin at an index when Pepe touches it.
+ * @param {number} idx The coin index inside the level array.
+ */
+World.prototype.collectCoinAt = function (idx) {
+    let coin = this.level.coins[idx];
+
+    if (!this.character.isColliding(coin) || this.character.isDead()) return;
+    if (!this.applyCoinPickup(coin)) return;
+
+    this.finishCoinCollection(idx, coin);
+};
+
+/**
+ * Records and removes a collected coin and plays its sound.
+ * @param {number} idx The coin index inside the level array.
+ * @param {Coin} coin The collected coin instance.
+ */
+World.prototype.finishCoinCollection = function (idx, coin) {
+    rememberCollectedCoin(this.levelNumber, coin);
+    recordCollectedCoin();
+    this.level.coins.splice(idx, 1);
+    playSound(audioHub.coinCollect);
 };

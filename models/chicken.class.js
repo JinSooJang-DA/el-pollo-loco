@@ -49,19 +49,40 @@ class Chicken extends MovableObject {
 
     /** Updates the chicken's movement direction relative to Pepe. */
     updateChickenMovement() {
-        if (this.isDeadChicken || isPaused || !world) return;
-        
-        // Stop moving during the stomp reaction.
-        if (this.isStompReacting) return;
+        if (!this.canUpdateChickenMovement()) return;
 
-        // Compare the center positions.
-        let chickenCenter = this.x + this.width / 2;
-        let pepeCenter = world.character.x + world.character.width / 2;
-        let distance = pepeCenter - chickenCenter;
+        let distance = this.getCharacterDistance();
 
         // Stop only after the collision boxes actually touch.
         if (this.isColliding(world.character)) return;
 
+        this.moveTowardCharacter(distance);
+    }
+
+    /**
+     * Returns whether the chicken may currently move.
+     * @returns {boolean} True when alive, unpaused, and not stomp-reacting.
+     */
+    canUpdateChickenMovement() {
+        if (this.isDeadChicken || isPaused || !world) return false;
+        return !this.isStompReacting;
+    }
+
+    /**
+     * Returns the horizontal distance between Pepe and this chicken.
+     * @returns {number} Negative when Pepe stands left of the chicken.
+     */
+    getCharacterDistance() {
+        let chickenCenter = this.x + this.width / 2;
+        let pepeCenter = world.character.x + world.character.width / 2;
+        return pepeCenter - chickenCenter;
+    }
+
+    /**
+     * Moves the chicken toward Pepe and faces the walking direction.
+     * @param {number} distance The signed horizontal distance to Pepe.
+     */
+    moveTowardCharacter(distance) {
         if (distance < 0) {
             this.moveLeft();
             if (Math.abs(distance) >= 50) this.otherDirection = false;
@@ -90,16 +111,28 @@ class Chicken extends MovableObject {
         if (this.isDeadChicken || this.isStompReacting) return;
 
         this.isStompReacting = true;
+        this.applyStompedSize();
+        this.scheduleStompReset();
+    }
+
+    /** Applies the squished sprite size and position. */
+    applyStompedSize() {
         this.height = this.stompedHeight;
         this.y = this.stompedY;
+    }
 
-        setTimeout(() => {
-            if (!this.isDeadChicken) {
-                this.height = this.normalHeight;
-                this.y = this.normalY;
-            }
-            this.isStompReacting = false;
-        }, 120);
+    /** Restores the normal sprite size after the stomp reaction. */
+    scheduleStompReset() {
+        setTimeout(() => this.resetStompReaction(), 120);
+    }
+
+    /** Restores normal size unless the chicken died during the reaction. */
+    resetStompReaction() {
+        if (!this.isDeadChicken) {
+            this.height = this.normalHeight;
+            this.y = this.normalY;
+        }
+        this.isStompReacting = false;
     }
 
     /** Kills chicken and stops its animation timers. */

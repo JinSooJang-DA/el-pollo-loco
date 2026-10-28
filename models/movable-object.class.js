@@ -19,19 +19,35 @@ class MovableObject extends DrawableObject {
 
     /** Logs the character's descent path for top-landing calculations. */
     recordFallStep() {
+        let fallStep = this.createFallStep();
+
+        this.lastFallStep = fallStep;
+        this.lastFallSteps = this.getRecentFallSteps(fallStep);
+    }
+
+    /**
+     * Builds the fall-step snapshot for the current physics tick.
+     * @returns {Object} The recorded fall segment.
+     */
+    createFallStep() {
         let feetBefore = this.y + this.height - this.offset.bottom;
-        let feetAfter = feetBefore - this.speedY;
-        
-        let fallStep = {
+
+        return {
             from: feetBefore,
-            to: feetAfter,
+            to: feetBefore - this.speedY,
             left: this.x + this.offset.left,
             right: this.x + this.width - this.offset.right,
             time: Date.now()
         };
-        
-        this.lastFallStep = fallStep;
-        this.lastFallSteps = [
+    }
+
+    /**
+     * Returns the fall-step history limited to the 120 ms window.
+     * @param {Object} fallStep The newest fall step.
+     * @returns {Object[]} The filtered fall-step history.
+     */
+    getRecentFallSteps(fallStep) {
+        return [
             ...(this.lastFallSteps || []),
             fallStep
         ].filter(step => fallStep.time - step.time < 120);
@@ -41,21 +57,28 @@ class MovableObject extends DrawableObject {
      * Applies gravity pull downward when object is airborne.
      */
     applyGravity() {
-        setInterval(() => {
-            if (isPaused) return;
+        setInterval(() => this.stepGravity(), 1000 / 25);
+    }
 
-            if (this.isAboveGround() || this.speedY > 0) {
-                // Remember Pepe's downward movement.
-                if (this instanceof Character && this.speedY < 0) {
-                    this.recordFallStep();
-                }
+    /** Advances one gravity tick while gameplay is running. */
+    stepGravity() {
+        if (isPaused) return;
 
-                this.y -= this.speedY;
-                this.speedY -= this.acceleration;
-            } else {
-                this.handleGroundContact();
-            }
-        }, 1000 / 25);
+        if (this.isAboveGround() || this.speedY > 0) {
+            this.applyFallVelocity();
+        } else {
+            this.handleGroundContact();
+        }
+    }
+
+    /** Moves the object by its vertical velocity and records Pepe's fall. */
+    applyFallVelocity() {
+        if (this instanceof Character && this.speedY < 0) {
+            this.recordFallStep();
+        }
+
+        this.y -= this.speedY;
+        this.speedY -= this.acceleration;
     }
 
     /**

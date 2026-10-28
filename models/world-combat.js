@@ -255,18 +255,32 @@ World.prototype.removeEnemyAfterDelay = function (enemy, delay) {
  */
 World.prototype.checkBottleCollisions = function () {
     this.throwableObjects.forEach(bottle => {
-        if (bottle.isSplashed) return;
-
-        let hitEnemies = this.level.enemies.filter(enemy => {
-            let alive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
-            return alive && bottle.isColliding(enemy);
-        });
-
-        if (hitEnemies.length === 0) return;
-        hitEnemies.forEach(enemy => this.handleBottleImpact(bottle, enemy));
-        bottle.splash();
-        this.removeBottleAfterDelay(bottle, 100);
+        if (!bottle.isSplashed) this.checkSingleBottle(bottle);
     });
+};
+
+/**
+ * Resolves one thrown bottle against all living enemies.
+ * @param {ThrowableObject} bottle The thrown bottle instance.
+ */
+World.prototype.checkSingleBottle = function (bottle) {
+    let hitEnemies = this.level.enemies.filter(enemy => this.isLivingBottleTarget(bottle, enemy));
+
+    if (hitEnemies.length === 0) return;
+    hitEnemies.forEach(enemy => this.handleBottleImpact(bottle, enemy));
+    bottle.splash();
+    this.removeBottleAfterDelay(bottle, 100);
+};
+
+/**
+ * Returns whether a bottle currently overlaps a living enemy.
+ * @param {ThrowableObject} bottle The thrown bottle.
+ * @param {MovableObject} enemy The enemy to test.
+ * @returns {boolean} True if the enemy is alive and hit.
+ */
+World.prototype.isLivingBottleTarget = function (bottle, enemy) {
+    let alive = typeof enemy.isDead === 'function' ? !enemy.isDead() : !enemy.isDead;
+    return alive && bottle.isColliding(enemy);
 };
 
 /**
@@ -307,19 +321,35 @@ World.prototype.applySmallChickenBottleImpact = function (bottle, enemy) {
 World.prototype.applyChickenBottleDamage = function (bottle, enemy) {
     enemy.energy = Math.max(0, enemy.energy - 2);
     let isDead = enemy.energy === 0;
+
+    this.playChickenHitSound(bottle, enemy, isDead);
+    this.applyChickenHitResult(enemy, isDead);
+};
+
+/**
+ * Plays the chicken impact sound once per thrown bottle.
+ * @param {ThrowableObject} bottle The thrown bottle.
+ * @param {Chicken} enemy The struck chicken.
+ * @param {boolean} isDead Whether the hit killed the chicken.
+ */
+World.prototype.playChickenHitSound = function (bottle, enemy, isDead) {
+    if (bottle.hasPlayedChickenHitSound) return;
+
     let sound = isDead ? audioHub.chickenDead1 : audioHub.chickenStomp;
-    
-    if (!bottle.hasPlayedChickenHitSound) {
-        playSpatialSound(sound, enemy.x + enemy.width / 2);
-        bottle.hasPlayedChickenHitSound = true;
-    }
-    
-    if (isDead) {
-        enemy.die();
-        this.removeEnemyAfterDelay(enemy, 500);
-    } else {
-        enemy.showStompReaction();
-    }
+    playSpatialSound(sound, enemy.x + enemy.width / 2);
+    bottle.hasPlayedChickenHitSound = true;
+};
+
+/**
+ * Routes a surviving or defeated chicken hit to its follow-up action.
+ * @param {Chicken} enemy The struck chicken.
+ * @param {boolean} isDead Whether the hit killed the chicken.
+ */
+World.prototype.applyChickenHitResult = function (enemy, isDead) {
+    if (!isDead) return enemy.showStompReaction();
+
+    enemy.die();
+    this.removeEnemyAfterDelay(enemy, 500);
 };
 
 /**

@@ -117,21 +117,24 @@ class Endboss extends MovableObject {
      * Initiates main animation and state loop for the boss.
      */
     animate() {
-        let mainInterval = setInterval(() => {
-            if (isPaused) return;
+        let mainInterval = setInterval(() => this.runMainLoop(mainInterval, moveInterval), 150);
 
-            if (this.isDead()) {
-                clearInterval(mainInterval);
-                clearInterval(moveInterval);
-                this.startDeathSequence();
-            } else {
-                this.handleBossActions();
-            }
-        }, 150);
+        let moveInterval = setInterval(() => this.updateBossMovement(), 50);
+    }
 
-        let moveInterval = setInterval(() => {
-            this.updateBossMovement();
-        }, 50);
+    /**
+     * Runs one boss animation tick or starts the death sequence.
+     * @param {number} mainInterval The main animation interval ID.
+     * @param {number} moveInterval The movement interval ID.
+     */
+    runMainLoop(mainInterval, moveInterval) {
+        if (isPaused) return;
+
+        if (!this.isDead()) return this.handleBossActions();
+
+        clearInterval(mainInterval);
+        clearInterval(moveInterval);
+        this.startDeathSequence();
     }
 
     /** Manages the animation sequences during combat engagement. */
@@ -187,12 +190,21 @@ class Endboss extends MovableObject {
         if (this.isDead()) return;
 
         if (this.specialAttackNextPhase === 'charge') {
-            this.isPreparingAttack = false;
-            this.isCharging = true;
-            this.scheduleSpecialAttackPhase('finish', 1000);
-            return;
+            return this.startChargePhase();
         }
 
+        this.finishAttackPhase();
+    }
+
+    /** Switches the boss into its charge phase and schedules the finish. */
+    startChargePhase() {
+        this.isPreparingAttack = false;
+        this.isCharging = true;
+        this.scheduleSpecialAttackPhase('finish', 1000);
+    }
+
+    /** Clears all active special-attack state after the charge ends. */
+    finishAttackPhase() {
         this.isCharging = false;
         this.specialAttackNextPhase = null;
         this.specialAttackRemaining = 0;

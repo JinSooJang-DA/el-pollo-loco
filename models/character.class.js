@@ -168,20 +168,42 @@ class Character extends MovableObject {
      */
     getDeathEdgeOffset(frameIndex) {
         if (!this.world?.canvas || frameIndex < 0) return 0;
-        let allBounds = this.IMAGES_DEAD.map((_, i) => this.getDeathScreenBounds(i, this.getDeathRotation(i)));
-        
-        let animLeft = Math.min(...allBounds.map(b => b.left));
-        let animRight = Math.max(...allBounds.map(b => b.right));
-        let margin = 8;
-        let targetScreenOffset = 0;
-        
-        if (animLeft < margin) targetScreenOffset = margin - animLeft;
-        else if (animRight > this.world.canvas.width - margin) targetScreenOffset = this.world.canvas.width - margin - animRight;
-        
+        let targetScreenOffset = this.getDeathScreenCorrection();
+
         let progress = [0, 0, 0.2, 0.45, 0.75, 1][frameIndex] || 0;
         let localOffset = targetScreenOffset * progress;
-        
+
         return this.otherDirection ? -localOffset : localOffset;
+    }
+
+    /**
+     * Calculates how far the whole death animation must shift to stay visible.
+     * @returns {number} The screen-space correction in pixels.
+     */
+    getDeathScreenCorrection() {
+        let allBounds = this.IMAGES_DEAD.map((_, i) => this.getDeathScreenBounds(i, this.getDeathRotation(i)));
+
+        let animLeft = Math.min(...allBounds.map(b => b.left));
+        let animRight = Math.max(...allBounds.map(b => b.right));
+
+        return this.getCanvasBoundsCorrection(animLeft, animRight);
+    }
+
+    /**
+     * Returns the shift needed to keep the animation inside the canvas margins.
+     * @param {number} animLeft The leftmost animation bound.
+     * @param {number} animRight The rightmost animation bound.
+     * @returns {number} The screen offset in pixels.
+     */
+    getCanvasBoundsCorrection(animLeft, animRight) {
+        let margin = 8;
+
+        if (animLeft < margin) return margin - animLeft;
+        if (animRight > this.world.canvas.width - margin) {
+            return this.world.canvas.width - margin - animRight;
+        }
+
+        return 0;
     }
 
     /**
