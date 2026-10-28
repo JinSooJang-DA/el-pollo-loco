@@ -1,5 +1,5 @@
 /**
- * Represents the playable hero Pepe.
+ * Represents the main playable character (Pepe).
  * @extends MovableObject
  */
 class Character extends MovableObject {
@@ -11,7 +11,7 @@ class Character extends MovableObject {
     lastActionTime = new Date().getTime();
     lastRecoveryTime = 0;
     deadFrameIndex = 0;
-   
+
     offset = {
         top: 120,
         bottom: 30,
@@ -81,7 +81,6 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-56.png'
     ];
 
-    // Measured non-transparent bounds in the 610 × 1200 DEAD source PNGs.
     DEAD_FRAME_ALPHA_BOUNDS = [
         { left: 69, top: 495, right: 546, bottom: 1200 },
         { left: 48, top: 466, right: 561, bottom: 1200 },
@@ -91,25 +90,32 @@ class Character extends MovableObject {
         { left: 55, top: 301, right: 567, bottom: 1141 }
     ];
 
-    // Render-only lift values that complete the source PNGs' short hop.
     DEAD_FRAME_RENDER_Y = [0, 0, -8, -24, -36, 0];
 
-    /** Initializes Pepe's images and animation loops. */
+    /**
+     * Loads initial images and starts gravity and animations.
+     */
     constructor() {
-        super().loadImage('img/2_character_pepe/2_walk/W-21.png');
+        super();
+        this.loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadCharacterImages();
         this.applyGravity();
         this.animate();
     }
 
-    /** Loads all image arrays for the character. */
+    /**
+     * Loads all state-specific image arrays into the cache.
+     */
     loadCharacterImages() {
         [this.IMAGES_IDLE, this.IMAGES_LONG_IDLE, this.IMAGES_WALKING,
          this.IMAGES_JUMPING, this.IMAGES_HURT, this.IMAGES_DEAD]
          .forEach(images => this.loadImages(images));
     }
 
-    /** Draws DEAD frames with an isolated hop, fall, and landing transform. */
+    /**
+     * Performs standard rendering when alive, and special rendering when dead.
+     * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
+     */
     draw(ctx) {
         if (!this.isDead()) {
             super.draw(ctx);
@@ -118,7 +124,10 @@ class Character extends MovableObject {
         this.drawDeadFrame(ctx);
     }
 
-    /** Handles the complex rendering of the death animation frame. */
+    /**
+     * Draws the death animation frame applying rotation and offsets.
+     * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
+     */
     drawDeadFrame(ctx) {
         let frameIndex = this.IMAGES_DEAD.findIndex(path => this.imageCache[path] === this.img);
         let rotation = this.getDeathRotation(frameIndex);
@@ -133,18 +142,30 @@ class Character extends MovableObject {
         ctx.restore();
     }
 
-    /** Keeps Pepe face-up after World applies its outer horizontal mirror. */
+    /**
+     * Returns the screen rotation angle per frame.
+     * @param {number} frameIndex The current death frame index.
+     * @returns {number} The rotation value in radians.
+     */
     getDeathRotation(frameIndex) {
         let rotations = [0, 0, 0, 0, -Math.PI / 6, -Math.PI / 2];
         return rotations[frameIndex] || 0;
     }
 
-    /** Returns the DEAD-only visual lift without changing physics coordinates. */
+    /**
+     * Returns the visual height offset exclusively for rendering.
+     * @param {number} frameIndex The current death frame index.
+     * @returns {number} The Y-axis pixel offset.
+     */
     getDeathVisualOffset(frameIndex) {
         return this.DEAD_FRAME_RENDER_Y[frameIndex] || 0;
     }
 
-    /** Smoothly shifts a DEAD-only render back inside the visible canvas. */
+    /**
+     * Returns the correction value to keep the death sprite within the canvas.
+     * @param {number} frameIndex The current death frame index.
+     * @returns {number} The offset for screen position correction.
+     */
     getDeathEdgeOffset(frameIndex) {
         if (!this.world?.canvas || frameIndex < 0) return 0;
         let allBounds = this.IMAGES_DEAD.map((_, i) => this.getDeathScreenBounds(i, this.getDeathRotation(i)));
@@ -163,7 +184,12 @@ class Character extends MovableObject {
         return this.otherDirection ? -localOffset : localOffset;
     }
 
-    /** Calculates rotated screen vertices for bounds checking. */
+    /**
+     * Calculates the screen corner coordinates with rotation applied.
+     * @param {Object} bounds The bounding box excluding transparency.
+     * @param {number} rotation The rotation value in radians.
+     * @returns {number[]} The array of canvas screen X coordinates.
+     */
     calculateScreenVertices(bounds, rotation) {
         let scaleX = this.width / 610, scaleY = this.height / 1200;
         let xVals = [bounds.left * scaleX - this.width / 2, bounds.right * scaleX - this.width / 2];
@@ -176,7 +202,12 @@ class Character extends MovableObject {
         return xVals.flatMap(x => yVals.map(y => pivotX + mirror * (cos * x - sin * y)));
     }
 
-    /** Returns the rotated alpha bounds in visible screen coordinates. */
+    /**
+     * Returns the left and right endpoints of the visible death sprite on screen.
+     * @param {number} frameIndex The current death frame index.
+     * @param {number} rotation The rotation value in radians.
+     * @returns {Object} An object containing the min (left) and max (right) screen coordinates.
+     */
     getDeathScreenBounds(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return { left: 0, right: 0 };
@@ -185,7 +216,12 @@ class Character extends MovableObject {
         return { left: Math.min(...screenX), right: Math.max(...screenX) };
     }
 
-    /** Keeps the rotated PNG's lowest opaque pixel on Pepe's existing floor. */
+    /**
+     * Calculates the Y offset touching the floor, ignoring transparency.
+     * @param {number} frameIndex The current death frame index.
+     * @param {number} rotation The rotation value in radians.
+     * @returns {number} The offset for floor correction.
+     */
     getDeathFloorOffset(frameIndex, rotation) {
         let bounds = this.DEAD_FRAME_ALPHA_BOUNDS[frameIndex];
         if (!bounds) return 0;
@@ -197,149 +233,5 @@ class Character extends MovableObject {
         let lowestPixel = Math.max(...xValues.flatMap(x => yValues.map(y => sin * x + cos * y)));
         
         return Math.min(0, -lowestPixel);
-    }
-
-    /** Remembers when Pepe lands after falling. */
-    handleGroundContact() {
-        let wasFalling = this.speedY < 0;
-        super.handleGroundContact();
-        
-        if (wasFalling) {
-            this.lastLandingTime = Date.now();
-        }
-    }
-
-    /** Starts movement and animation intervals. */
-    animate() {
-        setInterval(() => this.processMovement(), 1000 / 60);
-        setInterval(() => this.processAnimations(), 150);
-    }
-
-    /** Handles walking and jumping input. */
-    handleWalkAndJump() {
-        let movedRight = this.walkRight();
-        let movedLeft = this.walkLeft();
-        
-        if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-            this.jump();
-            return true;
-        }
-        return movedRight || movedLeft;
-    }
-
-    /** Moves Pepe to the right if possible. */
-    walkRight() {
-        if (!this.world.keyboard.RIGHT) return false;
-        if (this.x >= this.world.level.level_end_x) return false;
-        this.moveRight();
-        this.otherDirection = false;
-        return true;
-    }
-
-    /** Moves Pepe to the left if possible. */
-    walkLeft() {
-        if (!this.world.keyboard.LEFT || this.x <= 0) return false;
-        this.moveLeft();
-        this.otherDirection = true;
-        return true;
-    }
-
-    /** Calculates the target camera X position based on direction. */
-    calculateTargetCameraX(screenWidth) {
-        let pepeCenter = this.x + this.offset.left + (this.width - this.offset.left - this.offset.right) / 2;
-        let targetPosition = this.otherDirection ? screenWidth * 0.85 : screenWidth * 0.15;
-        let targetCameraX = targetPosition - pepeCenter;
-        let maxScroll = Math.max(0, this.world.level.level_end_x + this.width - screenWidth);
-        
-        return Math.max(-maxScroll, Math.min(0, targetCameraX));
-    }
-
-    /** Updates the camera smoothly around the boss or player. */
-    updateCameraPosition() {
-        let targetCameraX = this.calculateTargetCameraX(this.world.canvas.width);
-        this.world.camera_x += (targetCameraX - this.world.camera_x) * 0.08;
-    }
-
-    /** Plays Pepe's death animation. */
-    playDeathAnimation() {
-        let idx = Math.min(this.deadFrameIndex, this.IMAGES_DEAD.length - 1);
-        this.img = this.imageCache[this.IMAGES_DEAD[idx]];
-        if (this.deadFrameIndex < this.IMAGES_DEAD.length - 1) {
-            this.deadFrameIndex++;
-        }
-    }
-
-    /** Handles walking and idle animations. */
-    handleGroundState() {
-        if (this.world && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
-            this.playAnimation(this.IMAGES_WALKING);
-            if (AUDIO_HUB.run.paused && !isMuted && !isPaused) {
-                playSound(AUDIO_HUB.run);
-            }
-        } else {
-            AUDIO_HUB.run.pause();
-            AUDIO_HUB.run.currentTime = 0;
-            this.handleIdleAnimation();
-        }
-    }
-
-    /** Shows idle or sleeping animation. */
-    handleIdleAnimation() {
-        let timePassed = (new Date().getTime() - this.lastActionTime) / 1000;
-        if (timePassed > 4) {
-            this.playAnimation(this.IMAGES_LONG_IDLE);
-            if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore?.paused) {
-                playSound(AUDIO_HUB.pepeSnore);
-            }
-        } else {
-            this.playAnimation(this.IMAGES_IDLE);
-        }
-    }
-
-    /** Makes Pepe jump and plays the jump sound. */
-    jump() {
-        this.speedY = 30;
-        if (typeof playSound === 'function' && typeof AUDIO_HUB !== 'undefined') {
-            playSound(AUDIO_HUB.jump);
-        }
-    }
-
-    /** Processes input and updates the camera. */
-    processMovement() {
-        if (!this.world || this.isDead() || isPaused) return;
-        let isMoving = this.handleWalkAndJump();
-        
-        if (isMoving || this.world.keyboard.D) {
-            this.resetIdleTimer();
-        }
-        this.updateCameraPosition();
-    }
-
-    /** Plays the correct animation for Pepe's state. */
-    processAnimations() {
-        if (isPaused) return AUDIO_HUB.run.pause();
-        
-        if (this.isDead() || this.isHurt() || this.isAboveGround()) {
-            AUDIO_HUB.run.pause();
-            AUDIO_HUB.run.currentTime = 0;
-        }
-        
-        if (this.isDead()) return this.playDeathAnimation();
-        
-        if (this.isHurt() || this.isAboveGround()) {
-            this.playAnimation(this.isHurt() ? this.IMAGES_HURT : this.IMAGES_JUMPING);
-            this.resetIdleTimer();
-        } else {
-            this.handleGroundState();
-        }
-    }
-
-    /** Resets idle time and stops the snoring sound. */
-    resetIdleTimer() {
-        this.lastActionTime = new Date().getTime();
-        if (typeof AUDIO_HUB !== 'undefined' && AUDIO_HUB.pepeSnore && !AUDIO_HUB.pepeSnore.paused) {
-            AUDIO_HUB.pepeSnore.pause();
-            AUDIO_HUB.pepeSnore.currentTime = 0;
-        }
     }
 }
