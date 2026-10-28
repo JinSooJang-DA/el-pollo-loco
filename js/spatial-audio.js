@@ -61,16 +61,34 @@ function routeSpatialAudio(audio, worldX) {
     let panner = audioContext.createStereoPanner();
 
     panner.pan.value = getSoundPan(worldX);
+    connectSpatialNodes(audioContext, source, panner);
+    disconnectSpatialAudioOnEnd(audio, source, panner);
 
+    return audioContext;
+}
+
+/**
+ * Connects the source through the panner to the audio destination.
+ * @param {AudioContext} audioContext The active audio context.
+ * @param {AudioNode} source The media element source node.
+ * @param {StereoPannerNode} panner The stereo panner node.
+ */
+function connectSpatialNodes(audioContext, source, panner) {
     source.connect(panner);
     panner.connect(audioContext.destination);
+}
 
+/**
+ * Disconnects the source and panner once playback ends.
+ * @param {HTMLAudioElement} audio The spatial audio element.
+ * @param {AudioNode} source The media element source node.
+ * @param {StereoPannerNode} panner The stereo panner node.
+ */
+function disconnectSpatialAudioOnEnd(audio, source, panner) {
     audio.addEventListener('ended', () => {
         source.disconnect();
         panner.disconnect();
     }, { once: true });
-
-    return audioContext;
 }
 
 /** Orchestrates the playback of a spatial sound effect. */

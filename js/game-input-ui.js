@@ -43,17 +43,39 @@ function getTopNavControls() {
  * @returns {Element[]} Visible controls within active overlay.
  */
 function getActiveScopeControls() {
-    const startScreen = document.getElementById('startScreen');
-    const visibleDialog = ['settingsDialog', 'infoDialog', 'legalDialog']
+    const activeScope = getVisibleDialog() || getVisibleOverlay();
+    if (activeScope) return getFocusableControls(activeScope);
+    return getStartScreenFallback();
+}
+
+/**
+ * Returns the first visible modal dialog, if any.
+ * @returns {Element|null} The open dialog element.
+ */
+function getVisibleDialog() {
+    return ['settingsDialog', 'infoDialog', 'legalDialog']
         .map(id => document.getElementById(id))
-        .find(dialog => dialog && !dialog.classList.contains('d-none'));
+        .find(dialog => dialog && !dialog.classList.contains('d-none')) || null;
+}
+
+/**
+ * Returns the visible overlay screen, preferring the result screen.
+ * @returns {Element|null} The visible overlay element.
+ */
+function getVisibleOverlay() {
     const overlays = Array.from(document.querySelectorAll(
         '.overlay-screen:not(.d-none), .story-video-screen:not(.d-none)'
     ));
-    const visibleOverlay = overlays.find(o => o.id === 'restartScreen') || 
-        overlays.find(o => o.getClientRects().length > 0);
-    const activeScope = visibleDialog || visibleOverlay;
-    if (activeScope) return getFocusableControls(activeScope);
+    return overlays.find(o => o.id === 'restartScreen') ||
+        overlays.find(o => o.getClientRects().length > 0) || null;
+}
+
+/**
+ * Returns the start screen button when only the start screen is visible.
+ * @returns {Element[]} The start button or an empty list.
+ */
+function getStartScreenFallback() {
+    const startScreen = document.getElementById('startScreen');
     if (startScreen && !startScreen.classList.contains('d-none')) {
         return [document.getElementById('startBtn')];
     }
@@ -166,13 +188,36 @@ function moveMenuFocus(event, controls) {
  * @param {Element} nextControl The control receiving focus.
  */
 function closeInactiveSubmenus(nextControl) {
+    closeInactiveBgmMenu(nextControl);
+    closeInactiveGameMenu(nextControl);
+    closeInactiveDialogs(nextControl);
+}
+
+/**
+ * Closes the BGM submenu once focus moves outside it.
+ * @param {Element} nextControl The control receiving focus.
+ */
+function closeInactiveBgmMenu(nextControl) {
     const bgmMenu = document.getElementById('bgmMenu');
     if (bgmMenu?.open && !bgmMenu.contains(nextControl)) bgmMenu.open = false;
+}
+
+/**
+ * Closes the game Menu once focus moves outside it.
+ * @param {Element} nextControl The control receiving focus.
+ */
+function closeInactiveGameMenu(nextControl) {
     const gameMenu = document.querySelector('.game-menu');
-    if (gameMenu?.open && !gameMenu.contains(nextControl)) {
-        menuCloseKeepsPause = true;
-        gameMenu.open = false;
-    }
+    if (!gameMenu?.open || gameMenu.contains(nextControl)) return;
+    menuCloseKeepsPause = true;
+    gameMenu.open = false;
+}
+
+/**
+ * Closes open modal dialogs that no longer contain the focused control.
+ * @param {Element} nextControl The control receiving focus.
+ */
+function closeInactiveDialogs(nextControl) {
     ['settingsDialog', 'infoDialog', 'legalDialog'].forEach(id => {
         const dialog = document.getElementById(id);
         if (dialog && !dialog.classList.contains('d-none') && !dialog.contains(nextControl)) {
