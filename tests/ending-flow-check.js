@@ -121,7 +121,7 @@ expect(componentStyles.includes('#infoDialog .dialog-content') &&
     componentStyles.includes('guide-section-heading'),
     'How to Play scrolls only its content while the close button remains available');
 const expectedDelays = Array.from({ length: 21 }, (_, index) =>
-    `--credit-delay: -${index * 4.5}s`);
+    `--credit-delay: ${index * 4.5}s`);
 expectedDelays[0] = '--credit-delay: 0s';
 expect(expectedDelays.every(delay => index.includes(delay)),
     'each credit card has its place in the 21-card sequence');
