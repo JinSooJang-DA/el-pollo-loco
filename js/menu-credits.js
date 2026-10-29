@@ -134,7 +134,7 @@ function restoreMenuCreditsAudio(origin, savedBgmState) {
 }
 
 /**
- * Returns focus to Resume or the reopened Menu after closing credits.
+ * Returns focus to Resume, or closes all menus and focuses Start Game after closing credits.
  * @param {'start'|'game'} origin Where the credits were opened from.
  */
 function focusAfterMenuCredits(origin) {
@@ -143,7 +143,6 @@ function focusAfterMenuCredits(origin) {
             focusPauseResumeButton();
             return;
         }
-        setGameMenuOpen(true);
-        document.getElementById('creditsBtn')?.focus();
+        resetStartScreenMenuState();
     });
 }

@@ -627,7 +627,9 @@ const menuCreditElements = {
     startVideo: createMenuCreditElement(),
     endVideo: createMenuCreditElement(),
     creditsBtn: createMenuCreditElement(),
-    pauseBtn: createMenuCreditElement()
+    pauseBtn: createMenuCreditElement(),
+    bgmMenu: createMenuCreditElement(),
+    startBtn: createMenuCreditElement()
 };
 menuCreditElements.startScreen.classList.remove('d-none');
 
@@ -672,8 +674,8 @@ expect(menuCreditContext.menuCreditApi.getCurrent() === menuCreditContext.menuCr
     'start Menu credits starts BGM04 and reuses the ending credits screen');
 menuCreditContext.menuCreditApi.close();
 expect(menuCreditContext.menuCreditApi.getCurrent() === menuCreditContext.menuCreditApi.getAudioHub().bgmMenu &&
-    menuCreditMenu.open && menuCreditElements.creditsBtn.focused,
-    'closing start Menu credits restores BGM01 and Credits focus');
+    !menuCreditMenu.open && !menuCreditElements.bgmMenu.open && menuCreditElements.startBtn.focused,
+    'closing start Menu credits restores BGM01, closes the menus and focuses Start Game');
 
 menuCreditContext.menuCreditApi.setGameOrigin();
 menuCreditContext.menuCreditApi.open();
