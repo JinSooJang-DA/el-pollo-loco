@@ -141,8 +141,20 @@ function resumeMediaAfterRotation() {
     mediaPausedByRotation = [];
 }
 
+/**
+ * Closes open Settings, How to Play and Legal Notice dialogs when the Menu opens,
+ * so they do not stay on top of the screen the Menu leads to.
+ * @param {Event} event The toggle event of a details element.
+ */
+function closeDialogsWhenMenuOpens(event) {
+    const menu = event.target;
+    if (!(menu instanceof Element) || !menu.matches('.game-menu') || !menu.open) return;
+    closeInactiveDialogs(menu);
+}
+
 document.addEventListener('click', handleOneShotControlClick);
 document.addEventListener('keydown', blockControlKeysDuringGameplay, true);
 document.addEventListener('keyup', blockControlKeysDuringGameplay, true);
 document.addEventListener('fullscreenchange', handleFullscreenExit);
+document.addEventListener('toggle', closeDialogsWhenMenuOpens, true);
 rotateHintQuery.addEventListener('change', handleRotateToPortrait);

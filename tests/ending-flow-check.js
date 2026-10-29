@@ -645,6 +645,7 @@ const menuCreditContext = {
     localStorage: { getItem() { return null; }, setItem() { } },
     requestAnimationFrame(callback) { callback(); },
     isStoryVideoPlaying() { return false; },
+    closeInactiveDialogs() { },
     playlistActive: false,
     playlistRepeat: 'track',
     setGameMenuOpen(isOpen) { menuCreditMenu.open = isOpen; }

@@ -26,6 +26,7 @@ function openMenuCredits() {
     const openedFromStart = isMainMenuVisible();
     const openedFromGame = Boolean(world && !world.gameEnded);
     if (!openedFromStart && !openedFromGame) return;
+    closeInactiveDialogs(null);
     menuCreditsOrigin = openedFromStart ? 'start' : 'game';
     menuCreditsBgmState = getMenuCreditsBgmState(openedFromGame);
     showMenuCreditsScreen();
