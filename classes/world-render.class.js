@@ -94,11 +94,13 @@ World.prototype.renderChickenHealthBar = function (enemy) {
 };
 
 /**
- * Draws health bars above all living normal chickens.
+ * Draws health bars above living normal chickens that need more than one hit.
+ * Level 1 chickens die with one stomp, so they show no bar.
  */
 World.prototype.drawChickenHealthBars = function () {
     this.level.enemies.forEach(enemy => {
         if (!(enemy instanceof Chicken) || enemy.isDead()) return;
+        if (enemy.maxEnergy <= 1) return;
         this.renderChickenHealthBar(enemy);
     });
 };
