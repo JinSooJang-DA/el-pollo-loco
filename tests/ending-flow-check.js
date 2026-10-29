@@ -90,12 +90,12 @@ expect(/id="startVideo"[^>]*autoplay[^>]*muted[^>]*loop[^>]*playsinline/.test(in
 expect(/id="endVideo"[^>]*autoplay[^>]*muted[^>]*loop[^>]*playsinline/.test(index),
     'end video has autoplay-safe attributes');
 const creditEntries = [...index.matchAll(/class="credit-entry"/g)];
-expect(creditEntries.length === 18,
-    'ending contains all 18 requested credit cards');
+expect(creditEntries.length === 21,
+    'ending contains all 21 requested credit cards');
 expect(index.includes('JIN SOO JANG') && index.includes('JUNUS ERGIN') &&
     index.includes('GIULIANO GIOIA') && index.includes('GOOGLE GEMINI (LYRIA)'),
     'ending contains the supplied principal credit names');
-expect(index.includes('BASED ON THE ORIGINAL GAME TUTORIAL BY') &&
+expect(index.includes('FOUNDER OF DEVELOPER AKADEMIE &amp; ORIGINAL GAME TUTORIAL') &&
     index.includes('GAME DESIGN &amp; EXTENDED DEVELOPMENT') &&
     index.includes('PROGRAMMING &amp; AI ASSISTANCE'),
     'ending credits Junus Ergin\'s tutorial contribution and the extended development correctly');
@@ -120,14 +120,14 @@ expect(componentStyles.includes('#infoDialog .dialog-content') &&
     componentStyles.includes('overflow: hidden;') &&
     componentStyles.includes('guide-section-heading'),
     'How to Play scrolls only its content while the close button remains available');
-const expectedDelays = Array.from({ length: 18 }, (_, index) =>
+const expectedDelays = Array.from({ length: 21 }, (_, index) =>
     `--credit-delay: -${index * 4.5}s`);
 expectedDelays[0] = '--credit-delay: 0s';
 expect(expectedDelays.every(delay => index.includes(delay)),
-    'each credit card has its place in the 18-card sequence');
-expect(baseStyles.includes('animation: credit-cycle 81s') &&
+    'each credit card has its place in the 21-card sequence');
+expect(baseStyles.includes('animation: credit-cycle 94.5s') &&
     baseStyles.includes('@keyframes credit-cycle'),
-    'credits repeat through one continuous 81-second CSS cycle');
+    'credits repeat through one continuous 94.5-second CSS cycle');
 expect(componentStyles.includes('.game-container:has(#startScreen.d-none) .bgm-menu') &&
     !componentStyles.includes('.game-container:has(#restartScreen:not(.d-none) #endCredits:not(.d-none)) .game-menu') &&
     componentStyles.includes('display: none;'),

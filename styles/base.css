@@ -218,7 +218,7 @@ canvas {
     text-align: center;
     text-shadow: 0 3px 10px #160700, 0 0 16px rgba(0, 0, 0, 0.9);
     opacity: 0;
-    animation: credit-cycle 81s ease-in-out infinite;
+    animation: credit-cycle 94.5s ease-in-out infinite;
     animation-delay: var(--credit-delay, 0s);
 }
 
@@ -251,9 +251,9 @@ canvas {
 }
 
 @keyframes credit-cycle {
-    0%, 0.8% { opacity: 0; transform: translateY(14px); }
-    1.5%, 4.5% { opacity: 1; transform: translateY(0); }
-    5.55%, 100% { opacity: 0; transform: translateY(-14px); }
+    0%, 0.69% { opacity: 0; transform: translateY(14px); }
+    1.29%, 3.86% { opacity: 1; transform: translateY(0); }
+    4.76%, 100% { opacity: 0; transform: translateY(-14px); }
 }
 
 #restartScreen:has(.end-credits:not(.d-none)) {
