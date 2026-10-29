@@ -61,9 +61,7 @@ function createSpatialAudioElement(sound) {
     if (!audioPath) return null;
 
     let audio = new Audio(audioPath);
-    audio.volume = typeof sound === 'string'
-        ? 0.5
-        : sound.volume;
+    audio.volume = sfxVolume;
 
     return audio;
 }

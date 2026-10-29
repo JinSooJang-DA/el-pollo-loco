@@ -7,6 +7,11 @@ class Endboss extends MovableObject {
     width = 178;
     y = 170;
     speed = 3;
+    /**
+     * Multiplies chase and charge speed; set per level by the World.
+     * @type {number}
+     */
+    speedMultiplier = 1;
     energy = 100;
     hadFirstContact = false;
     deathAnimationFinished = false;
@@ -113,9 +118,9 @@ class Endboss extends MovableObject {
         if (this.isHurt() || this.isPreparingAttack) return;
 
         if (this.isCharging) {
-            this.chargeCharacter(18);
+            this.chargeCharacter(18 * this.speedMultiplier);
         } else {
-            this.chaseCharacter(6);
+            this.chaseCharacter(6 * this.speedMultiplier);
         }
     }
 

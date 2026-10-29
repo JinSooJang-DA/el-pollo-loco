@@ -519,10 +519,10 @@ canvas {
 .turn-device-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
+    inset: 0;
+    width: 100%;
     height: 100vh;
+    height: 100dvh;
     background: #111;
     z-index: 999;
     flex-direction: column;

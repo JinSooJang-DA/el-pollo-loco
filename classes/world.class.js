@@ -135,6 +135,7 @@ class World {
         let bossHealth = { 1: 50, 2: 70, 3: 50, 4: 100, 5: 100 };
         boss.energy = bossHealth[this.levelNumber] || 50;
         boss.maxEnergy = boss.energy;
+        boss.speedMultiplier = 1 + (this.levelNumber - 1) * 0.1;
         this.statusBarEndboss.setPercentage(100);
         let distance = 500;
         boss.x = this.character.otherDirection ? this.character.x - distance : this.character.x + distance;
