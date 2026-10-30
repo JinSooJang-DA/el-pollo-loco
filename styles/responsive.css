@@ -20,17 +20,6 @@
     }
 }
 
-@media screen and (orientation: portrait) and (max-width: 1024px) {
-    .turn-device-overlay {
-        display: flex !important;
-    }
-
-    h1,
-    .game-container {
-        display: none !important;
-    }
-}
-
 @media screen and (orientation: landscape) and (max-height: 600px) and (hover: none) {
     body {
         margin: 0;
@@ -50,14 +39,6 @@
     }
 
     .mobile-controls-container {
-        display: flex !important;
-    }
-}
-
-/* Mobile and tablet: portrait orientation */
-@media screen and (orientation: portrait) and (pointer: coarse),
-screen and (orientation: portrait) and (max-width: 600px) {
-    .turn-device-overlay {
         display: flex !important;
     }
 }
@@ -265,7 +246,8 @@ screen and (orientation: portrait) and (max-width: 600px) {
     background-repeat: no-repeat;
 }
 
-@media screen and (orientation: portrait) and (any-pointer: coarse) {
+/* Rotate hint only on touch devices without hover (phones, tablets) held upright */
+@media screen and (orientation: portrait) and (hover: none) {
     .turn-device-overlay {
         display: flex !important;
     }

@@ -76,9 +76,7 @@ function handleFullscreenExit() {
  * Matches the screens on which the rotate-device hint covers the game (see responsive.css).
  * @type {MediaQueryList}
  */
-const rotateHintQuery = window.matchMedia(
-    '(orientation: portrait) and (max-width: 1024px), (orientation: portrait) and (pointer: coarse)'
-);
+const rotateHintQuery = window.matchMedia('(orientation: portrait) and (hover: none)');
 
 /**
  * Music and videos that were stopped because the rotate hint covered the screen.
